@@ -2,34 +2,35 @@ package ar.com.qsy;
 
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Terminal implements Runnable, Cleanable {
 
 	private final Buffer<QSYPacket> buffer;
 	private final ReceiverSelector receiverSelector;
-	private volatile boolean searchNodes;
+	private volatile AtomicBoolean searchNodes;
 
 	private final HashSet<InetAddress> nodes;
 
-	private volatile boolean running;
+	private volatile AtomicBoolean running;
 
 	public Terminal(final Buffer<QSYPacket> buffer, final ReceiverSelector receiverSelector) {
 		this.buffer = buffer;
 		this.receiverSelector = receiverSelector;
 		this.nodes = new HashSet<>();
-		this.searchNodes = false;
-		this.running = true;
+		this.searchNodes = new AtomicBoolean(false);
+		this.running = new AtomicBoolean(true);
 	}
 
 	@Override
 	public void run() {
-		while (running) {
+		while (running.get()) {
 			final QSYPacket qsyPacket = buffer.remove();
-			if (searchNodes && QSYPacketTools.isHelloPacket(qsyPacket.getData())) {
-				if (!nodes.contains(qsyPacket.getSource())) {
+			if (searchNodes.get() && QSYPacketTools.isHelloPacket(qsyPacket.getData())) {
+				if (!nodes.contains(qsyPacket.getNodeAddress())) {
 					printQSYPacket(qsyPacket);
-					nodes.add(qsyPacket.getSource());
-					receiverSelector.addSocketChannel(qsyPacket.getSource().getHostAddress(), QSYPacketTools.TCP_PORT, null);
+					nodes.add(qsyPacket.getNodeAddress());
+					receiverSelector.addSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacketTools.TCP_PORT, null);
 				}
 			} else if (QSYPacketTools.isKeepAlivePacket(qsyPacket.getData())) {
 				printQSYPacket(qsyPacket);
@@ -38,7 +39,7 @@ public final class Terminal implements Runnable, Cleanable {
 	}
 
 	private void printQSYPacket(final QSYPacket qsyPacket) {
-		System.out.println("Data received from: " + qsyPacket.getSource());
+		System.out.println("Data received from: " + qsyPacket.getNodeAddress());
 		final byte[] data = qsyPacket.getData();
 		for (int i = 0; i < data.length; i++) {
 			System.out.print("[ " + data[i] + " ]\t");
@@ -47,17 +48,17 @@ public final class Terminal implements Runnable, Cleanable {
 	}
 
 	public void searchNodes() {
-		searchNodes = true;
+		searchNodes.set(true);
 	}
 
 	public void finalizeNodesSearch() {
-		searchNodes = false;
+		searchNodes.set(false);
 	}
 
 	@Override
 	public void cleanUp() {
 		nodes.clear();
-		running = false;
+		running.set(false);
 	}
 
 }

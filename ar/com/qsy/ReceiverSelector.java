@@ -8,15 +8,18 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ReceiverSelector implements Runnable, Cleanable {
 
 	private final Selector selector;
+	private volatile AtomicBoolean newConnection;
+
 	private final Buffer<QSYPacket> buffer;
-	private final ByteBuffer bb;
+	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
-	private volatile boolean running;
+	private volatile AtomicBoolean running;
 
 	public ReceiverSelector(final Buffer<QSYPacket> buffer) {
 		Selector select = null;
@@ -26,19 +29,27 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 			e.printStackTrace();
 		}
 		this.selector = select;
-		this.buffer = buffer;
-		this.running = true;
+		this.newConnection = new AtomicBoolean(false);
 
-		this.bb = ByteBuffer.allocate(QSYPacketTools.PACKET_SIZE);
+		this.buffer = buffer;
+		this.running = new AtomicBoolean(true);
+
+		this.byteBuffer = ByteBuffer.allocate(QSYPacketTools.PACKET_SIZE);
 		this.data = new byte[QSYPacketTools.PACKET_SIZE];
 	}
 
 	@Override
 	public void run() {
-		while (running) {
+		while (running.get()) {
 			try {
-				selector.select();
-			} catch (IOException e) {
+				if (!newConnection.get()) {
+					if (selector.select() <= 0) {
+						continue;
+					}
+				} else {
+					continue;
+				}
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 			final Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
@@ -50,15 +61,15 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 
 					final SocketChannel channel = (SocketChannel) key.channel();
 					try {
-						channel.read(bb);
+						channel.read(byteBuffer);
 					} catch (final IOException e) {
 						e.printStackTrace();
 					}
-					bb.flip();
-					bb.get(data);
+					byteBuffer.flip();
+					byteBuffer.get(data);
 					final Socket socket = channel.socket();
-					buffer.add(new QSYPacket(socket.getInetAddress(), socket.getLocalAddress(), data));
-					bb.clear();
+					buffer.add(new QSYPacket(socket.getInetAddress(), data));
+					byteBuffer.clear();
 
 				}
 				iterator.remove();
@@ -72,8 +83,10 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 		try {
 			client = SocketChannel.open(hostAddress);
 			client.configureBlocking(false);
+			newConnection.set(true);
 			selector.wakeup();
 			client.register(selector, SelectionKey.OP_READ, object);
+			newConnection.set(false);
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -81,7 +94,7 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 
 	@Override
 	public void cleanUp() {
-		running = false;
+		running.set(false);
 		try {
 			selector.close();
 		} catch (IOException e) {

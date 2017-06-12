@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class MulticastReceiver implements Runnable, Cleanable {
 
@@ -12,7 +13,7 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 	private final MulticastSocket socket;
 	private final DatagramPacket packet;
 
-	private volatile boolean running;
+	private volatile AtomicBoolean running;
 
 	private final Buffer<QSYPacket> buffer;
 
@@ -31,16 +32,16 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 		this.port = serverPort;
 
 		this.packet = new DatagramPacket(new byte[QSYPacketTools.PACKET_SIZE], QSYPacketTools.PACKET_SIZE);
-		this.running = true;
+		this.running = new AtomicBoolean(true);
 
 		this.buffer = buffer;
 	}
 
 	@Override
 	public void run() {
-		while (running) {
+		while (running.get()) {
 			if (receive(packet)) {
-				buffer.add(new QSYPacket(packet.getAddress(), null, packet.getData()));
+				buffer.add(new QSYPacket(packet.getAddress(), packet.getData()));
 			}
 		}
 	}
@@ -55,12 +56,8 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 		return result;
 	}
 
-	public boolean isRunning() {
-		return running;
-	}
-
 	public void setRunning(final boolean running) {
-		this.running = running;
+		this.running.set(running);
 	}
 
 	public InetAddress getAddress() {
@@ -73,7 +70,7 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 
 	@Override
 	public void cleanUp() {
-		running = false;
+		running.set(false);
 		try {
 			socket.leaveGroup(address);
 		} catch (final IOException e) {
