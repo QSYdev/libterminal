@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ar.com.qsy.model.interfaces.Cleanable;
-import ar.com.qsy.model.utils.Buffer;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
@@ -20,9 +20,9 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 
 	private final AtomicBoolean running;
 
-	private final Buffer<QSYPacket> buffer;
+	private final BlockingQueue<QSYPacket> buffer;
 
-	public MulticastReceiver(final String serverAddress, final int serverPort, final Buffer<QSYPacket> buffer) {
+	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> buffer) {
 		InetAddress mcIPAddress = null;
 		MulticastSocket mcSocket = null;
 		try {
@@ -46,7 +46,11 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 	public void run() {
 		while (running.get()) {
 			if (receive(packet)) {
-				buffer.add(new QSYPacket(packet.getAddress(), packet.getData()));
+				try {
+					buffer.put(new QSYPacket(packet.getAddress(), packet.getData()));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			} else {
 				// TODO error en el multicast.
 			}

@@ -9,10 +9,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ar.com.qsy.model.interfaces.Cleanable;
-import ar.com.qsy.model.utils.Buffer;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
@@ -20,13 +20,13 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 
 	private final Selector selector;
 	private final LinkedList<SimpleEntry<Object, SocketChannel>> newConnections;
-	private final Buffer<QSYPacket> buffer;
+	private final LinkedBlockingQueue<QSYPacket> buffer;
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
 	private final AtomicBoolean running;
 
-	public ReceiverSelector(final Buffer<QSYPacket> buffer) {
+	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> buffer) {
 		Selector select = null;
 		try {
 			select = Selector.open();
@@ -53,12 +53,12 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 						channel.read(byteBuffer);
 						byteBuffer.flip();
 						byteBuffer.get(data);
-						buffer.add(new QSYPacket(channel.socket().getInetAddress(), data));
+						buffer.put(new QSYPacket(channel.socket().getInetAddress(), data));
 						byteBuffer.clear();
 					}
 				}
 				selector.selectedKeys().clear();
-			} catch (final IOException e) {
+			} catch (final IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
 		}

@@ -1,9 +1,10 @@
 package ar.com.qsy.main;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 import ar.com.qsy.model.objects.MulticastReceiver;
 import ar.com.qsy.model.objects.ReceiverSelector;
 import ar.com.qsy.model.objects.Terminal;
-import ar.com.qsy.model.utils.Buffer;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
@@ -11,7 +12,7 @@ public final class Main {
 
 	public static void main(final String[] args) {
 
-		final Buffer<QSYPacket> buffer = new Buffer<>();
+		final LinkedBlockingQueue<QSYPacket> buffer = new LinkedBlockingQueue<>();
 
 		final ReceiverSelector receiverSelector = new ReceiverSelector(buffer);
 		final Thread threadReceiveSelector = new Thread(receiverSelector, "Receive Selector");
