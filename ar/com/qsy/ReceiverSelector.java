@@ -1,7 +1,6 @@
 package ar.com.qsy;
 
 import java.io.IOException;
-
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -20,7 +19,7 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
-	private AtomicBoolean running;
+	private final AtomicBoolean running;
 
 	public ReceiverSelector(final Buffer<QSYPacket> buffer) {
 		Selector select = null;
@@ -43,7 +42,7 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 			try {
 				addNewConnections();
 				selector.select();
-				for (SelectionKey key : selector.selectedKeys()) {
+				for (final SelectionKey key : selector.selectedKeys()) {
 					if (key.isReadable()) {
 						final SocketChannel channel = (SocketChannel) key.channel();
 						channel.read(byteBuffer);
@@ -60,10 +59,10 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 		}
 	}
 
-	public void addSocketChannel(final String address, final int port, final Object object) {
+	public void registerNewSocketChannel(final String address, final int port, final Object object) {
 		final InetSocketAddress hostAddress = new InetSocketAddress(address, port);
 		try {
-			SocketChannel client = SocketChannel.open(hostAddress);
+			final SocketChannel client = SocketChannel.open(hostAddress);
 			client.configureBlocking(false);
 			synchronized (newConnections) {
 				newConnections.add(new SimpleEntry<Object, SocketChannel>(object, client));
@@ -86,9 +85,9 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 
 	private void addNewConnections() throws ClosedChannelException {
 		synchronized (newConnections) {
-			for (SimpleEntry<Object, SocketChannel> item : newConnections) {
-				SocketChannel s = item.getValue();
-				Object o = item.getKey();
+			for (final SimpleEntry<Object, SocketChannel> item : newConnections) {
+				final SocketChannel s = item.getValue();
+				final Object o = item.getKey();
 				s.register(selector, SelectionKey.OP_READ, o);
 			}
 			newConnections.clear();

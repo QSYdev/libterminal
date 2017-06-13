@@ -11,7 +11,7 @@ public final class Terminal implements Runnable, Cleanable {
 	private final AtomicBoolean searchNodes;
 	private final HashSet<InetAddress> nodes;
 
-	private volatile AtomicBoolean running;
+	private final AtomicBoolean running;
 
 	public Terminal(final Buffer<QSYPacket> buffer, final ReceiverSelector receiverSelector) {
 		this.buffer = buffer;
@@ -29,7 +29,7 @@ public final class Terminal implements Runnable, Cleanable {
 				if (!nodes.contains(qsyPacket.getNodeAddress())) {
 					printQSYPacket(qsyPacket);
 					nodes.add(qsyPacket.getNodeAddress());
-					receiverSelector.addSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacketTools.TCP_PORT, null);
+					receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacketTools.TCP_PORT, null);
 				}
 			} else if (QSYPacketTools.isKeepAlivePacket(qsyPacket.getData())) {
 				printQSYPacket(qsyPacket);

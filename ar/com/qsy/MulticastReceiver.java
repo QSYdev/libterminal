@@ -13,7 +13,7 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 	private final MulticastSocket socket;
 	private final DatagramPacket packet;
 
-	private volatile AtomicBoolean running;
+	private final AtomicBoolean running;
 
 	private final Buffer<QSYPacket> buffer;
 
@@ -42,6 +42,8 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 		while (running.get()) {
 			if (receive(packet)) {
 				buffer.add(new QSYPacket(packet.getAddress(), packet.getData()));
+			} else {
+				// TODO error en el multicast.
 			}
 		}
 	}
