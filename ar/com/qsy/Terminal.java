@@ -8,8 +8,7 @@ public final class Terminal implements Runnable, Cleanable {
 
 	private final Buffer<QSYPacket> buffer;
 	private final ReceiverSelector receiverSelector;
-	private volatile AtomicBoolean searchNodes;
-
+	private final AtomicBoolean searchNodes;
 	private final HashSet<InetAddress> nodes;
 
 	private volatile AtomicBoolean running;
