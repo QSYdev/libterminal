@@ -12,11 +12,10 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.model.interfaces.Cleanable;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
-public final class ReceiverSelector implements Runnable, Cleanable {
+public final class ReceiverSelector implements Runnable, AutoCloseable {
 
 	private final Selector selector;
 	private final LinkedList<SimpleEntry<Object, SocketChannel>> newConnections;
@@ -78,16 +77,6 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 		}
 	}
 
-	@Override
-	public void cleanUp() {
-		running.set(false);
-		try {
-			selector.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	private void addNewConnections() throws ClosedChannelException {
 		synchronized (newConnections) {
 			for (final SimpleEntry<Object, SocketChannel> item : newConnections) {
@@ -97,5 +86,21 @@ public final class ReceiverSelector implements Runnable, Cleanable {
 			}
 			newConnections.clear();
 		}
+	}
+
+	@Override
+	public void close() {
+		running.set(false);
+		try {
+			selector.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		close();
 	}
 }

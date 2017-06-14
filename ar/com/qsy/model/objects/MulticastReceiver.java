@@ -7,11 +7,10 @@ import java.net.MulticastSocket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.model.interfaces.Cleanable;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
-public final class MulticastReceiver implements Runnable, Cleanable {
+public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 	private final InetAddress address;
 	private final int port;
@@ -80,7 +79,7 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 	}
 
 	@Override
-	public void cleanUp() {
+	public void close() {
 		running.set(false);
 		try {
 			socket.leaveGroup(address);
@@ -89,6 +88,12 @@ public final class MulticastReceiver implements Runnable, Cleanable {
 		} finally {
 			socket.close();
 		}
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		close();
 	}
 
 }

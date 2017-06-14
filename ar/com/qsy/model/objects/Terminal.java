@@ -5,11 +5,10 @@ import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.model.interfaces.Cleanable;
 import ar.com.qsy.model.utils.QSYPacketTools;
 import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
-public final class Terminal implements Runnable, Cleanable {
+public final class Terminal implements Runnable, AutoCloseable {
 
 	private final BlockingQueue<QSYPacket> buffer;
 	private final ReceiverSelector receiverSelector;
@@ -29,20 +28,22 @@ public final class Terminal implements Runnable, Cleanable {
 	@Override
 	public void run() {
 		while (running.get()) {
-			
+
 			try {
 				QSYPacket qsyPacket = buffer.take();
-	
+
 				if (QSYPacketTools.isHelloPacket(qsyPacket.getData())) {
 					if (searchNodes.get() && !nodes.contains(qsyPacket.getNodeAddress())) {
 						printQSYPacket(qsyPacket);
 						nodes.add(qsyPacket.getNodeAddress());
 						receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacketTools.TCP_PORT, null);
-						//TODO notifyEvent(new TerminalEventArgs(TerminalEventArgs.NEW_NODE_CONNECTION_EVENT, new Object[] { this, qsyPacket }));
+						// TODO notifyEvent(new
+						// TerminalEventArgs(TerminalEventArgs.NEW_NODE_CONNECTION_EVENT,
+						// new Object[] { this, qsyPacket }));
 					}
 				} else if (QSYPacketTools.isKeepAlivePacket(qsyPacket.getData())) {
 					printQSYPacket(qsyPacket);
-					//TODO Keepalive
+					// TODO Keepalive
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -68,9 +69,15 @@ public final class Terminal implements Runnable, Cleanable {
 	}
 
 	@Override
-	public void cleanUp() {
+	public void close() {
 		nodes.clear();
 		running.set(false);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		close();
 	}
 
 }
