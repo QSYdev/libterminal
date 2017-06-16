@@ -1,12 +1,10 @@
 package ar.com.qsy.model.objects;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import ar.com.qsy.model.utils.QSYPacketTools;
-import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
 
 public final class Terminal implements Runnable, AutoCloseable {
 
@@ -30,34 +28,35 @@ public final class Terminal implements Runnable, AutoCloseable {
 		while (running.get()) {
 
 			try {
-				QSYPacket qsyPacket = buffer.take();
+				final QSYPacket qsyPacket = buffer.take();
 
-				if (QSYPacketTools.isHelloPacket(qsyPacket.getData())) {
+				switch (qsyPacket.getType()) {
+				case Hello: {
 					if (searchNodes.get() && !nodes.contains(qsyPacket.getNodeAddress())) {
-						printQSYPacket(qsyPacket);
+						// System.out.println(qsyPacket);
 						nodes.add(qsyPacket.getNodeAddress());
-						receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacketTools.TCP_PORT, null);
-						// TODO notifyEvent(new
-						// TerminalEventArgs(TerminalEventArgs.NEW_NODE_CONNECTION_EVENT,
-						// new Object[] { this, qsyPacket }));
+						receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT, null);
 					}
-				} else if (QSYPacketTools.isKeepAlivePacket(qsyPacket.getData())) {
-					printQSYPacket(qsyPacket);
-					// TODO Keepalive
+					break;
 				}
-			} catch (InterruptedException e) {
+				case Keepalive: {
+					// System.out.println(qsyPacket);
+					break;
+				}
+				case Command: {
+					// TODO cuando se recibe un command.
+					break;
+				}
+				case Touche: {
+					// TODO cuando se recibe un touche.
+					break;
+				}
+				}
+			} catch (final InterruptedException | IOException e) {
 				e.printStackTrace();
 			}
 		}
-	}
 
-	private void printQSYPacket(final QSYPacket qsyPacket) {
-		System.out.println("Data received from: " + qsyPacket.getNodeAddress());
-		final byte[] data = qsyPacket.getData();
-		for (int i = 0; i < data.length; i++) {
-			System.out.print("[ " + data[i] + " ]\t");
-		}
-		System.out.println();
 	}
 
 	public void searchNodes() {

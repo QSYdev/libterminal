@@ -7,9 +7,6 @@ import java.net.MulticastSocket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.model.utils.QSYPacketTools;
-import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
-
 public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 	private final InetAddress address;
@@ -21,21 +18,13 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 	private final BlockingQueue<QSYPacket> buffer;
 
-	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> buffer) {
-		InetAddress mcIPAddress = null;
-		MulticastSocket mcSocket = null;
-		try {
-			mcIPAddress = InetAddress.getByName(serverAddress);
-			mcSocket = new MulticastSocket(serverPort);
-			mcSocket.joinGroup(mcIPAddress);
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-		this.socket = mcSocket;
-		this.address = mcIPAddress;
+	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> buffer) throws IOException {
+		this.address = InetAddress.getByName(serverAddress);
+		this.socket = new MulticastSocket(serverPort);
+		this.socket.joinGroup(address);
 		this.port = serverPort;
 
-		this.packet = new DatagramPacket(new byte[QSYPacketTools.PACKET_SIZE], QSYPacketTools.PACKET_SIZE);
+		this.packet = new DatagramPacket(new byte[QSYPacket.PACKET_SIZE], QSYPacket.PACKET_SIZE);
 		this.running = new AtomicBoolean(true);
 
 		this.buffer = buffer;
@@ -44,25 +33,24 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 	@Override
 	public void run() {
 		while (running.get()) {
-			if (receive(packet)) {
-				try {
+			try {
+				if (receive(packet)) {
 					buffer.put(new QSYPacket(packet.getAddress(), packet.getData()));
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				} else {
+					throw new Exception("<< QSY_MULTICAST_ERROR >> Ha ocurrido un error en la conexion con el multicast");
 				}
-			} else {
-				// TODO error en el multicast.
+			} catch (final IOException | IllegalArgumentException | InterruptedException e) {
+				e.printStackTrace();
+			} catch (final Exception e) {
+				e.printStackTrace();
 			}
 		}
+
 	}
 
-	private boolean receive(final DatagramPacket packet) {
+	private boolean receive(final DatagramPacket packet) throws IOException {
 		boolean result = true;
-		try {
-			socket.receive(packet);
-		} catch (final Exception e) {
-			result = false;
-		}
+		socket.receive(packet);
 		return result;
 	}
 

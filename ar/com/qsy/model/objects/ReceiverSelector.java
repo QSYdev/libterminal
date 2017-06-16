@@ -12,9 +12,6 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.model.utils.QSYPacketTools;
-import ar.com.qsy.model.utils.QSYPacketTools.QSYPacket;
-
 public final class ReceiverSelector implements Runnable, AutoCloseable {
 
 	private final Selector selector;
@@ -25,19 +22,13 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 
 	private final AtomicBoolean running;
 
-	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> buffer) {
-		Selector select = null;
-		try {
-			select = Selector.open();
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-		this.selector = select;
+	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> buffer) throws IOException {
+		this.selector = Selector.open();
 		this.newConnections = new LinkedList<SimpleEntry<Object, SocketChannel>>();
 		this.buffer = buffer;
 		this.running = new AtomicBoolean(true);
-		this.byteBuffer = ByteBuffer.allocate(QSYPacketTools.PACKET_SIZE);
-		this.data = new byte[QSYPacketTools.PACKET_SIZE];
+		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
+		this.data = new byte[QSYPacket.PACKET_SIZE];
 	}
 
 	@Override
@@ -63,18 +54,14 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 		}
 	}
 
-	public void registerNewSocketChannel(final String address, final int port, final Object object) {
+	public void registerNewSocketChannel(final String address, final int port, final Object object) throws IOException {
 		final InetSocketAddress hostAddress = new InetSocketAddress(address, port);
-		try {
-			final SocketChannel client = SocketChannel.open(hostAddress);
-			client.configureBlocking(false);
-			synchronized (newConnections) {
-				newConnections.add(new SimpleEntry<Object, SocketChannel>(object, client));
-			}
-			selector.wakeup();
-		} catch (final IOException e) {
-			e.printStackTrace();
+		final SocketChannel client = SocketChannel.open(hostAddress);
+		client.configureBlocking(false);
+		synchronized (newConnections) {
+			newConnections.add(new SimpleEntry<Object, SocketChannel>(object, client));
 		}
+		selector.wakeup();
 	}
 
 	private void addNewConnections() throws ClosedChannelException {
