@@ -1,6 +1,6 @@
 *.class
 *.project
 *.classpath
-
-
-
+.idea/
+out/
+qsy-terminal-2.0.iml
