@@ -12,8 +12,10 @@ public final class Terminal implements Runnable, AutoCloseable {
 	private final ReceiverSelector receiverSelector;
 	private final AtomicBoolean searchNodes;
 	private final HashSet<InetAddress> nodes;
-
 	private final AtomicBoolean running;
+
+	private final KeepAliveChecker keepAliveChecker;
+	private Thread kacThread;
 
 	public Terminal(final BlockingQueue<QSYPacket> buffer, final ReceiverSelector receiverSelector) {
 		this.buffer = buffer;
@@ -21,6 +23,7 @@ public final class Terminal implements Runnable, AutoCloseable {
 		this.nodes = new HashSet<>();
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
+		keepAliveChecker = new KeepAliveChecker(this.nodes);
 	}
 
 	@Override
@@ -29,18 +32,24 @@ public final class Terminal implements Runnable, AutoCloseable {
 
 			try {
 				final QSYPacket qsyPacket = buffer.take();
-
 				switch (qsyPacket.getType()) {
 				case Hello: {
 					if (searchNodes.get() && !nodes.contains(qsyPacket.getNodeAddress())) {
-						// System.out.println(qsyPacket);
+						System.out.println(qsyPacket);
+						if(nodes.isEmpty()){
+							kacThread = new Thread(keepAliveChecker, "KeepAliveChecker");
+							kacThread.start();
+						}
 						nodes.add(qsyPacket.getNodeAddress());
 						receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT, null);
+						keepAliveChecker.update(qsyPacket.getNodeAddress());
 					}
 					break;
 				}
 				case Keepalive: {
-					// System.out.println(qsyPacket);
+					//System.out.println(qsyPacket);
+					//TODO chequear concurrencia
+					keepAliveChecker.update(qsyPacket.getNodeAddress());
 					break;
 				}
 				case Command: {
