@@ -1,7 +1,6 @@
 package ar.com.qsy.model.objects;
 
 import java.net.InetAddress;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -11,17 +10,9 @@ public class KeepAliveChecker implements Runnable{
     private final short keepAlivePeriodChecker = (int)(keepAlivePeriod*1.5);
 
     private final Hashtable<InetAddress,Long> keepAliveRegistry;
-    private final HashSet<InetAddress> nodes;
 
-    public KeepAliveChecker(HashSet<InetAddress> nodes){
-        keepAliveRegistry = new Hashtable<InetAddress, Long>();
-        //TODO concurrencia
-        this.nodes=nodes;
-    }
-
-    public void update(InetAddress ip){
-        System.out.println(System.currentTimeMillis()%10000+"\tAgregando keepAlive");
-        keepAliveRegistry.put(ip,System.currentTimeMillis());
+    public KeepAliveChecker(Hashtable<InetAddress, Long> nodes){
+        this.keepAliveRegistry=nodes;
     }
 
     @Override
@@ -42,7 +33,7 @@ public class KeepAliveChecker implements Runnable{
                 aux = keepAliveRegistry.get(ip);
                 if (aux + keepAlivePeriodChecker< now) {
                     stopped = true;
-                    nodes.remove(ip);
+                    keepAliveRegistry.remove(ip);
                     break;
                 }
             }
