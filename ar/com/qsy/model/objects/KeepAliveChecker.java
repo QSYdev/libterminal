@@ -7,7 +7,8 @@ import java.util.Set;
 public class KeepAliveChecker implements Runnable{
 
     private final short keepAlivePeriod = 500;
-    private final short keepAlivePeriodChecker = (int)(keepAlivePeriod*1.5);
+    private final short keepAliveTries = 2;
+    private final short keepAlivePeriodChecker = keepAlivePeriod*keepAliveTries;
 
     private final Hashtable<InetAddress,Long> keepAliveRegistry;
 
