@@ -36,10 +36,21 @@ public abstract class EventSource {
 
 		});
 	}
+	
+	public final void removeAllListeners() {
+		pendingActions.add(new Command() {
+
+			@Override
+			public void execute() {
+				listeners.clear();
+			}
+
+		});
+	}
 
 	public final void sendEvent(final Event event) throws InterruptedException {
-		for (final Command accion : pendingActions) {
-			accion.execute();
+		for (final Command action : pendingActions) {
+			action.execute();
 		}
 		for (final EventListener eventListener : listeners) {
 			eventListener.receiveEvent(event);
