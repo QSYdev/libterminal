@@ -36,7 +36,7 @@ public abstract class EventSource {
 
 		});
 	}
-	
+
 	public final void removeAllListeners() {
 		pendingActions.add(new Command() {
 
@@ -48,10 +48,11 @@ public abstract class EventSource {
 		});
 	}
 
-	public final void sendEvent(final Event event) throws InterruptedException {
+	public final void sendEvent(final Event event) throws Exception {
 		for (final Command action : pendingActions) {
 			action.execute();
 		}
+		pendingActions.clear();
 		for (final EventListener eventListener : listeners) {
 			eventListener.receiveEvent(event);
 		}

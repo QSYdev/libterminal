@@ -7,23 +7,25 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class ReceiverSelector implements Runnable, AutoCloseable {
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import ar.com.qsy.model.patterns.observer.EventListener;
+import ar.com.qsy.model.patterns.observer.EventSource;
+
+public final class ReceiverSelector extends EventSource implements Runnable, AutoCloseable, EventListener {
 
 	private final Selector selector;
 	private final LinkedList<Node> pendingConnections;
-	private final LinkedBlockingQueue<QSYPacket> inputBuffer;
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
 	private final AtomicBoolean running;
 
-	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> inputBuffer) throws IOException {
+	public ReceiverSelector() throws IOException {
 		this.selector = Selector.open();
 		this.pendingConnections = new LinkedList<>();
-		this.inputBuffer = inputBuffer;
 		this.running = new AtomicBoolean(true);
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 		this.data = new byte[QSYPacket.PACKET_SIZE];
@@ -41,18 +43,18 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 						channel.read(byteBuffer);
 						byteBuffer.flip();
 						byteBuffer.get(data);
-						inputBuffer.put(new QSYPacket(channel.socket().getInetAddress(), data));
+						sendEvent(new Event(EventType.IncomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
 						byteBuffer.clear();
 					}
 				}
 				selector.selectedKeys().clear();
-			} catch (final IOException | InterruptedException e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void qsyHelloPacketReceived(final Node node) throws IOException {
+	private void newNodeCreated(final Node node) throws IOException {
 		synchronized (pendingConnections) {
 			pendingConnections.add(node);
 		}
@@ -83,5 +85,19 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 	protected void finalize() throws Throwable {
 		super.finalize();
 		close();
+	}
+
+	@Override
+	public void receiveEvent(final Event event) throws InterruptedException, IOException {
+		switch (event.getEventType()) {
+		case newNode: {
+			final Node node = (Node) event.getContent();
+			newNodeCreated(node);
+			break;
+		}
+		default: {
+			break;
+		}
+		}
 	}
 }

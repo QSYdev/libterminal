@@ -4,20 +4,20 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.TreeMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class SenderSelector implements Runnable, AutoCloseable {
+import ar.com.qsy.model.patterns.observer.AsynchronousListener;
+import ar.com.qsy.model.patterns.observer.Event;
+
+public final class SenderSelector extends AsynchronousListener implements Runnable, AutoCloseable {
 
 	private final TreeMap<Integer, Node> nodes;
-	private final LinkedBlockingQueue<QSYPacket> outputBuffer;
 	private final ByteBuffer byteBuffer;
 
 	private final AtomicBoolean running;
 
-	public SenderSelector(final TreeMap<Integer, Node> nodes, final LinkedBlockingQueue<QSYPacket> outputBuffer) {
+	public SenderSelector(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
-		this.outputBuffer = outputBuffer;
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 
 		this.running = new AtomicBoolean(true);
@@ -27,9 +27,10 @@ public final class SenderSelector implements Runnable, AutoCloseable {
 	public void run() {
 		while (running.get()) {
 			try {
-				final QSYPacket qsyPacket = outputBuffer.take();
-				switch (qsyPacket.getType()) {
-				case Command: {
+				final Event event = getEvent();
+				switch (event.getEventType()) {
+				case commandPacketSent: {
+					final QSYPacket qsyPacket = (QSYPacket) event.getContent();
 					final SocketChannel channel;
 					synchronized (nodes) {
 						channel = nodes.get(qsyPacket.getId()).getNodeSocketChannel();
@@ -48,6 +49,7 @@ public final class SenderSelector implements Runnable, AutoCloseable {
 				e.printStackTrace();
 			}
 		}
+
 	}
 
 	@Override

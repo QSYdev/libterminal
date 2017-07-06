@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class MulticastReceiver implements Runnable, AutoCloseable {
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import ar.com.qsy.model.patterns.observer.EventSource;
+
+public final class MulticastReceiver extends EventSource implements Runnable, AutoCloseable {
 
 	private final InetAddress address;
 	private final int port;
@@ -16,9 +19,7 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 	private final AtomicBoolean running;
 
-	private final BlockingQueue<QSYPacket> inputBuffer;
-
-	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> inputBuffer) throws IOException {
+	public MulticastReceiver(final String serverAddress, final int serverPort) throws IOException {
 		this.address = InetAddress.getByName(serverAddress);
 		this.socket = new MulticastSocket(serverPort);
 		this.socket.joinGroup(address);
@@ -26,8 +27,6 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 		this.packet = new DatagramPacket(new byte[QSYPacket.PACKET_SIZE], QSYPacket.PACKET_SIZE);
 		this.running = new AtomicBoolean(true);
-
-		this.inputBuffer = inputBuffer;
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 		while (running.get()) {
 			try {
 				if (receive(packet)) {
-					inputBuffer.put(new QSYPacket(packet.getAddress(), packet.getData()));
+					sendEvent(new Event(EventType.IncomingQSYPacket, new QSYPacket(packet.getAddress(), packet.getData())));
 				} else {
 					throw new Exception("<< QSY_MULTICAST_ERROR >> Ha ocurrido un error en la conexion con el multicast");
 				}

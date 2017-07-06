@@ -4,7 +4,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-public final class KeepAlive implements AutoCloseable {
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.SynchronousListener;
+
+public final class KeepAlive implements AutoCloseable, SynchronousListener {
 
 	public static final int MAX_KEEP_ALIVE_DELAY = (int) ((5 / 2f) * QSYPacket.KEEP_ALIVE_MS);
 
@@ -18,15 +21,10 @@ public final class KeepAlive implements AutoCloseable {
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
-	public void qsyHelloPacketReceived(final QSYPacket qsyPacket) {
+	private void newNodeCreated(final Node node) {
 		final long currentTime = System.currentTimeMillis();
-		final int nodeId = qsyPacket.getId();
 		final boolean nodeAlive;
 
-		final Node node;
-		synchronized (nodes) {
-			node = nodes.get(nodeId);
-		}
 		nodeAlive = node.isAlive(currentTime);
 		node.keepAlive(currentTime);
 
@@ -36,7 +34,7 @@ public final class KeepAlive implements AutoCloseable {
 		}
 	}
 
-	public void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
+	private void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
 		final long currentTime = System.currentTimeMillis();
 
 		final Node node;
@@ -85,6 +83,25 @@ public final class KeepAlive implements AutoCloseable {
 			return;
 		}
 
+	}
+
+	@Override
+	public void receiveEvent(final Event event) throws Exception {
+		switch (event.getEventType()) {
+		case newNode: {
+			final Node node = (Node) event.getContent();
+			newNodeCreated(node);
+			break;
+		}
+		case keepAliveReceived: {
+			final QSYPacket qsyPacket = (QSYPacket) event.getContent();
+			qsyKeepAlivePacketReceived(qsyPacket);
+			break;
+		}
+		default: {
+			break;
+		}
+		}
 	}
 
 }

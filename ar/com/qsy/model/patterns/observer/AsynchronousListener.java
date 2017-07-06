@@ -3,7 +3,7 @@ package ar.com.qsy.model.patterns.observer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public abstract class AsynchronousListener implements EventListener {
+public class AsynchronousListener implements EventListener {
 
 	private final BlockingQueue<Event> eventQueue;
 

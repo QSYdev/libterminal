@@ -76,6 +76,8 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final InterruptedException exception) {
 					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				} catch (final Exception exception) {
+					exception.printStackTrace();
 				}
 			}
 		});

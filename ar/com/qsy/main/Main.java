@@ -1,7 +1,5 @@
 package ar.com.qsy.main;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 import ar.com.qsy.model.objects.MulticastReceiver;
 import ar.com.qsy.model.objects.QSYPacket;
 import ar.com.qsy.model.objects.ReceiverSelector;
@@ -13,28 +11,29 @@ public final class Main {
 
 	public static void main(final String[] args) throws Exception {
 
-		final QSYFrame view = new QSYFrame();
+		final MulticastReceiver multicastReceiver = new MulticastReceiver(QSYPacket.MULTICAST_ADDRESS, QSYPacket.MULTICAST_PORT);
+		final Terminal terminal = new Terminal();
+		final ReceiverSelector receiverSelector = new ReceiverSelector();
+		final SenderSelector senderSelector = new SenderSelector(terminal.getNodes());
+		final QSYFrame view = new QSYFrame(terminal);
 
-		final LinkedBlockingQueue<QSYPacket> inputBuffer = new LinkedBlockingQueue<>();
-		final LinkedBlockingQueue<QSYPacket> outputBuffer = new LinkedBlockingQueue<>();
+		multicastReceiver.addListener(terminal);
+		receiverSelector.addListener(terminal);
+		terminal.addListener(receiverSelector);
+		terminal.addListener(senderSelector);
+		terminal.addListener(view);
 
-		final ReceiverSelector receiverSelector = new ReceiverSelector(inputBuffer);
 		final Thread threadReceiveSelector = new Thread(receiverSelector, "Receive Selector");
 		threadReceiveSelector.start();
 
-		final Terminal terminal = new Terminal(inputBuffer, receiverSelector, outputBuffer, view);
 		final Thread threadTerminal = new Thread(terminal, "Terminal");
 		threadTerminal.start();
 
-		final SenderSelector senderSelector = new SenderSelector(terminal.getNodes(), outputBuffer);
 		final Thread threadSenderSelector = new Thread(senderSelector, "Sender Selector");
 		threadSenderSelector.start();
 
-		final MulticastReceiver multicastReceiver = new MulticastReceiver(QSYPacket.MULTICAST_ADDRESS, QSYPacket.MULTICAST_PORT, inputBuffer);
 		final Thread threadMulticastReceiver = new Thread(multicastReceiver, "Multicast Receiver");
 		threadMulticastReceiver.start();
-
-		view.setTerminal(terminal);
 
 	}
 

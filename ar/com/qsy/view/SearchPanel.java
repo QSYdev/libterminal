@@ -15,7 +15,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import ar.com.qsy.model.objects.QSYPacket;
+import ar.com.qsy.model.objects.Node;
 
 public final class SearchPanel extends JPanel implements AutoCloseable {
 
@@ -95,8 +95,8 @@ public final class SearchPanel extends JPanel implements AutoCloseable {
 		return table;
 	}
 
-	public void addNewNode(final QSYPacket qsyPacket) {
-		model.addNode(qsyPacket);
+	public void addNewNode(final Node node) {
+		model.addNode(node);
 	}
 
 	public void removeNode(final int nodeId) {

@@ -4,7 +4,7 @@ import java.util.TreeMap;
 
 import javax.swing.table.DefaultTableModel;
 
-import ar.com.qsy.model.objects.QSYPacket;
+import ar.com.qsy.model.objects.Node;
 
 public final class QSYTableModel extends DefaultTableModel {
 
@@ -27,9 +27,9 @@ public final class QSYTableModel extends DefaultTableModel {
 		return false;
 	}
 
-	public void addNode(final QSYPacket helloPacket) {
-		addRow(new Object[] { helloPacket.getId(), helloPacket.getNodeAddress(), "enabled" });
-		nodes.put(helloPacket.getId(), getRowCount() - 1);
+	public void addNode(final Node node) {
+		addRow(new Object[] { node.getNodeId(), node.getNodeAddress(), "enabled" });
+		nodes.put(node.getNodeId(), getRowCount() - 1);
 	}
 
 	public void removeNode(final int nodeId) {

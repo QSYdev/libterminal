@@ -15,10 +15,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import ar.com.qsy.model.objects.QSYPacket;
+import ar.com.qsy.model.objects.Node;
 import ar.com.qsy.model.objects.Terminal;
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.EventListener;
 
-public final class QSYFrame extends JFrame implements AutoCloseable {
+public final class QSYFrame extends JFrame implements AutoCloseable, EventListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,9 +30,9 @@ public final class QSYFrame extends JFrame implements AutoCloseable {
 	private final SearchPanel searchPanel;
 	private final CommandPanel commandPanel;
 
-	private Terminal terminal;
+	private final Terminal terminal;
 
-	public QSYFrame() {
+	public QSYFrame(final Terminal terminal) {
 		super("QSY Packet Sender");
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -47,6 +49,8 @@ public final class QSYFrame extends JFrame implements AutoCloseable {
 				// TODO notificar a la terminal.
 			}
 		});
+
+		this.terminal = terminal;
 
 		searchPanel = new SearchPanel(this);
 		commandPanel = new CommandPanel(this);
@@ -80,15 +84,11 @@ public final class QSYFrame extends JFrame implements AutoCloseable {
 		return terminal;
 	}
 
-	public void setTerminal(final Terminal terminal) {
-		this.terminal = terminal;
-	}
-
-	public void addNewNode(final QSYPacket qsyPacket) {
+	private void newNodeCreated(final Node node) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				searchPanel.addNewNode(qsyPacket);
+				searchPanel.addNewNode(node);
 			}
 		});
 	}
@@ -97,5 +97,19 @@ public final class QSYFrame extends JFrame implements AutoCloseable {
 	public void close() throws Exception {
 		searchPanel.close();
 		commandPanel.close();
+	}
+
+	@Override
+	public void receiveEvent(final Event event) throws Exception {
+		switch (event.getEventType()) {
+		case newNode: {
+			final Node node = (Node) event.getContent();
+			newNodeCreated(node);
+			break;
+		}
+		default: {
+			break;
+		}
+		}
 	}
 }
