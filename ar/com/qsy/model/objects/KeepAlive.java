@@ -10,12 +10,12 @@ public final class KeepAlive implements AutoCloseable {
 
 	private final TreeMap<Integer, Node> nodes;
 	private final Timer timer;
-	private final DeadNodesPurger task;
+	private final DeadNodesPurger deadNodesPurgerTask;
 
 	public KeepAlive(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
-		this.timer = new Timer("Keep Alive Timer");
-		this.timer.scheduleAtFixedRate(task = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
+		this.timer = new Timer("Dead Nodes Purger");
+		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
 	public void qsyHelloPacketReceived(final QSYPacket qsyPacket) {
@@ -49,7 +49,7 @@ public final class KeepAlive implements AutoCloseable {
 	@Override
 	public void close() throws Exception {
 		timer.cancel();
-		task.close();
+		deadNodesPurgerTask.close();
 	}
 
 	@Override
