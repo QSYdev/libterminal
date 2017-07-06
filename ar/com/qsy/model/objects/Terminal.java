@@ -1,29 +1,38 @@
 package ar.com.qsy.model.objects;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.view.QSYFrame;
+
 public final class Terminal implements Runnable, AutoCloseable {
 
-	private final BlockingQueue<QSYPacket> buffer;
+	private final QSYFrame view;
+
+	private final BlockingQueue<QSYPacket> inputBuffer;
 	private final ReceiverSelector receiverSelector;
+
+	private final BlockingQueue<QSYPacket> outputBuffer;
+
+	private final TreeMap<Integer, Node> nodes;
+
+	private final KeepAlive keepAlive;
+
 	private final AtomicBoolean searchNodes;
-	private final Hashtable<InetAddress, Long> nodesRegistry;
 	private final AtomicBoolean running;
 
-	private final KeepAliveChecker keepAliveChecker;
-	private Thread kacThread;
+	public Terminal(final BlockingQueue<QSYPacket> inputBuffer, final ReceiverSelector receiverSelector, final BlockingQueue<QSYPacket> outputBuffer, final QSYFrame view) {
+		this.view = view;
 
-	public Terminal(final BlockingQueue<QSYPacket> buffer, final ReceiverSelector receiverSelector) {
-		this.buffer = buffer;
+		this.inputBuffer = inputBuffer;
 		this.receiverSelector = receiverSelector;
-		this.nodesRegistry = new Hashtable<InetAddress, Long>();
+		this.outputBuffer = outputBuffer;
+		this.nodes = new TreeMap<>();
+		this.keepAlive = new KeepAlive(nodes);
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
-		keepAliveChecker = new KeepAliveChecker(this.nodesRegistry);
 	}
 
 	@Override
@@ -31,33 +40,37 @@ public final class Terminal implements Runnable, AutoCloseable {
 		while (running.get()) {
 
 			try {
-				final QSYPacket qsyPacket = buffer.take();
+				final QSYPacket qsyPacket = inputBuffer.take();
+
 				switch (qsyPacket.getType()) {
 				case Hello: {
-					if (searchNodes.get() && !nodesRegistry.contains(qsyPacket.getNodeAddress())) {
-						System.out.println(qsyPacket);
-						if (nodesRegistry.isEmpty()) {
-							kacThread = new Thread(keepAliveChecker, "KeepAliveChecker");
-							kacThread.start();
+					if (searchNodes.get()) {
+						final boolean contains;
+						synchronized (nodes) {
+							contains = nodes.containsKey(qsyPacket.getId());
 						}
-						System.out.println(System.currentTimeMillis() % 10000 + "\tAgregando nodo y keepAlive");
-						nodesRegistry.put(qsyPacket.getNodeAddress(), System.currentTimeMillis());
-						receiverSelector.registerNewSocketChannel(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT, null);
+						if (!contains) {
+							final Node node = new Node(qsyPacket);
+							synchronized (nodes) {
+								nodes.put(node.getNodeId(), node);
+							}
+							receiverSelector.qsyHelloPacketReceived(node);
+							keepAlive.qsyHelloPacketReceived(qsyPacket);
+							view.addNewNode(qsyPacket);
+						}
 					}
 					break;
 				}
 				case Keepalive: {
-					long ahora = System.currentTimeMillis();
-					System.out.printf("Actualizando keepAlive nodo %s. prev: %d - ahora: %d\n", qsyPacket.getNodeAddress(), (nodesRegistry.get(qsyPacket.getNodeAddress()) % 10000), ahora % 10000);
-					nodesRegistry.put(qsyPacket.getNodeAddress(), System.currentTimeMillis());
-					break;
-				}
-				case Command: {
-					// TODO cuando se recibe un command.
+					keepAlive.qsyKeepAlivePacketReceived(qsyPacket);
 					break;
 				}
 				case Touche: {
 					// TODO cuando se recibe un touche.
+					System.out.println(qsyPacket);
+					break;
+				}
+				default: {
 					break;
 				}
 				}
@@ -68,6 +81,10 @@ public final class Terminal implements Runnable, AutoCloseable {
 
 	}
 
+	public TreeMap<Integer, Node> getNodes() {
+		return nodes;
+	}
+
 	public void searchNodes() {
 		searchNodes.set(true);
 	}
@@ -76,10 +93,14 @@ public final class Terminal implements Runnable, AutoCloseable {
 		searchNodes.set(false);
 	}
 
+	public void sendQSYPacket(final QSYPacket qsyPacket) throws InterruptedException {
+		outputBuffer.put(qsyPacket);
+	}
+
 	@Override
-	public void close() {
-		nodesRegistry.clear();
+	public void close() throws Exception {
 		running.set(false);
+		keepAlive.close();
 	}
 
 	@Override
