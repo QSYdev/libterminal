@@ -1,13 +1,11 @@
 package ar.com.qsy.model.objects;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,17 +13,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class ReceiverSelector implements Runnable, AutoCloseable {
 
 	private final Selector selector;
-	private final LinkedList<SimpleEntry<Object, SocketChannel>> newConnections;
-	private final LinkedBlockingQueue<QSYPacket> buffer;
+	private final LinkedList<Node> pendingConnections;
+	private final LinkedBlockingQueue<QSYPacket> inputBuffer;
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
 	private final AtomicBoolean running;
 
-	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> buffer) throws IOException {
+	public ReceiverSelector(final LinkedBlockingQueue<QSYPacket> inputBuffer) throws IOException {
 		this.selector = Selector.open();
-		this.newConnections = new LinkedList<SimpleEntry<Object, SocketChannel>>();
-		this.buffer = buffer;
+		this.pendingConnections = new LinkedList<>();
+		this.inputBuffer = inputBuffer;
 		this.running = new AtomicBoolean(true);
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 		this.data = new byte[QSYPacket.PACKET_SIZE];
@@ -43,7 +41,7 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 						channel.read(byteBuffer);
 						byteBuffer.flip();
 						byteBuffer.get(data);
-						buffer.put(new QSYPacket(channel.socket().getInetAddress(), data));
+						inputBuffer.put(new QSYPacket(channel.socket().getInetAddress(), data));
 						byteBuffer.clear();
 					}
 				}
@@ -54,29 +52,25 @@ public final class ReceiverSelector implements Runnable, AutoCloseable {
 		}
 	}
 
-	public void registerNewSocketChannel(final String address, final int port, final Object object) throws IOException {
-		final InetSocketAddress hostAddress = new InetSocketAddress(address, port);
-		final SocketChannel client = SocketChannel.open(hostAddress);
-		client.configureBlocking(false);
-		synchronized (newConnections) {
-			newConnections.add(new SimpleEntry<Object, SocketChannel>(object, client));
+	public void qsyHelloPacketReceived(final Node node) throws IOException {
+		synchronized (pendingConnections) {
+			pendingConnections.add(node);
 		}
 		selector.wakeup();
 	}
 
 	private void addNewConnections() throws ClosedChannelException {
-		synchronized (newConnections) {
-			for (final SimpleEntry<Object, SocketChannel> item : newConnections) {
-				final SocketChannel s = item.getValue();
-				final Object o = item.getKey();
-				s.register(selector, SelectionKey.OP_READ, o);
+		synchronized (pendingConnections) {
+			for (final Node node : pendingConnections) {
+				final SocketChannel s = node.getNodeSocketChannel();
+				s.register(selector, SelectionKey.OP_READ, null);
 			}
-			newConnections.clear();
+			pendingConnections.clear();
 		}
 	}
 
 	@Override
-	public void close() {
+	public void close() throws Exception {
 		running.set(false);
 		try {
 			selector.close();

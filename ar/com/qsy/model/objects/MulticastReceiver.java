@@ -16,9 +16,9 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 
 	private final AtomicBoolean running;
 
-	private final BlockingQueue<QSYPacket> buffer;
+	private final BlockingQueue<QSYPacket> inputBuffer;
 
-	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> buffer) throws IOException {
+	public MulticastReceiver(final String serverAddress, final int serverPort, final BlockingQueue<QSYPacket> inputBuffer) throws IOException {
 		this.address = InetAddress.getByName(serverAddress);
 		this.socket = new MulticastSocket(serverPort);
 		this.socket.joinGroup(address);
@@ -27,7 +27,7 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 		this.packet = new DatagramPacket(new byte[QSYPacket.PACKET_SIZE], QSYPacket.PACKET_SIZE);
 		this.running = new AtomicBoolean(true);
 
-		this.buffer = buffer;
+		this.inputBuffer = inputBuffer;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 		while (running.get()) {
 			try {
 				if (receive(packet)) {
-					buffer.put(new QSYPacket(packet.getAddress(), packet.getData()));
+					inputBuffer.put(new QSYPacket(packet.getAddress(), packet.getData()));
 				} else {
 					throw new Exception("<< QSY_MULTICAST_ERROR >> Ha ocurrido un error en la conexion con el multicast");
 				}
@@ -67,7 +67,7 @@ public final class MulticastReceiver implements Runnable, AutoCloseable {
 	}
 
 	@Override
-	public void close() {
+	public void close() throws Exception {
 		running.set(false);
 		try {
 			socket.leaveGroup(address);
