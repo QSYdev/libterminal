@@ -15,8 +15,8 @@ public final class QSYPacket {
 	public static final int MULTICAST_PORT = 3000;
 	public static final int TCP_PORT = 3000;
 
-	private static final int MIN_ID_SIZE = 0;
-	private static final int MAX_ID_SIZE = (int) (Math.pow(2, 16) - 1);
+	public static final int MIN_ID_SIZE = 0;
+	public static final int MAX_ID_SIZE = (int) (Math.pow(2, 16) - 1);
 	private static final long MIN_DELAY_SIZE = 0;
 	private static final long MAX_DELAY_SIZE = (long) (Math.pow(2, 32) - 1);
 
