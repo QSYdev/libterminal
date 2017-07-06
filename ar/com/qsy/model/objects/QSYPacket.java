@@ -9,14 +9,14 @@ public final class QSYPacket {
 	public static final long QSY_PROTOCOL_VERSION = 130617;
 
 	public static final byte PACKET_SIZE = 12;
-	public static final int KEEP_ALIVE_MS = 1000;
+	public static final int KEEP_ALIVE_MS = 500;
 
 	public static final String MULTICAST_ADDRESS = "224.0.0.12";
 	public static final int MULTICAST_PORT = 3000;
 	public static final int TCP_PORT = 3000;
 
-	private static final int MIN_ID_SIZE = 0;
-	private static final int MAX_ID_SIZE = (int) (Math.pow(2, 16) - 1);
+	public static final int MIN_ID_SIZE = 0;
+	public static final int MAX_ID_SIZE = (int) (Math.pow(2, 16) - 1);
 	private static final long MIN_DELAY_SIZE = 0;
 	private static final long MAX_DELAY_SIZE = (long) (Math.pow(2, 32) - 1);
 
@@ -69,9 +69,9 @@ public final class QSYPacket {
 
 	public QSYPacket(final InetAddress nodeAddress, final byte[] data) throws IllegalArgumentException {
 		if (data.length != PACKET_SIZE) {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El tamaño del QSYPacket debe ser de " + PACKET_SIZE + ".");
+			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El tamaï¿½o del QSYPacket debe ser de " + PACKET_SIZE + ".");
 		} else if (data[Q_INDEX] != 'Q' || data[S_INDEX] != 'S' || data[Y_INDEX] != 'Y') {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket posee una firma inválida.");
+			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket posee una firma invï¿½lida.");
 		}
 
 		this.nodeAddress = nodeAddress;
@@ -123,6 +123,8 @@ public final class QSYPacket {
 			result = GREEN_VALUE;
 		} else if (color.equals(Color.blue)) {
 			result = BLUE_VALUE;
+		} else if (color.equals(Color.white)) {
+			result = WHITE_VALUE;
 		} else {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");
 		}
@@ -253,7 +255,7 @@ public final class QSYPacket {
 		}
 		}
 		stringBuilder.append(" From = " + getNodeAddress() + "\n");
-		stringBuilder.append("ID = " + getId() + "\t");
+		stringBuilder.append("ID = " + getId() + " || ");
 		stringBuilder.append("COLOR = ");
 		if (color == null) {
 			stringBuilder.append("No Color");
@@ -266,13 +268,9 @@ public final class QSYPacket {
 		} else if (color.equals(Color.white)) {
 			stringBuilder.append("White");
 		}
-		stringBuilder.append("\tDELAY = " + getDelay());
+		stringBuilder.append(" || DELAY = " + getDelay());
 
 		return stringBuilder.toString();
-	}
-
-	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final Color color, final long delay) throws IllegalArgumentException {
-		return createCommandPacket(nodeAddress, 0, color, delay);
 	}
 
 	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final int nodeId, final Color color, final long delay) throws IllegalArgumentException {
