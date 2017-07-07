@@ -93,6 +93,15 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 		});
 	}
 
+	private void removeDisconectedNode(final Node node) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				searchPanel.removeNode(node);
+			}
+		});
+	}
+
 	@Override
 	public void close() throws Exception {
 		searchPanel.close();
@@ -105,6 +114,11 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 		case newNode: {
 			final Node node = (Node) event.getContent();
 			newNodeCreated(node);
+			break;
+		}
+		case disconectedNode: {
+			final Node node = (Node) event.getContent();
+			removeDisconectedNode(node);
 			break;
 		}
 		default: {

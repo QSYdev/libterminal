@@ -26,7 +26,20 @@ public final class Event {
 		 * La aplicacion ha enviado un command hacia el nodo. En Content se
 		 * encuentra el QSYPacket.
 		 */
-		commandPacketSent
+		commandPacketSent,
+
+		/**
+		 * El modulo keepalive detecto que un nodo no ha enviado a tiempo su
+		 * keepalive. En Content se encuentra la instancia del nodo
+		 * desconectado.
+		 */
+		keepAliveError,
+
+		/**
+		 * La terminal determina que un nodo ha sido desconectado. En content se
+		 * encuentra la instancia del nodo.
+		 */
+		disconectedNode
 	}
 
 	private final EventType eventType;

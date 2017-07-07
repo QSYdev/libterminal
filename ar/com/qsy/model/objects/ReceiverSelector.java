@@ -82,12 +82,6 @@ public final class ReceiverSelector extends EventSource implements Runnable, Aut
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
-	}
-
-	@Override
 	public void receiveEvent(final Event event) throws InterruptedException, IOException {
 		switch (event.getEventType()) {
 		case newNode: {
@@ -95,9 +89,15 @@ public final class ReceiverSelector extends EventSource implements Runnable, Aut
 			newNodeCreated(node);
 			break;
 		}
+		case disconectedNode: {
+			final Node node = (Node) event.getContent();
+			node.getNodeSocketChannel().keyFor(selector).cancel();
+			break;
+		}
 		default: {
 			break;
 		}
 		}
 	}
+
 }

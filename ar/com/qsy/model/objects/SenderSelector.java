@@ -57,10 +57,4 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 		running.set(false);
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
-	}
-
 }

@@ -5,9 +5,11 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import ar.com.qsy.model.patterns.observer.EventSource;
 import ar.com.qsy.model.patterns.observer.SynchronousListener;
 
-public final class KeepAlive implements AutoCloseable, SynchronousListener {
+public final class KeepAlive extends EventSource implements AutoCloseable, SynchronousListener {
 
 	public static final int MAX_KEEP_ALIVE_DELAY = (int) ((5 / 2f) * QSYPacket.KEEP_ALIVE_MS);
 
@@ -21,7 +23,7 @@ public final class KeepAlive implements AutoCloseable, SynchronousListener {
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
-	private void newNodeCreated(final Node node) {
+	private void newNodeCreated(final Node node) throws Exception {
 		final long currentTime = System.currentTimeMillis();
 		final boolean nodeAlive;
 
@@ -29,8 +31,7 @@ public final class KeepAlive implements AutoCloseable, SynchronousListener {
 		node.keepAlive(currentTime);
 
 		if (!nodeAlive) {
-			// TODO notificar a la terminal.
-			System.err.println("Timer>> Se ha desconectado un nodo");
+			sendEvent(new Event(EventType.keepAliveError, node));
 		}
 	}
 
@@ -51,41 +52,6 @@ public final class KeepAlive implements AutoCloseable, SynchronousListener {
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
-	}
-
-	private final class DeadNodesPurger extends TimerTask implements AutoCloseable {
-
-		public DeadNodesPurger() {
-		}
-
-		@Override
-		public void run() {
-			final long currentTime = System.currentTimeMillis();
-			boolean nodeAlive = true;
-
-			synchronized (nodes) {
-				for (final Node node : nodes.values()) {
-					nodeAlive = node.isAlive(currentTime);
-				}
-			}
-
-			if (!nodeAlive) {
-				// TODO notificar a la terminal.
-				System.err.println("Timer>> Se ha desconectado un nodo");
-			}
-		}
-
-		@Override
-		public void close() throws Exception {
-			return;
-		}
-
-	}
-
-	@Override
 	public void receiveEvent(final Event event) throws Exception {
 		switch (event.getEventType()) {
 		case newNode: {
@@ -102,6 +68,43 @@ public final class KeepAlive implements AutoCloseable, SynchronousListener {
 			break;
 		}
 		}
+	}
+
+	private final class DeadNodesPurger extends TimerTask implements AutoCloseable {
+
+		public DeadNodesPurger() {
+		}
+
+		@Override
+		public void run() {
+			final long currentTime = System.currentTimeMillis();
+			boolean nodeAlive = true;
+			Node disconectedNode = null;
+
+			synchronized (nodes) {
+				for (final Node node : nodes.values()) {
+					if (!node.isAlive(currentTime)) {
+						nodeAlive = false;
+						disconectedNode = node;
+						break;
+					}
+				}
+			}
+
+			if (!nodeAlive) {
+				try {
+					sendEvent(new Event(EventType.keepAliveError, disconectedNode));
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		public void close() throws Exception {
+			return;
+		}
+
 	}
 
 }

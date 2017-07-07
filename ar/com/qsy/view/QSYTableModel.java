@@ -32,11 +32,11 @@ public final class QSYTableModel extends DefaultTableModel {
 		nodes.put(node.getNodeId(), getRowCount() - 1);
 	}
 
-	public void removeNode(final int nodeId) {
-		final Integer rowToDelete = nodes.get(nodeId);
+	public void removeNode(final Node node) {
+		final Integer rowToDelete = nodes.get(node.getNodeId());
 		if (rowToDelete != null) {
 			removeRow(rowToDelete);
-			nodes.remove(nodeId);
+			nodes.remove(node.getNodeId());
 		}
 
 	}

@@ -13,7 +13,6 @@ import ar.com.qsy.model.patterns.observer.EventSource;
 public final class MulticastReceiver extends EventSource implements Runnable, AutoCloseable {
 
 	private final InetAddress address;
-	private final int port;
 	private final MulticastSocket socket;
 	private final DatagramPacket packet;
 
@@ -23,7 +22,6 @@ public final class MulticastReceiver extends EventSource implements Runnable, Au
 		this.address = InetAddress.getByName(serverAddress);
 		this.socket = new MulticastSocket(serverPort);
 		this.socket.joinGroup(address);
-		this.port = serverPort;
 
 		this.packet = new DatagramPacket(new byte[QSYPacket.PACKET_SIZE], QSYPacket.PACKET_SIZE);
 		this.running = new AtomicBoolean(true);
@@ -53,18 +51,6 @@ public final class MulticastReceiver extends EventSource implements Runnable, Au
 		return result;
 	}
 
-	public void setRunning(final boolean running) {
-		this.running.set(running);
-	}
-
-	public InetAddress getAddress() {
-		return address;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
 	@Override
 	public void close() throws Exception {
 		running.set(false);
@@ -75,12 +61,6 @@ public final class MulticastReceiver extends EventSource implements Runnable, Au
 		} finally {
 			socket.close();
 		}
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
 	}
 
 }

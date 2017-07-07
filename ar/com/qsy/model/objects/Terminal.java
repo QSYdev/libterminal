@@ -24,6 +24,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		this.internalListener = new AsynchronousListener();
 		this.keepAlive = new KeepAlive(nodes);
 		addListener(keepAlive);
+		keepAlive.addListener(this);
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
 	}
@@ -70,6 +71,19 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 					}
 					break;
 				}
+				case keepAliveError: {
+					final Node node = (Node) event.getContent();
+					final boolean successful;
+					synchronized (nodes) {
+						successful = nodes.remove(node.getNodeId()) != null;
+					}
+					node.close();
+					if (successful) {
+						System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
+						sendEvent(new Event(EventType.disconectedNode, node));
+					}
+					break;
+				}
 				default: {
 					break;
 				}
@@ -101,12 +115,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	public void close() throws Exception {
 		running.set(false);
 		keepAlive.close();
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		close();
 	}
 
 	@Override

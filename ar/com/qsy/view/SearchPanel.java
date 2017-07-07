@@ -99,8 +99,8 @@ public final class SearchPanel extends JPanel implements AutoCloseable {
 		model.addNode(node);
 	}
 
-	public void removeNode(final int nodeId) {
-		model.removeNode(nodeId);
+	public void removeNode(final Node node) {
+		model.removeNode(node);
 	}
 
 	@Override
