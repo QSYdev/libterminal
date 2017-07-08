@@ -36,7 +36,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 			try {
 				final Event event = internalListener.getEvent();
 				switch (event.getEventType()) {
-				case IncomingQSYPacket: {
+				case incomingQSYPacket: {
 					final QSYPacket qsyPacket = (QSYPacket) event.getContent();
 
 					switch (qsyPacket.getType()) {
@@ -73,15 +73,12 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 				}
 				case keepAliveError: {
 					final Node node = (Node) event.getContent();
-					final boolean successful;
 					synchronized (nodes) {
-						successful = nodes.remove(node.getNodeId()) != null;
+						nodes.remove(node.getNodeId());
 					}
 					node.close();
-					if (successful) {
-						System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
-						sendEvent(new Event(EventType.disconectedNode, node));
-					}
+					sendEvent(new Event(EventType.disconnectedNode, node));
+					System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
 					break;
 				}
 				default: {

@@ -32,7 +32,7 @@ public final class MulticastReceiver extends EventSource implements Runnable, Au
 		while (running.get()) {
 			try {
 				if (receive(packet)) {
-					sendEvent(new Event(EventType.IncomingQSYPacket, new QSYPacket(packet.getAddress(), packet.getData())));
+					sendEvent(new Event(EventType.incomingQSYPacket, new QSYPacket(packet.getAddress(), packet.getData())));
 				} else {
 					throw new Exception("<< QSY_MULTICAST_ERROR >> Ha ocurrido un error en la conexion con el multicast");
 				}

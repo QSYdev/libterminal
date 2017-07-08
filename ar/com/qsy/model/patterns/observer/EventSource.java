@@ -16,43 +16,51 @@ public abstract class EventSource {
 	}
 
 	public final void addListener(final EventListener eventListener) {
-		pendingActions.add(new Command() {
+		synchronized (pendingActions) {
+			pendingActions.add(new Command() {
 
-			@Override
-			public void execute() {
-				listeners.add(eventListener);
-			}
+				@Override
+				public void execute() {
+					listeners.add(eventListener);
+				}
 
-		});
+			});
+		}
 	}
 
 	public final void removeListener(final EventListener eventListener) {
-		pendingActions.add(new Command() {
+		synchronized (pendingActions) {
+			pendingActions.add(new Command() {
 
-			@Override
-			public void execute() {
-				listeners.remove(eventListener);
-			}
+				@Override
+				public void execute() {
+					listeners.remove(eventListener);
+				}
 
-		});
+			});
+		}
 	}
 
 	public final void removeAllListeners() {
-		pendingActions.add(new Command() {
+		synchronized (pendingActions) {
+			pendingActions.add(new Command() {
 
-			@Override
-			public void execute() {
-				listeners.clear();
-			}
+				@Override
+				public void execute() {
+					listeners.clear();
+				}
 
-		});
+			});
+		}
 	}
 
 	public final void sendEvent(final Event event) throws Exception {
-		for (final Command action : pendingActions) {
-			action.execute();
+		synchronized (pendingActions) {
+			for (final Command action : pendingActions) {
+				action.execute();
+			}
+			pendingActions.clear();
 		}
-		pendingActions.clear();
 		for (final EventListener eventListener : listeners) {
 			eventListener.receiveEvent(event);
 		}

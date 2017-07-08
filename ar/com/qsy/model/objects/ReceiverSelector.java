@@ -43,7 +43,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Aut
 						channel.read(byteBuffer);
 						byteBuffer.flip();
 						byteBuffer.get(data);
-						sendEvent(new Event(EventType.IncomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
+						sendEvent(new Event(EventType.incomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
 						byteBuffer.clear();
 					}
 				}
@@ -89,7 +89,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Aut
 			newNodeCreated(node);
 			break;
 		}
-		case disconectedNode: {
+		case disconnectedNode: {
 			final Node node = (Node) event.getContent();
 			node.getNodeSocketChannel().keyFor(selector).cancel();
 			break;

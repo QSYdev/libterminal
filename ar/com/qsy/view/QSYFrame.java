@@ -116,7 +116,7 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 			newNodeCreated(node);
 			break;
 		}
-		case disconectedNode: {
+		case disconnectedNode: {
 			final Node node = (Node) event.getContent();
 			removeDisconectedNode(node);
 			break;

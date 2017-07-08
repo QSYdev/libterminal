@@ -8,7 +8,7 @@ public final class Event {
 		 * el ReceiverSelector. El mismo no se determina su tipo. En Content se
 		 * encuentra el QSYPacket.
 		 */
-		IncomingQSYPacket,
+		incomingQSYPacket,
 
 		/**
 		 * La terminal ha indentificado un nuevo nodo y lo ha agregado a su
@@ -39,7 +39,7 @@ public final class Event {
 		 * La terminal determina que un nodo ha sido desconectado. En content se
 		 * encuentra la instancia del nodo.
 		 */
-		disconectedNode
+		disconnectedNode
 	}
 
 	private final EventType eventType;
