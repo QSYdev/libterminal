@@ -23,7 +23,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		this.nodes = new TreeMap<>();
 		this.internalListener = new AsynchronousListener();
 		this.keepAlive = new KeepAlive(nodes);
-		addListener(keepAlive);
 		keepAlive.addListener(this);
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
@@ -51,13 +50,14 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 								synchronized (nodes) {
 									nodes.put(node.getNodeId(), node);
 								}
+								keepAlive.newNodeCreated(node);
 								sendEvent(new Event(EventType.newNode, node));
 							}
 						}
 						break;
 					}
 					case Keepalive: {
-						sendEvent(new Event(EventType.keepAliveReceived, qsyPacket));
+						keepAlive.qsyKeepAlivePacketReceived(qsyPacket);
 						break;
 					}
 					case Touche: {

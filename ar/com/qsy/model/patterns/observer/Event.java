@@ -29,16 +29,6 @@ public final class Event {
                 newNode,
 
                 /**
-                 * La terminal ha identificado un keepAliveReceived. En Content se
-                 * encuentra el QSYPacket recibido.
-                 * Listeners:</b>
-                 * - <b>KeepAlive: actualiza el keepAlive del nodo correspondiente.
-                 * Senders:
-                 * - <b>Terminal</b>: cuando el incomingQSYPacket es de tipo keepAlive.
-                 */
-                keepAliveReceived,
-
-                /**
                  * La aplicacion ha enviado un command hacia el nodo. En Content se
                  * encuentra el QSYPacket.
                  * Listeners:

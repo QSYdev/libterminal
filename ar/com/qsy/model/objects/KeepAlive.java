@@ -9,7 +9,7 @@ import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventSource;
 import ar.com.qsy.model.patterns.observer.SynchronousListener;
 
-public final class KeepAlive extends EventSource implements AutoCloseable, SynchronousListener {
+public final class KeepAlive extends EventSource implements AutoCloseable {
 
 	public static final int MAX_KEEP_ALIVE_DELAY = (int) ((5 / 2f) * QSYPacket.KEEP_ALIVE_MS);
 
@@ -23,7 +23,7 @@ public final class KeepAlive extends EventSource implements AutoCloseable, Synch
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
-	private void newNodeCreated(final Node node) throws Exception {
+	protected void newNodeCreated(final Node node) throws Exception {
 		final long currentTime = System.currentTimeMillis();
 		final boolean nodeAlive;
 
@@ -35,7 +35,7 @@ public final class KeepAlive extends EventSource implements AutoCloseable, Synch
 		}
 	}
 
-	private void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
+	protected void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
 		final long currentTime = System.currentTimeMillis();
 
 		final Node node;
@@ -51,25 +51,6 @@ public final class KeepAlive extends EventSource implements AutoCloseable, Synch
 		deadNodesPurgerTask.close();
 	}
 
-	@Override
-	public void receiveEvent(final Event event) throws Exception {
-		switch (event.getEventType()) {
-		case newNode: {
-			final Node node = (Node) event.getContent();
-			newNodeCreated(node);
-			break;
-		}
-		case keepAliveReceived: {
-			final QSYPacket qsyPacket = (QSYPacket) event.getContent();
-			qsyKeepAlivePacketReceived(qsyPacket);
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-	}
-
 	private final class DeadNodesPurger extends TimerTask implements AutoCloseable {
 
 		public DeadNodesPurger() {
@@ -79,13 +60,13 @@ public final class KeepAlive extends EventSource implements AutoCloseable, Synch
 		public void run() {
 			final long currentTime = System.currentTimeMillis();
 			boolean nodeAlive = true;
-			Node disconectedNode = null;
+			Node disconnectedNode = null;
 
 			synchronized (nodes) {
 				for (final Node node : nodes.values()) {
 					if (!node.isAlive(currentTime)) {
 						nodeAlive = false;
-						disconectedNode = node;
+						disconnectedNode = node;
 						break;
 					}
 				}
@@ -93,7 +74,7 @@ public final class KeepAlive extends EventSource implements AutoCloseable, Synch
 
 			if (!nodeAlive) {
 				try {
-					sendEvent(new Event(EventType.keepAliveError, disconectedNode));
+					sendEvent(new Event(EventType.keepAliveError, disconnectedNode));
 				} catch (final Exception e) {
 					e.printStackTrace();
 				}
