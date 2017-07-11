@@ -2,7 +2,6 @@ package ar.com.qsy.model.objects;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// TODO: definir si la implementacion Runnable o la no runnable
 public class PlayerExecutor extends Executor {
 
 	// TODO: parametros para el constructor en caso de player
@@ -12,4 +11,6 @@ public class PlayerExecutor extends Executor {
 
 	public void start() {
 	}
+
+	public void touche(Node node) {}
 }

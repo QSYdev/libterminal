@@ -64,8 +64,15 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case Touche: {
+						// TODO: creo que no hace falta hacer nada mas aca, chequear
 						if(executor.isRunning()) {
-							// TODO: si recibimos un touche y un executor esta corriendo, que hacemos?
+							Node node;
+							synchronized (nodes) {
+								node = nodes.get(qsyPacket.getId());
+							}
+							if(node != null) {
+								executor.touche(node);
+							}
 						}
 						break;
 					}

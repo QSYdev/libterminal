@@ -13,6 +13,8 @@ public abstract class Executor extends EventSource {
 
 	public void start() {}
 
+	public void touche(Node node) {}
+
 	public boolean isRunning() {
 		return running.get();
 	}
