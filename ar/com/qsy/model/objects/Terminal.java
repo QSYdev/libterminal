@@ -16,10 +16,13 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	private final AsynchronousListener internalListener;
 	private final KeepAlive keepAlive;
 
+	private Executor executor;
+
 	private final AtomicBoolean searchNodes;
 	private final AtomicBoolean running;
 
 	public Terminal() {
+		this.executor = null;
 		this.nodes = new TreeMap<>();
 		this.internalListener = new AsynchronousListener();
 		this.keepAlive = new KeepAlive(nodes);
@@ -61,8 +64,9 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case Touche: {
-						// TODO cuando se recibe un touche.
-						System.out.println(qsyPacket);
+						if(executor.isRunning()) {
+							// TODO: si recibimos un touche y un executor esta corriendo, que hacemos?
+						}
 						break;
 					}
 					default: {
@@ -102,6 +106,23 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 
 	public void finalizeNodesSearch() {
 		searchNodes.set(false);
+	}
+
+	/*
+	 * stopExecutor se llamaria desde la interfaz del cliente que decidamos
+	 * usar. La idea de esto es poder cortar la ejecucion de la rutina a partir
+	 * de una accion del usuario.
+	 */
+	public void stopExecutor() { executor.stop(); }
+
+	public void executePlayer() {
+		executor = new PlayerExecutor();
+		executor.start();
+	}
+
+	public void executeCustom() {
+		executor = new CustomExecutor();
+		executor.start();
 	}
 
 	public void sendQSYPacket(final QSYPacket qsyPacket) throws Exception {
