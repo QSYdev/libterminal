@@ -10,17 +10,18 @@ public class PlayerExecutor extends Executor {
 
 	// TODO: parametros para el constructor en caso de player
 	public PlayerExecutor() {
-		this.running = new AtomicBoolean(true);
+		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
 	}
 
 	@Override
 	public void start() {
-		/*
-		 * TODO: implementacion inicial de la rutina
-		 * en start deberiamos obtener el primer paso de la rutina, crear el StepTimeout acorde al paso
-		 * y mandarle el evento commandPacketSent a la terminal, indicando los nodos del primer paso
-		 */
+		this.running.set(true);
+		generateAndExecuteNextStep();
+	}
+
+	private void generateAndExecuteNextStep() {
+
 	}
 
 	@Override

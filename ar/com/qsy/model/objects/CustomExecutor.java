@@ -1,67 +1,76 @@
 package ar.com.qsy.model.objects;
 
 import ar.com.qsy.model.patterns.observer.Event;
-import ar.com.qsy.model.patterns.observer.Event.EventType;
-import java.awt.Color;
-import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketSent;
 
 public class CustomExecutor extends Executor {
 	private Timer timer;
 	private StepTimeout stepTimeoutTask;
 	private Routine routine;
-	private HashMap<Integer, InetAddress> nodes;
+	private HashMap<Integer, Node> nodesAssociations;
 	private Step currentStep;
 	private Set<Integer> touchedNodes;
 
-	public CustomExecutor(Routine routine, HashMap<Integer, InetAddress> nodes) {
+	public CustomExecutor(Routine routine, HashMap<Integer, Node> nodes) {
 		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
-		this.nodes = nodes;
+		this.nodesAssociations = nodes;
 		this.routine = routine;
+		this.touchedNodes = new HashSet<>();
 	}
 
 	@Override
 	public void start() {
 		this.running.set(true);
-		executeNextStep();
+		if(routine.hasNext()) executeNextStep();
 	}
 
 	private void executeNextStep() {
-		currentStep = routine.getSteps().next();
-		ArrayList<NodeConfiguration> nodes = step.getNodes();
+		currentStep = routine.next();
+		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
 		QSYPacket qsyPacket;
-		long totalDelay = -1;
+		long maxDelay = -1;
 
-		for (ArrayList<NodeConfiguration> node : nodes) {
-			final int id = node.getId();
-			final int delay = node.getDelay();
-			if(delay > totalDelay) {
-				totalDelay = delay;
+		for (NodeConfiguration nodeConfiguration : nodesConfiguration) {
+			final int logicId = nodeConfiguration.getId();
+			final int delay = nodeConfiguration.getDelay();
+			if(delay > maxDelay) {
+				maxDelay = delay;
 			}
-			qsyPacket = QSYPacket.createCommandPacket(this.nodes.get(id),id, node.getColor(), delay);
-			sendEvent(new Event(commandPacketSent, qsyPacket));
+			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
+				this.nodesAssociations.get(logicId).getNodeId(),
+				nodeConfiguration.getColor(),
+				delay);
+			try{
+				sendEvent(new Event(commandPacketSent, qsyPacket));
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		int timeout = currentStep.getTimeout();
 		if (timeout > 0) {
 			stepTimeoutTask.cancel();
 			timer.purge();
-			totalDelay = totalDelay + timeout;
+			maxDelay = maxDelay + timeout;
 			stepTimeoutTask = new StepTimeout();
-			timer.schedule(stepTimeoutTask, totalDelay);
+			timer.schedule(stepTimeoutTask, maxDelay);
 		}
 	}
 
 	@Override
 	public void touche(Node node) {
-		int id = node.getNodeId();
-		touchedNodes.add(id);
+		int nodeId = node.getNodeId();
+		// TODO: chequear cuando el id devuelto sea -1
+		touchedNodes.add(getLogicIdFromNodeId(nodeId));
 		if(!currentStep.isFinished(touchedNodes)) {
 			return;
 		}
-		if(routine.getSteps().hasNext()) {
+		if(routine.hasNext()) {
+			turnOffCurrentStep();
 			executeNextStep();
 		}
 	}
@@ -70,6 +79,20 @@ public class CustomExecutor extends Executor {
 	public void stop() {
 		super.stop();
 		timer.cancel();
+	}
+
+	private int getLogicIdFromNodeId(int nodeId) {
+		for(Map.Entry<Integer, Node> entry : nodesAssociations.entrySet()) {
+			if(entry.getValue().getNodeId() == nodeId) {
+				return entry.getKey();
+			}
+		}
+		return -1;
+	}
+
+	// TODO: apagar todos los del paso que no fueron tocados
+	private void turnOffCurrentStep() {
+
 	}
 
 	private class StepTimeout extends TimerTask {
@@ -85,6 +108,7 @@ public class CustomExecutor extends Executor {
 			 * termine la rutina o si simplemente se lo marca como no tocado y
 			 * se continua.
 			 */
+
 		}
 	}
 }
