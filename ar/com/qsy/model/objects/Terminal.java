@@ -122,11 +122,13 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	 */
 	public void stopExecutor() { executor.stop(); }
 
+	// TODO: executePlayer deberia recibir por parametro informacion necesaria para la rutina player
 	public void executePlayer() {
 		executor = new PlayerExecutor();
 		executor.start();
 	}
 
+	// TODO: executeCustom deberia recibir por parametro la rutina custom especifica
 	public void executeCustom() {
 		executor = new CustomExecutor();
 		executor.start();

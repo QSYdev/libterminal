@@ -5,17 +5,21 @@ import ar.com.qsy.model.patterns.observer.EventSource;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Executor extends EventSource {
+	// TODO: definir estructura de la lista de los steps
 	protected AtomicBoolean running;
 
 	public void stop() {
 		running.set(false);
 	}
 
-	public void start() {}
+	public void start() {
+	}
 
-	public void touche(Node node) {}
+	public void touche(Node node) {
+	}
 
 	public boolean isRunning() {
 		return running.get();
 	}
+
 }
