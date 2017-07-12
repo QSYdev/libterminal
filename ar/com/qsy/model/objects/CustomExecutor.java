@@ -6,10 +6,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CustomExecutor extends Executor {
 	private Timer timer;
+	private StepTimeout stepTimeoutTask;
 
 	// TODO: parametros para el constructor en caso de custom
 	public CustomExecutor() {
 		this.running = new AtomicBoolean(true);
+		this.timer = new Timer("Step timeouts");
 	}
 
 	@Override
@@ -24,7 +26,6 @@ public class CustomExecutor extends Executor {
 	public void stop() {
 		super.stop();
 		timer.cancel();
-		timer.purge();
 	}
 
 	private class StepTimeout extends TimerTask {
