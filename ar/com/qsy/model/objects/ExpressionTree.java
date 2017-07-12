@@ -1,5 +1,6 @@
 package ar.com.qsy.model.objects;
 
+import java.util.Set;
 import java.util.Stack;
 
 import ar.com.qsy.model.utils.Utils;
@@ -25,23 +26,21 @@ public final class ExpressionTree {
 		return stack.pop();
 	}
 
-	public boolean evaluateExpressionTree() {
-		return evaluateExpressionTree(expressionRootNode);
+	public boolean evaluateExpressionTree(Set<Integer> ids) {
+		return evaluateExpressionTree(expressionRootNode,ids);
 	}
 
-	private boolean evaluateExpressionTree(final ExpressionNode node) {
+	private boolean evaluateExpressionTree(ExpressionNode node, Set<Integer> ids) {
 		if (node.isLeaf()) {
 			final int nodeId = node.getValue();
-
-			// TODO cambiar esto por si el nodo fue tocado.
-			return nodeId != 0;
+			return ids.contains(nodeId);
 		} else {
 			switch (node.getValue()) {
 			case Utils.AND_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft()) && evaluateExpressionTree(node.getRight());
+				return evaluateExpressionTree(node.getLeft(),ids) && evaluateExpressionTree(node.getRight(),ids);
 			}
 			case Utils.OR_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft()) || evaluateExpressionTree(node.getRight());
+				return evaluateExpressionTree(node.getLeft(),ids) || evaluateExpressionTree(node.getRight(),ids);
 			}
 			default: {
 				return false;
