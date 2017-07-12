@@ -65,7 +65,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 					}
 					case Touche: {
 						// TODO: creo que no hace falta hacer nada mas aca, chequear
-						if(executor.isRunning()) {
+						if(executor != null && executor.isRunning()) {
 							Node node;
 							synchronized (nodes) {
 								node = nodes.get(qsyPacket.getId());
@@ -120,7 +120,11 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	 * usar. La idea de esto es poder cortar la ejecucion de la rutina a partir
 	 * de una accion del usuario.
 	 */
-	public void stopExecutor() { executor.stop(); }
+	public void stopExecutor() {
+		if(executor != null) {
+			executor.stop();
+		}
+	}
 
 	// TODO: executePlayer deberia recibir por parametro informacion necesaria para la rutina player
 	public void executePlayer() {

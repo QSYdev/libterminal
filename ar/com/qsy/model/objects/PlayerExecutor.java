@@ -6,10 +6,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PlayerExecutor extends Executor {
 	private Timer timer;
+	private StepTimeout stepTimeoutTask;
 
 	// TODO: parametros para el constructor en caso de player
 	public PlayerExecutor() {
 		this.running = new AtomicBoolean(true);
+		this.timer = new Timer("Step timeouts");
 	}
 
 	@Override
@@ -27,8 +29,8 @@ public class PlayerExecutor extends Executor {
 		 * TODO: schedule de timer
 		 * para la ejecucion del timer deberiamos usar schedule(TimerTask task, long delay), ya que
 		 * ese ejecuta el task una sola vez. Ademas, una vez que nos llegan todos los touches necesarios
-		 * para terminar el paso, tenemos que hacer timer.cancel() Y timer.purge(), ya que cancel deja
-		 * al timerTask dando vueltas, con purge lo limpias.
+		 * para terminar el paso, tenemos que hacer timerTask.cancel() Y timer.purge(), ya que cancel lo
+		 * pone en estado cancelado y purge limpia todos los cancelados.
 		 */
 	}
 
@@ -36,7 +38,6 @@ public class PlayerExecutor extends Executor {
 	public void stop() {
 		super.stop();
 		timer.cancel();
-		timer.purge();
 	}
 
 	private class StepTimeout extends TimerTask {
