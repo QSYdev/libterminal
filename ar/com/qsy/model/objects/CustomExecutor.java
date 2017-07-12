@@ -1,25 +1,69 @@
 package ar.com.qsy.model.objects;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import java.awt.Color;
+import java.net.InetAddress;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CustomExecutor extends Executor {
 	private Timer timer;
 	private StepTimeout stepTimeoutTask;
+	private Routine routine;
+	private HashMap<Integer, InetAddress> nodes;
+	private Step currentStep;
+	private Set<Integer> touchedNodes;
 
-	// TODO: parametros para el constructor en caso de custom
-	public CustomExecutor() {
-		this.running = new AtomicBoolean(true);
+	public CustomExecutor(Routine routine, HashMap<Integer, InetAddress> nodes) {
+		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
+		this.nodes = nodes;
+		this.routine = routine;
 	}
 
 	@Override
 	public void start() {
+		this.running.set(true);
+		executeNextStep();
+	}
+
+	private void executeNextStep() {
+		currentStep = routine.getSteps().next();
+		ArrayList<NodeConfiguration> nodes = step.getNodes();
+		QSYPacket qsyPacket;
+		long totalDelay = -1;
+
+		for (ArrayList<NodeConfiguration> node : nodes) {
+			final int id = node.getId();
+			final int delay = node.getDelay();
+			if(delay > totalDelay) {
+				totalDelay = delay;
+			}
+			qsyPacket = QSYPacket.createCommandPacket(this.nodes.get(id),id, node.getColor(), delay);
+			sendEvent(new Event(commandPacketSent, qsyPacket));
+		}
+
+		int timeout = currentStep.getTimeout();
+		if (timeout > 0) {
+			stepTimeoutTask.cancel();
+			timer.purge();
+			totalDelay = totalDelay + timeout;
+			stepTimeoutTask = new StepTimeout();
+			timer.schedule(stepTimeoutTask, totalDelay);
+		}
 	}
 
 	@Override
 	public void touche(Node node) {
+		int id = node.getNodeId();
+		touchedNodes.add(id);
+		if(!currentStep.isFinished(touchedNodes)) {
+			return;
+		}
+		if(routine.getSteps().hasNext()) {
+			executeNextStep();
+		}
 	}
 
 	@Override
