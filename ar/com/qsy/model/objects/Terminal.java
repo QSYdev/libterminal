@@ -68,7 +68,8 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 								break;
 							}
 							case Touche: {
-								// TODO: creo que no hace falta hacer nada mas aca, chequear
+								// TODO: falta agregar la logica de corte de ejecucion
+								// es decir avisar cuando la rutina ya termino
 								if (executor != null && executor.isRunning()) {
 									Node node;
 									synchronized (nodes) {

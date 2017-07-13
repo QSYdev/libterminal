@@ -34,6 +34,9 @@ public class CustomExecutor extends Executor {
 
 	private void executeNextStep() {
 		turnOffCurrentStep();
+		if(!running.get()) {
+			return;
+		}
 		currentStep = routine.next();
 		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
 		QSYPacket qsyPacket;
@@ -98,9 +101,29 @@ public class CustomExecutor extends Executor {
 		return -1;
 	}
 
-	// TODO: apagar todos los del paso que no fueron tocados
+	/*
+	 * turnOffCurrentStep apaga todos los nodos del paso que no fueron tocados
+	 */
 	private void turnOffCurrentStep() {
+		QSYPacket qsyPacket;
+		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
+		for(NodeConfiguration nodeConfiguration : stepNodes) {
+			if(touchedNodes.contains(nodeConfiguration)) {
+				continue;
+			}
+			int logicId = nodeConfiguration.getId();
+			// TODO: aca en color le tenemos que mandar el color que tiene valor 0
+			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
+				this.nodesAssociations.get(logicId).getNodeId(),
+				nodeConfiguration.getColor(),
+				0);
+			try{
+				sendEvent(new Event(commandPacketSent, qsyPacket));
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 
+		}
 	}
 
 	private class StepTimeout extends TimerTask {
