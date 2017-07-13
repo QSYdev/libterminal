@@ -1,8 +1,6 @@
 package ar.com.qsy.model.objects;
 
 import java.awt.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -128,6 +126,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	public void stopExecutor() {
 		if (executor != null) {
 			executor.stop();
+			System.out.println("Rutina stopeada");
 		}
 	}
 

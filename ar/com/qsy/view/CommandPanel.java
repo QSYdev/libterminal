@@ -30,7 +30,6 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 	private final JComboBox<String> comboBoxColor;
 	private final JTextField textDelay;
 	private final JButton btnSendCommand;
-	private final JButton btnStartRoutine;
 
 	public CommandPanel(final QSYFrame parent) {
 		this.setLayout(new GridLayout(0, 1, 2, 2));
@@ -72,7 +71,7 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 				} catch (final NullPointerException exception) {
 					JOptionPane.showMessageDialog(null, "Se debe seleccionar un color", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final NumberFormatException exception) {
-					JOptionPane.showMessageDialog(null, "Se debe colocar un número entero de 4 Bytes sin signo.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Se debe colocar un nï¿½mero entero de 4 Bytes sin signo.", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final IllegalArgumentException exception) {
 					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final InterruptedException exception) {
@@ -80,16 +79,6 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 				} catch (final Exception exception) {
 					exception.printStackTrace();
 				}
-			}
-		});
-
-		btnStartRoutine = new JButton("Start Routine");
-		this.add(btnStartRoutine);
-		btnStartRoutine.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				parent.getTerminal().executePlayer();
-				btnStartRoutine.setEnabled(false);
 			}
 		});
 	}
