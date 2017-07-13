@@ -1,13 +1,12 @@
 package ar.com.qsy.model.objects;
 
+import java.awt.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.exceptions.NotEnoughConnectedNodesException;
 import ar.com.qsy.model.patterns.observer.AsynchronousListener;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
@@ -131,16 +130,44 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		}
 	}
 
-	// TODO: executePlayer deberia recibir por parametro informacion necesaria para la rutina player
-	public void executePlayer() {
-		executor = new PlayerExecutor();
+	public void executePlayer(ArrayList<Color> playersAndColors, boolean soundEnabled, boolean touchEnabled,
+	                          long maxExecTime, int totalSteps, int timeout) throws NotEnoughConnectedNodesException {
+
+		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(playersAndColors.size());
+		if(nodesAddresses == null) {
+			throw new NotEnoughConnectedNodesException();
+		}
+
+		executor = new PlayerExecutor(playersAndColors, nodesAddresses, soundEnabled, touchEnabled, maxExecTime,
+			totalSteps, timeout);
 		executor.start();
 	}
 
-	// TODO: asosiacion nodos logicos y fisicos
-	public void executeCustom(Routine routine, boolean soundEnabled, boolean touchEnabled) {
-		if(routine.getNumberOfNodes() > nodes.size()) {
-			return;
+	// TODO: asociacion nodos logicos y fisicos a rutinas, va dentro de routine por ahi?
+	public void executeCustom(Routine routine, ArrayList<Integer> nodesIdsAssociations, boolean soundEnabled,
+	                          boolean touchEnabled) throws NotEnoughConnectedNodesException {
+
+		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(routine.getNumberOfNodes());
+		if(nodesAddresses == null) {
+			throw new NotEnoughConnectedNodesException();
+		}
+
+		executor = new CustomExecutor(routine, nodesAddresses, soundEnabled, touchEnabled);
+		executor.start();
+	}
+
+	/*
+	 * getNodesAssociations genera una estructura donde se le asignan nodos fisicos a direcciones logicas
+	 * empezando en la direccion 1.
+	 *
+	 * @param numberOfNodes: indica la cantidad de nodos que necesitamos
+	 * @return: devuelve null si no se tiene la cantidad de nodos fisicos necesaria. En caso de que se tenga
+	 * devuelve un HashMap donde para cada clave logica(empezando en 1 hasta numberOfNodes) se le asigna un nodo
+	 * correspondiente. Esto seria en orden de conexion de los nodos
+	 */
+	private HashMap<Integer, Node> getNodesAssociations(int numberOfNodes) {
+		if(numberOfNodes > nodes.size()) {
+			return null;
 		}
 
 		HashMap<Integer, Node> nodesAddresses = new HashMap<>();
@@ -148,9 +175,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		for(Map.Entry<Integer, Node> entry : nodes.entrySet()) {
 			nodesAddresses.put(i++, entry.getValue());
 		}
-
-		executor = new CustomExecutor(routine, nodesAddresses);
-		executor.start();
+		return nodesAddresses;
 	}
 
 	public void sendQSYPacket(final QSYPacket qsyPacket) throws Exception {

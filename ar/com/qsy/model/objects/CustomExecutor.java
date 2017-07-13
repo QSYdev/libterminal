@@ -13,13 +13,17 @@ public class CustomExecutor extends Executor {
 	private HashMap<Integer, Node> nodesAssociations;
 	private Step currentStep;
 	private Set<Integer> touchedNodes;
+	private boolean touchEnabled;
+	private boolean soundEnabled;
 
-	public CustomExecutor(Routine routine, HashMap<Integer, Node> nodes) {
+	public CustomExecutor(Routine routine, HashMap<Integer, Node> nodes, boolean soundEnabled, boolean touchEnabled) {
 		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
 		this.nodesAssociations = nodes;
 		this.routine = routine;
 		this.touchedNodes = new HashSet<>();
+		this.soundEnabled = soundEnabled;
+		this.touchEnabled = touchEnabled;
 	}
 
 	@Override
@@ -29,6 +33,7 @@ public class CustomExecutor extends Executor {
 	}
 
 	private void executeNextStep() {
+		turnOffCurrentStep();
 		currentStep = routine.next();
 		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
 		QSYPacket qsyPacket;
@@ -40,6 +45,8 @@ public class CustomExecutor extends Executor {
 			if(delay > maxDelay) {
 				maxDelay = delay;
 			}
+			// TODO: cuando se cambie el protocolo para incluir el sonido lo tenemos que mandar aca
+			// solo si soundEnabled es true
 			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
 				this.nodesAssociations.get(logicId).getNodeId(),
 				nodeConfiguration.getColor(),
@@ -65,6 +72,7 @@ public class CustomExecutor extends Executor {
 	public void touche(Node node) {
 		int nodeId = node.getNodeId();
 		// TODO: chequear cuando el id devuelto sea -1
+		// TODO: chequear si esta touchEnabled y chequear si se toco o se paso la mano
 		touchedNodes.add(getLogicIdFromNodeId(nodeId));
 		if(!currentStep.isFinished(touchedNodes)) {
 			return;
