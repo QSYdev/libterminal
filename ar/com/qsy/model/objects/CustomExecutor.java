@@ -23,7 +23,6 @@ public class CustomExecutor extends Executor {
 		this.timer = new Timer("Step timeouts");
 		this.nodesAssociations = nodes;
 		this.routine = routine;
-		this.touchedNodes = new HashSet<>();
 		this.soundEnabled = soundEnabled;
 		this.touchEnabled = touchEnabled;
 	}
@@ -54,6 +53,7 @@ public class CustomExecutor extends Executor {
 		if(!running.get()) {
 			return;
 		}
+		touchedNodes = new HashSet<>();
 		currentStep = routine.next();
 		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
 		QSYPacket qsyPacket;

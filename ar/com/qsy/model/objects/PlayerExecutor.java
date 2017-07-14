@@ -1,7 +1,6 @@
 package ar.com.qsy.model.objects;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,11 +8,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import ar.com.qsy.model.patterns.observer.Event;
+
 import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketSent;
+import static ar.com.qsy.model.patterns.observer.Event.EventType.executorDoneExecuting;
+import static ar.com.qsy.model.patterns.observer.Event.EventType.executorStepTimeout;
 
 public class PlayerExecutor extends Executor {
 	private Timer timer;
-	private StepTimeout stepTimeoutTask;
+	private StepTimeoutTask stepTimeoutTask;
+	private RoutineTimeoutTask routineTimeoutTask;
 	private Step currentStep;
 	private HashMap<Integer, Node> nodesAssociations;
 	private ArrayList<Color> playersAndColors;
@@ -37,13 +40,13 @@ public class PlayerExecutor extends Executor {
 		this.maxExecTime = maxExecTime;
 		this.totalSteps = totalSteps;
 		this.executedSteps = 0;
-		this.touchedNodes = new HashSet<>();
 	}
 
 	@Override
 	public void start() {
 		this.running.set(true);
-		// TODO agregar el timeout total de la rutina
+		routineTimeoutTask = new RoutineTimeoutTask();
+		this.timer.schedule(routineTimeoutTask, maxExecTime);
 		executeNextStep();
 		executedSteps++;
 	}
@@ -54,23 +57,34 @@ public class PlayerExecutor extends Executor {
 		// TODO: chequear cuando el id devuelto sea -1
 		// TODO: chequear si esta touchEnabled y chequear si se toco o se paso la mano
 		touchedNodes.add(getLogicIdFromNodeId(nodeId));
-		if(!currentStep.isFinished(touchedNodes)) {
+		if (!currentStep.isFinished(touchedNodes)) {
 			return;
 		}
-		if(executedSteps < totalSteps) {
-			turnOffCurrentStep();
+		continueExecution();
+	}
+
+	@Override
+	public void continueExecution() {
+		if (executedSteps < totalSteps) {
 			executeNextStep();
 			executedSteps++;
 		} else {
-			// TODO: que hacemos cuando terminamos??
+			try{
+				// TODO: fijarse que tendria que ir en content
+				sendEvent(new Event(executorDoneExecuting, null));
+			} catch(Exception e) {
+				// TODO: manejar excepciones bien
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private void executeNextStep() {
 		turnOffCurrentStep();
-		if(!running.get()) {
+		if (!running.get()) {
 			return;
 		}
+		touchedNodes = new HashSet<>();
 		currentStep = generateNextStep();
 
 		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
@@ -80,7 +94,7 @@ public class PlayerExecutor extends Executor {
 		for (NodeConfiguration nodeConfiguration : nodesConfiguration) {
 			final int logicId = nodeConfiguration.getId();
 			final int delay = nodeConfiguration.getDelay();
-			if(delay > maxDelay) {
+			if (delay > maxDelay) {
 				maxDelay = delay;
 			}
 			// TODO: cuando se cambie el protocolo para incluir el sonido lo tenemos que mandar aca
@@ -89,9 +103,9 @@ public class PlayerExecutor extends Executor {
 				this.nodesAssociations.get(logicId).getNodeId(),
 				nodeConfiguration.getColor(),
 				delay);
-			try{
+			try {
 				sendEvent(new Event(commandPacketSent, qsyPacket));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -101,7 +115,7 @@ public class PlayerExecutor extends Executor {
 			stepTimeoutTask.cancel();
 			timer.purge();
 			maxDelay = maxDelay + timeout;
-			stepTimeoutTask = new StepTimeout();
+			stepTimeoutTask = new StepTimeoutTask();
 			timer.schedule(stepTimeoutTask, maxDelay);
 		}
 	}
@@ -117,12 +131,12 @@ public class PlayerExecutor extends Executor {
 		// esto genera una lista de enteros desde 1 hasta la cantidad de jugadores que hay
 		// TODO: chequear que pasa cuando es playersAndColors.size == 1
 		List<Integer> list = IntStream.of(IntStream.rangeClosed(1, playersAndColors.size()).
-			 toArray()).boxed().collect(Collectors.toList());
+			toArray()).boxed().collect(Collectors.toList());
 		// shuffle desordena la lista que generamos antes
 		Collections.shuffle(list);
 		ArrayList<NodeConfiguration> nodesConfigurations = new ArrayList<>();
 		String stepExpression = "";
-		for(Color color : playersAndColors) {
+		for (Color color : playersAndColors) {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
 			nodesConfigurations.add(new NodeConfiguration(logicId, 0, color));
@@ -135,8 +149,8 @@ public class PlayerExecutor extends Executor {
 	private void turnOffCurrentStep() {
 		QSYPacket qsyPacket;
 		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
-		for(NodeConfiguration nodeConfiguration : stepNodes) {
-			if(touchedNodes.contains(nodeConfiguration)) {
+		for (NodeConfiguration nodeConfiguration : stepNodes) {
+			if (touchedNodes.contains(nodeConfiguration)) {
 				continue;
 			}
 			int logicId = nodeConfiguration.getId();
@@ -145,9 +159,9 @@ public class PlayerExecutor extends Executor {
 				this.nodesAssociations.get(logicId).getNodeId(),
 				nodeConfiguration.getColor(),
 				0);
-			try{
+			try {
 				sendEvent(new Event(commandPacketSent, qsyPacket));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -155,8 +169,8 @@ public class PlayerExecutor extends Executor {
 	}
 
 	private int getLogicIdFromNodeId(int nodeId) {
-		for(Map.Entry<Integer, Node> entry : nodesAssociations.entrySet()) {
-			if(entry.getValue().getNodeId() == nodeId) {
+		for (Map.Entry<Integer, Node> entry : nodesAssociations.entrySet()) {
+			if (entry.getValue().getNodeId() == nodeId) {
 				return entry.getKey();
 			}
 		}
@@ -169,16 +183,31 @@ public class PlayerExecutor extends Executor {
 		timer.cancel();
 	}
 
-	private class StepTimeout extends TimerTask {
+	private class StepTimeoutTask extends TimerTask {
 
 		@Override
 		public void run() {
-			/*
-			 * TODO: chequear timeout de steps
-			 * dentro de este metodo deberiamos confirmar que el step actual
-			 * haya sido terminado, si no se termino deberiamos llevar a cabo la accion
-			 * establecida. En rutinas player creo que simplemente se pasa al siguiente paso
-			 */
+			if (currentStep.isFinished(touchedNodes)) return;
+
+			try{
+				sendEvent(new Event(executorStepTimeout, null));
+			} catch(Exception e) {
+				// TODO: manejo correcto de excepciones
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class RoutineTimeoutTask extends TimerTask {
+
+		@Override
+		public void run() {
+			try {
+				sendEvent(new Event(executorDoneExecuting, null));
+			} catch(Exception e) {
+				// TODO: manejo de excepciones
+				e.printStackTrace();
+			}
 		}
 	}
 }
