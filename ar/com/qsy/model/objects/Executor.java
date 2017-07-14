@@ -22,4 +22,6 @@ public abstract class Executor extends EventSource {
 		return running.get();
 	}
 
+	public void continueExecution() {}
+
 }

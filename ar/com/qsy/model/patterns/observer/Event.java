@@ -58,7 +58,27 @@ public final class Event {
                  * Senders:
                  * - <b>Terminal</b>: cuando le llega un keepAliveError.
                  */
-                disconnectedNode
+                disconnectedNode,
+
+                /**
+                 * El executor termino de ejecutar la rutina, esto se puede dar porque se terminaron todos los pasos o
+                 * porque se cumplio el tiempo de la rutina. TODO: en Content que vamos a poner?
+                 * Listeners:
+                 * - <b>Terminal</b>: frena el executor lo setea a null y le avisa al cliente que la ejecucion termino
+                 * Senders:
+                 * - <b>Executor</b>: cuando la ejecucion de la rutina actual termina sin ser cortada por el usuario
+                 */
+                executorDoneExecuting,
+
+	        /**
+	         * El Executor avisa que se cumplio la cantidad de tiempo maxima establecida para este paso.
+	         * TODO: En content va null por ahora, despues vemos que onda
+	         * Listeners:
+	         * - <b>Terminal</b>: llama a ejecutar el proximo paso de la rutina
+	         * Senders:
+	         * - <b>Executor</b>: cuando no se tocaron los nodos que se debian tocar en cierta cantidad de tiempo
+	         */
+	        executorStepTimeout
         }
 
         private final EventType eventType;

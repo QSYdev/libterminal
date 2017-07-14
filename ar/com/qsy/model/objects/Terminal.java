@@ -66,8 +66,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 								break;
 							}
 							case Touche: {
-								// TODO: falta agregar la logica de corte de ejecucion
-								// es decir avisar cuando la rutina ya termino
 								if (executor != null && executor.isRunning()) {
 									Node node;
 									synchronized (nodes) {
@@ -94,6 +92,16 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						sendEvent(new Event(EventType.disconnectedNode, node));
 						System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
 						break;
+					}
+					case executorStepTimeout: {
+						if(executor != null && executor.isRunning()) {
+							executor.continueExecution();
+						}
+					}
+					case executorDoneExecuting: {
+						executor.stop();
+						executor = null;
+						// TODO: falta agregar si le decimos algo al usuario
 					}
 					default: {
 						break;

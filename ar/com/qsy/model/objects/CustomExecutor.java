@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketSent;
+import static ar.com.qsy.model.patterns.observer.Event.EventType.executorDoneExecuting;
+import static ar.com.qsy.model.patterns.observer.Event.EventType.executorStepTimeout;
 
 public class CustomExecutor extends Executor {
 	private Timer timer;
@@ -29,7 +31,22 @@ public class CustomExecutor extends Executor {
 	@Override
 	public void start() {
 		this.running.set(true);
-		if(routine.hasNext()) executeNextStep();
+		continueExecution();
+	}
+
+	@Override
+	public void continueExecution() {
+		if(routine.hasNext()) {
+			executeNextStep();
+		} else {
+			try {
+				// TODO: fijarse que tendria que ir de content
+				sendEvent(new Event(executorDoneExecuting, null));
+			} catch(Exception e) {
+				// TODO: manejar excepciones bien
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void executeNextStep() {
@@ -130,16 +147,14 @@ public class CustomExecutor extends Executor {
 
 		@Override
 		public void run() {
-			/*
-			 * TODO: chequear timeout de steps
-			 * dentro de este metodo deberiamos confirmar que el step actual
-			 * haya sido terminado, si no se termino tenemos que hacer lo
-			 * que la rutina especifique. Por eso para mi las rutinas custom
-			 * tendrian que especificar si el timeout de un paso causa que se
-			 * termine la rutina o si simplemente se lo marca como no tocado y
-			 * se continua.
-			 */
+			if (currentStep.isFinished(touchedNodes)) return;
 
+			try{
+				sendEvent(new Event(executorStepTimeout, null));
+			} catch(Exception e) {
+				// TODO: manejo correcto de excepciones
+				e.printStackTrace();
+			}
 		}
 	}
 }
