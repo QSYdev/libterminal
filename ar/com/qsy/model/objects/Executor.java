@@ -43,8 +43,10 @@ public abstract class Executor extends EventSource {
 		return running.get();
 	}
 
-	public void continueExecution() {
-	}
+	/**
+	 * stepTimeout hace lo que se debe hacer en caso de que se de el timeout del step.
+	 */
+	public abstract void stepTimeout();
 
 	/*
 	 * turnOffCurrentStep apaga todos los nodos del paso actual que no fueron tocados

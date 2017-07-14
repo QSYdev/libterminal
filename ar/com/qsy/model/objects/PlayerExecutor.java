@@ -73,12 +73,17 @@ public class PlayerExecutor extends Executor {
 		return null;
 	}
 
+	@Override
+	public void stepTimeout() {
+		stepsWinners.add(null);
+		continueExecution();
+	}
+
 	/**
-	 * continueExecution procede a ejecutar el siguiente paso en caso de que lo haya. Si no lo hay entonces avisa,
+	 * stepTimeout procede a ejecutar el siguiente paso en caso de que corresponda. Si no lo hay entonces avisa,
 	 * a los que sea que esten escuchando, que la ejecucion de la rutina termino.
 	 */
-	@Override
-	public void continueExecution() {
+	private void continueExecution() {
 		if (executedSteps < totalSteps) {
 			executeNextStep();
 			executedSteps++;

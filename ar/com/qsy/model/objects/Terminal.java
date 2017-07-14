@@ -74,6 +74,13 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 									if (node != null) {
 										executor.touche(node);
 									}
+									// TODO: agregar el guardado de informacion del delay
+									// de los nodos para que una vez que termine la rutina
+									// tener la informacion disponible para guardar lo que
+									// queramos
+//									long delay = qsyPacket.getDelay();
+//									int logicId = executor.getLogicIdFromNodeId(node.getNodeId());
+//									algunaEstructuraEnOrden.put(logicId, delay);
 								}
 								break;
 							}
@@ -95,7 +102,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 					}
 					case executorStepTimeout: {
 						if (executor != null && executor.isRunning()) {
-							executor.continueExecution();
+							executor.stepTimeout();
 						}
 					}
 					case executorDoneExecuting: {
