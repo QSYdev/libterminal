@@ -30,6 +30,15 @@ public class CustomExecutor extends Executor {
 		continueExecution();
 	}
 
+	@Override
+	public void touche(Node node) {
+		super.touche(node);
+		if (!currentStep.isFinished(touchedNodes)) {
+			return;
+		}
+		continueExecution();
+	}
+
 	/**
 	 * continueExecution procede a ejecutar el siguiente paso en caso de que lo haya. Si no lo hay entonces avisa,
 	 * a los que sea que esten escuchando, que la ejecucion de la rutina termino.
@@ -60,6 +69,8 @@ public class CustomExecutor extends Executor {
 		if (!running.get()) {
 			return;
 		}
+		stepTimeoutTask.cancel();
+		timer.purge();
 		touchedNodes = new HashSet<>();
 		currentStep = routine.next();
 		super.executeNextStep();

@@ -31,18 +31,12 @@ public abstract class Executor extends EventSource {
 	 * @param node: el nodo fisico que fue tocado por el usuario
 	 */
 	public void touche(Node node) {
-		int nodeId = node.getNodeId();
-		int logicId = getLogicIdFromNodeId(nodeId);
+		int logicId = getLogicIdFromNodeId(node.getNodeId());
 		if (logicId == -1) {
 			// se toco un nodo que no es de la rutina, nose cuando puede pasar
 			return;
 		}
-		// TODO: chequear si esta touchEnabled y chequear si se toco o se paso la mano
 		touchedNodes.add(logicId);
-		if (!currentStep.isFinished(touchedNodes)) {
-			return;
-		}
-		continueExecution();
 	}
 
 	public boolean isRunning() {
@@ -116,8 +110,6 @@ public abstract class Executor extends EventSource {
 
 		int timeout = currentStep.getTimeout();
 		if (timeout > 0) {
-			stepTimeoutTask.cancel();
-			timer.purge();
 			maxDelay = maxDelay + timeout;
 			stepTimeoutTask = new StepTimeoutTask();
 			timer.schedule(stepTimeoutTask, maxDelay);
@@ -128,6 +120,7 @@ public abstract class Executor extends EventSource {
 
 		@Override
 		public void run() {
+			// TODO: me parece que vamos a tener que agregar un synchronized a la estructura touchedNodes
 			if (currentStep.isFinished(touchedNodes)) return;
 
 			try {

@@ -70,6 +70,8 @@ public class PlayerExecutor extends Executor {
 		if (!running.get()) {
 			return;
 		}
+		stepTimeoutTask.cancel();
+		timer.purge();
 		touchedNodes = new HashSet<>();
 		currentStep = generateNextStep();
 
