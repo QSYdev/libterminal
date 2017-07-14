@@ -3,6 +3,7 @@ package ar.com.qsy.model.objects;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -13,7 +14,8 @@ import static ar.com.qsy.model.patterns.observer.Event.EventType.executorDoneExe
 
 public class PlayerExecutor extends Executor {
 	private RoutineTimeoutTask routineTimeoutTask;
-	private ArrayList<Color> playersAndColors;
+	private ArrayList<Color> playersAndColors, stepsWinners;
+	private ArrayList<NodeConfiguration> currentStepConfiguration;
 	private int stepTimeout, executedSteps, totalSteps;
 	private long maxExecTime;
 	private boolean soundEnabled, touchEnabled;
@@ -30,6 +32,7 @@ public class PlayerExecutor extends Executor {
 		this.touchEnabled = touchEnabled;
 		this.maxExecTime = maxExecTime;
 		this.totalSteps = totalSteps;
+		this.stepsWinners = new ArrayList<>();
 		this.executedSteps = 0;
 	}
 
@@ -42,6 +45,32 @@ public class PlayerExecutor extends Executor {
 		routineTimeoutTask = new RoutineTimeoutTask();
 		this.timer.schedule(routineTimeoutTask, maxExecTime);
 		continueExecution();
+	}
+
+	/**
+	 * touche agrega el nodo correspondiente a los nodos tocados del paso actual.
+	 *
+	 * @param node: el nodo fisico que fue tocado por el usuario
+	 */
+	public void touche(Node node) {
+		super.touche(node);
+		Color color = getPlayerColorFromLogicId(getLogicIdFromNodeId(node.getNodeId()));
+		if(stepsWinners.size() < executedSteps) {
+			stepsWinners.add(color);
+		}
+		if (!currentStep.isFinished(touchedNodes)) {
+			return;
+		}
+		continueExecution();
+	}
+
+	private Color getPlayerColorFromLogicId(int logicId) {
+		for(NodeConfiguration nodeConfiguration : currentStepConfiguration) {
+			if(nodeConfiguration.getId() == logicId) {
+				return nodeConfiguration.getColor();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -85,22 +114,27 @@ public class PlayerExecutor extends Executor {
 	 * sus nodos para poder pasar de paso, en cambio con | el paso se cumple una vez que el primer jugador lo apaga.
 	 */
 	private Step generateNextStep() {
-		int i = 0;
-		// esto genera una lista de enteros desde 1 hasta la cantidad de jugadores que hay
-		// TODO: cuando playersAndColors.size es 1, estamos creando y haciendo banda de giladas al pedo
-		List<Integer> list = IntStream.of(IntStream.rangeClosed(1, playersAndColors.size()).
-			toArray()).boxed().collect(Collectors.toList());
-		// shuffle desordena la lista que generamos antes
-		Collections.shuffle(list);
-		ArrayList<NodeConfiguration> nodesConfigurations = new ArrayList<>();
+		currentStepConfiguration = new ArrayList<>();
 		String stepExpression = "";
+		int numberOfPlayers = playersAndColors.size();
+
+		if(numberOfPlayers == 1) {
+			Integer randLogicId = ThreadLocalRandom.current().nextInt(1, nodesAssociations.size()+1);
+			currentStepConfiguration.add(new NodeConfiguration(randLogicId, 0, playersAndColors.get(0)));
+			return new Step(currentStepConfiguration, this.stepTimeout, randLogicId.toString());
+		}
+
+		List<Integer> list = IntStream.of(IntStream.rangeClosed(1, nodesAssociations.size()).
+			toArray()).boxed().collect(Collectors.toList()); // lista desde 1 hasta la cantidad de nodos asociados
+		Collections.shuffle(list); // desordena de manera random la lista
+		int i = 0;
 		for (Color color : playersAndColors) {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
-			nodesConfigurations.add(new NodeConfiguration(logicId, 0, color));
+			currentStepConfiguration.add(new NodeConfiguration(logicId, 0, color));
 			stepExpression = stepExpression.concat(logicId.toString().concat("&"));
 		}
-		return new Step(nodesConfigurations, this.stepTimeout, stepExpression);
+		return new Step(currentStepConfiguration, this.stepTimeout, stepExpression);
 	}
 
 	private class RoutineTimeoutTask extends TimerTask {
