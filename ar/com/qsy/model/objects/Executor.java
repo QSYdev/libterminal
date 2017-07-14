@@ -5,7 +5,6 @@ import ar.com.qsy.model.patterns.observer.EventSource;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Executor extends EventSource {
-	// TODO: definir estructura de la lista de los steps
 	protected AtomicBoolean running;
 
 	public void stop() {
@@ -22,6 +21,7 @@ public abstract class Executor extends EventSource {
 		return running.get();
 	}
 
-	public void continueExecution() {}
+	public void continueExecution() {
+	}
 
 }

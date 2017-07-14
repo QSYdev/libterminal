@@ -94,7 +94,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case executorStepTimeout: {
-						if(executor != null && executor.isRunning()) {
+						if (executor != null && executor.isRunning()) {
 							executor.continueExecution();
 						}
 					}
@@ -142,7 +142,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	                          long maxExecTime, int totalSteps, int timeout) throws NotEnoughConnectedNodesException {
 
 		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(playersAndColors.size());
-		if(nodesAddresses == null) {
+		if (nodesAddresses == null) {
 			throw new NotEnoughConnectedNodesException();
 		}
 
@@ -156,7 +156,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	                          boolean touchEnabled) throws NotEnoughConnectedNodesException {
 
 		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(routine.getNumberOfNodes());
-		if(nodesAddresses == null) {
+		if (nodesAddresses == null) {
 			throw new NotEnoughConnectedNodesException();
 		}
 
@@ -164,23 +164,23 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		executor.start();
 	}
 
-	/*
+	/**
 	 * getNodesAssociations genera una estructura donde se le asignan nodos fisicos a direcciones logicas
 	 * empezando en la direccion 1.
 	 *
 	 * @param numberOfNodes: indica la cantidad de nodos que necesitamos
-	 * @return: devuelve null si no se tiene la cantidad de nodos fisicos necesaria. En caso de que se tenga
-	 * devuelve un HashMap donde para cada clave logica(empezando en 1 hasta numberOfNodes) se le asigna un nodo
-	 * correspondiente. Esto seria en orden de conexion de los nodos
+	 * @return HashMap<Integer, Node>: devuelve null si no se tiene la cantidad de nodos fisicos necesaria.
+	 * En caso de que se tenga devuelve un HashMap donde para cada clave logica(empezando en 1 hasta numberOfNodes)
+	 * se le asigna un nodo correspondiente. Esto seria en orden de conexion de los nodos
 	 */
 	private HashMap<Integer, Node> getNodesAssociations(int numberOfNodes) {
-		if(numberOfNodes > nodes.size()) {
+		if (numberOfNodes > nodes.size()) {
 			return null;
 		}
 
 		HashMap<Integer, Node> nodesAddresses = new HashMap<>();
 		int i = 1;
-		for(Map.Entry<Integer, Node> entry : nodes.entrySet()) {
+		for (Map.Entry<Integer, Node> entry : nodes.entrySet()) {
 			nodesAddresses.put(i++, entry.getValue());
 		}
 		return nodesAddresses;

@@ -25,8 +25,6 @@ public class PlayerExecutor extends Executor {
 	private long maxExecTime;
 	private Set<Integer> touchedNodes;
 
-
-	// TODO: parametros para el constructor en caso de player
 	public PlayerExecutor(ArrayList<Color> playersAndColors, HashMap<Integer, Node> nodesAssociations,
 	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout) {
 
@@ -42,6 +40,9 @@ public class PlayerExecutor extends Executor {
 		this.executedSteps = 0;
 	}
 
+	/**
+	 * start simplemente setea el flag de ejecutando a true y comienza la ejecucion.
+	 */
 	@Override
 	public void start() {
 		this.running.set(true);
@@ -51,28 +52,41 @@ public class PlayerExecutor extends Executor {
 		executedSteps++;
 	}
 
+	/**
+	 * touche agrega el nodo correspondiente a los nodos tocados del paso actual.
+	 *
+	 * @param node: el nodo fisico que fue tocado por el usuario
+	 */
 	@Override
 	public void touche(Node node) {
 		int nodeId = node.getNodeId();
-		// TODO: chequear cuando el id devuelto sea -1
+		int logicId = getLogicIdFromNodeId(nodeId);
+		if (logicId == -1) {
+			// se toco un nodo que no es de la rutina, nose cuando puede pasar
+			return;
+		}
 		// TODO: chequear si esta touchEnabled y chequear si se toco o se paso la mano
-		touchedNodes.add(getLogicIdFromNodeId(nodeId));
+		touchedNodes.add(logicId);
 		if (!currentStep.isFinished(touchedNodes)) {
 			return;
 		}
 		continueExecution();
 	}
 
+	/**
+	 * continueExecution procede a ejecutar el siguiente paso en caso de que lo haya. Si no lo hay entonces avisa,
+	 * a los que sea que esten escuchando, que la ejecucion de la rutina termino.
+	 */
 	@Override
 	public void continueExecution() {
 		if (executedSteps < totalSteps) {
 			executeNextStep();
 			executedSteps++;
 		} else {
-			try{
+			try {
 				// TODO: fijarse que tendria que ir en content
 				sendEvent(new Event(executorDoneExecuting, null));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				// TODO: manejar excepciones bien
 				e.printStackTrace();
 			}
@@ -129,7 +143,7 @@ public class PlayerExecutor extends Executor {
 	private Step generateNextStep() {
 		int i = 0;
 		// esto genera una lista de enteros desde 1 hasta la cantidad de jugadores que hay
-		// TODO: chequear que pasa cuando es playersAndColors.size == 1
+		// TODO: cuando playersAndColors.size es 1, estamos creando y haciendo banda de giladas al pedo
 		List<Integer> list = IntStream.of(IntStream.rangeClosed(1, playersAndColors.size()).
 			toArray()).boxed().collect(Collectors.toList());
 		// shuffle desordena la lista que generamos antes
@@ -145,7 +159,6 @@ public class PlayerExecutor extends Executor {
 		return new Step(nodesConfigurations, this.stepTimeout, stepExpression);
 	}
 
-	// TODO: apagar todos los del paso que no fueron tocados
 	private void turnOffCurrentStep() {
 		QSYPacket qsyPacket;
 		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
@@ -189,9 +202,9 @@ public class PlayerExecutor extends Executor {
 		public void run() {
 			if (currentStep.isFinished(touchedNodes)) return;
 
-			try{
+			try {
 				sendEvent(new Event(executorStepTimeout, null));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				// TODO: manejo correcto de excepciones
 				e.printStackTrace();
 			}
@@ -204,7 +217,7 @@ public class PlayerExecutor extends Executor {
 		public void run() {
 			try {
 				sendEvent(new Event(executorDoneExecuting, null));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				// TODO: manejo de excepciones
 				e.printStackTrace();
 			}
