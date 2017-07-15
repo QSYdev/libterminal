@@ -5,7 +5,8 @@ import javax.swing.border.CompoundBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class RoutinePanel extends JPanel implements AutoCloseable {
@@ -33,9 +34,19 @@ public class RoutinePanel extends JPanel implements AutoCloseable {
         btnStartPlayer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                //TODO parametros correspondientes
-                //parent.getTerminal().executePlayer();
+                ArrayList<Color> playersAndColors = new ArrayList<>();
+                //TODO
+                //un solo jugador
+                playersAndColors.add(Color.red);
                 startRoutine();
+                try {
+                    int steps=10;
+                    int timeout=1000;
+                    parent.getTerminal().executePlayer(playersAndColors, null, false, false, 0, steps,timeout);
+                } catch (Exception exc) {
+                    exc.printStackTrace();
+                }
+
             }
         });
 
