@@ -33,6 +33,7 @@ public class PlayerExecutor extends Executor {
 		this.maxExecTime = maxExecTime;
 		this.totalSteps = totalSteps;
 		this.stepsWinners = new ArrayList<>();
+		this.stepTimeoutTask = new StepTimeoutTask();
 		this.executedSteps = 0;
 	}
 
@@ -43,7 +44,7 @@ public class PlayerExecutor extends Executor {
 	public void start() {
 		this.running.set(true);
 		routineTimeoutTask = new RoutineTimeoutTask();
-		this.timer.schedule(routineTimeoutTask, maxExecTime);
+		if(maxExecTime > 0) this.timer.schedule(routineTimeoutTask, maxExecTime);
 		continueExecution();
 	}
 
@@ -55,12 +56,14 @@ public class PlayerExecutor extends Executor {
 	public void touche(Node node) {
 		super.touche(node);
 		Color color = getPlayerColorFromLogicId(getLogicIdFromNodeId(node.getNodeId()));
+		if(color == null) return; // el color no pertenece al paso
 		if(stepsWinners.size() < executedSteps) {
 			stepsWinners.add(color);
 		}
 		if (!currentStep.isFinished(touchedNodes)) {
 			return;
 		}
+		turnOffCurrentStep();
 		continueExecution();
 	}
 
@@ -76,6 +79,7 @@ public class PlayerExecutor extends Executor {
 	@Override
 	public void stepTimeout() {
 		stepsWinners.add(null);
+		turnOffCurrentStep();
 		continueExecution();
 	}
 
@@ -99,7 +103,6 @@ public class PlayerExecutor extends Executor {
 
 	@Override
 	protected void executeNextStep() {
-		turnOffCurrentStep();
 		if (!running.get()) {
 			return;
 		}
@@ -138,6 +141,7 @@ public class PlayerExecutor extends Executor {
 			currentStepConfiguration.add(new NodeConfiguration(logicId, 0, color));
 			stepExpression = stepExpression.concat(logicId.toString().concat("&"));
 		}
+		stepExpression = stepExpression.substring(0, stepExpression.length()-1);
 		return new Step(currentStepConfiguration, this.stepTimeout, stepExpression);
 	}
 

@@ -19,6 +19,7 @@ public class CustomExecutor extends Executor {
 		this.routine = routine;
 		this.soundEnabled = soundEnabled;
 		this.touchEnabled = touchEnabled;
+		this.stepTimeoutTask = new StepTimeoutTask();
 	}
 
 	/**
@@ -36,12 +37,14 @@ public class CustomExecutor extends Executor {
 		if (!currentStep.isFinished(touchedNodes)) {
 			return;
 		}
+		turnOffCurrentStep();
 		continueExecution();
 	}
 
 	@Override
 	public void stepTimeout() {
 		// TODO: registrar el paso como no terminado
+		turnOffCurrentStep();
 		continueExecution();
 	}
 
@@ -70,7 +73,6 @@ public class CustomExecutor extends Executor {
 	 */
 	@Override
 	protected void executeNextStep() {
-		turnOffCurrentStep();
 		if (!running.get()) {
 			return;
 		}

@@ -22,8 +22,7 @@ public abstract class Executor extends EventSource {
 		timer.cancel();
 	}
 
-	public void start() {
-	}
+	public abstract void start();
 
 	/**
 	 * touche agrega el nodo correspondiente a los nodos tocados del paso actual.
@@ -55,7 +54,7 @@ public abstract class Executor extends EventSource {
 		QSYPacket qsyPacket;
 		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
 		for (NodeConfiguration nodeConfiguration : stepNodes) {
-			if (touchedNodes.contains(nodeConfiguration)) {
+			if (touchedNodes.contains(nodeConfiguration.getId())) {
 				continue;
 			}
 			int logicId = nodeConfiguration.getId();
