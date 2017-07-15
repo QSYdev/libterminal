@@ -39,9 +39,16 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 					byteBuffer.flip();
 					channel.write(byteBuffer);
 					byteBuffer.clear();
+					System.out.print("["+System.currentTimeMillis() % 10000+"] : ");
+					if(qsyPacket.getColor()!=null){
+						System.out.println("Prendiendo");
+					}else{
+						System.out.println("Apagado");
+					}
 					break;
 				}
 				default: {
+					System.out.println("Error");
 					break;
 				}
 				}
