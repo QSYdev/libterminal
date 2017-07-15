@@ -148,8 +148,10 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 
 	public void executePlayer(ArrayList<Color> playersAndColors, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled,
 	                          long maxExecTime, int totalSteps, int timeout) throws NotEnoughConnectedNodesException {
-
-		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(playersAndColors.size());
+		//TODO: por ahora nodesIdsAssociation recibe null. Por lo que lo simulamos con getNodesAssociations
+		//Hardcodeamos a un solo nodo
+		int cant=1;
+		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(1);
 		if (nodesAddresses == null) {
 			throw new NotEnoughConnectedNodesException();
 		}
