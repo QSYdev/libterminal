@@ -59,14 +59,14 @@ public abstract class Executor extends EventSource {
 				continue;
 			}
 			int logicId = nodeConfiguration.getId();
-			// TODO: aca en color le tenemos que mandar el color que tiene valor 0
 			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
 				this.nodesAssociations.get(logicId).getNodeId(),
-				nodeConfiguration.getColor(),
+				null,
 				0);
 			try {
 				sendEvent(new Event(commandPacketSent, qsyPacket));
 			} catch (Exception e) {
+				// TODO: manejo de excepciones
 				e.printStackTrace();
 			}
 
@@ -99,6 +99,7 @@ public abstract class Executor extends EventSource {
 			}
 			// TODO: cuando se cambie el protocolo para incluir el sonido lo tenemos que mandar aca
 			// solo si soundEnabled es true
+			// TODO: touchEnabled
 			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
 				this.nodesAssociations.get(logicId).getNodeId(),
 				nodeConfiguration.getColor(),
@@ -122,7 +123,7 @@ public abstract class Executor extends EventSource {
 
 		@Override
 		public void run() {
-			// TODO: me parece que vamos a tener que agregar un synchronized a la estructura touchedNodes
+			// TODO: que pasa si se toca el que falta cuando estamos aca
 			if (currentStep.isFinished(touchedNodes)) return;
 
 			try {

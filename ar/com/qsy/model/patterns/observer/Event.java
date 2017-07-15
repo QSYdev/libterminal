@@ -72,7 +72,7 @@ public final class Event {
 
 		/**
 		 * El Executor avisa que se cumplio la cantidad de tiempo maxima establecida para este paso.
-		 * TODO: En content va null por ahora, despues vemos que onda
+		 * En content va null por ahora.
 		 * Listeners:
 		 * - <b>Terminal</b>: llama a ejecutar el proximo paso de la rutina
 		 * Senders:

@@ -54,7 +54,7 @@ public class CustomExecutor extends Executor {
 			executeNextStep();
 		} else {
 			try {
-				// TODO: fijarse que tendria que ir de content
+				// TODO: fijarse que tendria que ir de content, podria ir los resultados
 				sendEvent(new Event(executorDoneExecuting, null));
 			} catch (Exception e) {
 				// TODO: manejar excepciones bien

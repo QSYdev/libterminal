@@ -145,7 +145,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		}
 	}
 
-	public void executePlayer(ArrayList<Color> playersAndColors, boolean soundEnabled, boolean touchEnabled,
+	public void executePlayer(ArrayList<Color> playersAndColors, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled,
 	                          long maxExecTime, int totalSteps, int timeout) throws NotEnoughConnectedNodesException {
 
 		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(playersAndColors.size());
@@ -158,8 +158,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		executor.start();
 	}
 
-	// TODO: asociacion nodos logicos y fisicos a rutinas, va dentro de routine por ahi?
-	public void executeCustom(Routine routine, ArrayList<Integer> nodesIdsAssociations, boolean soundEnabled,
+	public void executeCustom(Routine routine, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled,
 	                          boolean touchEnabled) throws NotEnoughConnectedNodesException {
 
 		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(routine.getNumberOfNodes());

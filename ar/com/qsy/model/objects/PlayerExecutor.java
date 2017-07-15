@@ -89,7 +89,6 @@ public class PlayerExecutor extends Executor {
 			executedSteps++;
 		} else {
 			try {
-				// TODO: fijarse que tendria que ir en content
 				sendEvent(new Event(executorDoneExecuting, null));
 			} catch (Exception e) {
 				// TODO: manejar excepciones bien

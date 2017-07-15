@@ -10,7 +10,7 @@ public class Routine implements Iterator<Step>{
     public Routine(int numberOfNodes){
         index=0;
         this.numberOfNodes=numberOfNodes;
-        //TODO cargar los steps
+        //TODO cargar los steps, JSON?
     }
 
     @Override
