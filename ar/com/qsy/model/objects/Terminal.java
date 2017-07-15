@@ -90,6 +90,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						}
 						node.close();
 						sendEvent(new Event(EventType.disconnectedNode, node));
+						//TODO: al testear esto muuuuuuy pocas veces anda mal
 						System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
 						break;
 					}
@@ -100,10 +101,15 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case executorDoneExecuting: {
+						System.out.println("Termino la rutina");
 						executor.stop();
 						executor = null;
 						// TODO: falta agregar si le decimos algo al usuario
 						break;
+					}
+					case commandPacketSent: {
+						final QSYPacket packet= (QSYPacket) event.getContent();
+						sendQSYPacket(packet);
 					}
 					default: {
 						break;
@@ -150,6 +156,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 
 		executor = new PlayerExecutor(playersAndColors, nodesAddresses, soundEnabled, touchEnabled, maxExecTime,
 			totalSteps, timeout);
+		executor.addListener(this);
 		executor.start();
 	}
 
@@ -162,6 +169,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		}
 
 		executor = new CustomExecutor(routine, nodesAddresses, soundEnabled, touchEnabled);
+		executor.addListener(this);
 		executor.start();
 	}
 
@@ -183,6 +191,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		int i = 1;
 		for (Map.Entry<Integer, Node> entry : nodes.entrySet()) {
 			nodesAddresses.put(i++, entry.getValue());
+			if(i>numberOfNodes) break;
 		}
 		return nodesAddresses;
 	}
