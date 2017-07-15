@@ -124,10 +124,11 @@ public class PlayerExecutor extends Executor {
 		currentStepConfiguration = new ArrayList<>();
 		String stepExpression = "";
 		int numberOfPlayers = playersAndColors.size();
-
+		//TODO: el delay que tarda en prenderse cada nodo deberia ser configurable
+		int delayStep=1000;
 		if(numberOfPlayers == 1) {
 			Integer randLogicId = ThreadLocalRandom.current().nextInt(1, nodesAssociations.size()+1);
-			currentStepConfiguration.add(new NodeConfiguration(randLogicId, 0, playersAndColors.get(0)));
+			currentStepConfiguration.add(new NodeConfiguration(randLogicId, delayStep, playersAndColors.get(0)));
 			return new Step(currentStepConfiguration, this.stepTimeout, randLogicId.toString());
 		}
 
