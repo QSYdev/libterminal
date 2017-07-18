@@ -1,0 +1,53 @@
+{
+	'numberOfNodes':    '10',
+	'steps': [
+		{
+			'expression':	'1&2',
+			'timeOut':		'0',
+			'nodesConfigurations': [
+				{
+					'id': 		'1',
+					'delay': 	'0',
+					'color': 	{
+						'red':		'255',
+						'green':	'0',
+						'blue':		'0'
+					}
+				},
+				{	
+					'id': 		'2',
+					'delay': 	'500',
+					'color': 	{
+						'red':		'0',
+						'green':	'255',
+						'blue':		'0'
+					}
+				}
+			]
+		},
+		{
+			'expression':	'3&4',
+			'timeOut':		'100',
+			'nodesConfigurations': [
+				{
+					'id':		'4',
+					'delay':	'300',
+					'color':	{
+						'red':		'255',
+						'green':	'255',
+						'blue':		'255'
+					}
+				},
+				{	
+					'id':		'3',
+					'delay':	'250',
+					'color':	{
+						'red':		'0',
+						'green':	'0',
+						'blue':		'255'
+					}
+				}
+			]
+		}
+	]
+}
