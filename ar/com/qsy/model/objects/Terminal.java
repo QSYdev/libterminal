@@ -144,12 +144,12 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	}
 
 	public void executePlayer(ArrayList<Color> playersAndColors, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled,
-	                          long maxExecTime, int totalSteps, int timeout, int numberOfNodes, int delay) throws NotEnoughConnectedNodesException {
+	                          long maxExecTime, int totalSteps, int timeout, int numberOfNodes, int delay, String condition) throws NotEnoughConnectedNodesException {
 
 		HashMap<Integer, Node> nodesAddresses = associateNodes(nodesIdsAssociations, numberOfNodes);
 
 		executor = new PlayerExecutor(playersAndColors, nodesAddresses, soundEnabled, touchEnabled, maxExecTime,
-			totalSteps, timeout, delay);
+			totalSteps, timeout, delay, condition);
 		executor.addListener(this);
 		executor.start();
 	}

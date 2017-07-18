@@ -19,9 +19,11 @@ public class PlayerExecutor extends Executor {
 	private int stepTimeout, executedSteps, totalSteps, stepDelay;
 	private long maxExecTime;
 	private boolean soundEnabled, touchEnabled;
+	private String stepCondition;
 
 	public PlayerExecutor(ArrayList<Color> playersAndColors, HashMap<Integer, Node> nodesAssociations,
-	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout, int delay) {
+	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout,
+	                      int delay, String condition) {
 
 		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
@@ -35,6 +37,7 @@ public class PlayerExecutor extends Executor {
 		this.stepsWinners = new ArrayList<>();
 		this.stepTimeoutTask = new StepTimeoutTask();
 		this.stepDelay = delay;
+		this.stepCondition = condition;
 		this.executedSteps = 0;
 	}
 
@@ -117,9 +120,7 @@ public class PlayerExecutor extends Executor {
 
 	/*
 	 * generateNextStep devuelve un Step con toda la configuracion de los nodos cargada, y con la expresion
-	 * del paso random. Por ahora, la expresion es con & de todos los nodos unicamente. Pero mas adelante podemos
-	 * darle la opcion al usuario de que elijan que sea & o |. Con & todos los jugadores del paso tienen que apagar
-	 * sus nodos para poder pasar de paso, en cambio con | el paso se cumple una vez que el primer jugador lo apaga.
+	 * del paso random.
 	 */
 	private Step generateNextStep() {
 		currentStepConfiguration = new ArrayList<>();
@@ -139,7 +140,7 @@ public class PlayerExecutor extends Executor {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
 			currentStepConfiguration.add(new NodeConfiguration(logicId, stepDelay, color));
-			stepExpression = stepExpression.concat(logicId.toString().concat("&"));
+			stepExpression += logicId.toString() + stepCondition;
 		}
 		stepExpression = stepExpression.substring(0, stepExpression.length()-1);
 		return new Step(currentStepConfiguration, this.stepTimeout, stepExpression);

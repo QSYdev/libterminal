@@ -42,7 +42,7 @@ public class RoutinePanel extends JPanel implements AutoCloseable {
                     int steps=10;
                     int timeout=1000;
                     parent.getTerminal().executePlayer(playersAndColors, null, false,
-                            false, 0, steps,timeout, 1, 0);
+                            false, 0, steps,timeout, 1, 0, "&");
                 } catch (Exception exc) {
                     exc.printStackTrace();
                 }
