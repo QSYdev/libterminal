@@ -152,6 +152,8 @@ public class PlayerExecutor extends Executor {
 
 		@Override
 		public void run() {
+			if(!running.get())
+				return;
 			try {
 				sendEvent(new Event(executorDoneExecuting, null));
 			} catch (Exception e) {

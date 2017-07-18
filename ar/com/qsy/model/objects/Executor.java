@@ -123,7 +123,11 @@ public abstract class Executor extends EventSource {
 		@Override
 		public void run() {
 			// TODO: que pasa si se toca el que falta cuando estamos aca
-			if (currentStep.isFinished(touchedNodes)) return;
+			if(!running.get())
+				return;
+
+			if (currentStep.isFinished(touchedNodes))
+				return;
 
 			try {
 				sendEvent(new Event(executorStepTimeout, null));
