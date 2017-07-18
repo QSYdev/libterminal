@@ -1,10 +1,11 @@
 package ar.com.qsy.model.utils;
 
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,25 +41,27 @@ public final class RoutineManager {
 	private static final Gson gson;
 
 	public static Routine loadRoutine(final String path) throws UnsupportedEncodingException, IOException {
-		InputStreamReader reader = null;
+		Reader reader = null;
 		Routine routine = null;
 		try {
-			reader = new InputStreamReader(RoutineManager.class.getResourceAsStream(path), "UTF-8");
+			reader = new FileReader(path);
 			routine = gson.fromJson(reader, Routine.class);
 		} finally {
-			reader.close();
+			if (reader != null)
+				reader.close();
 		}
 
 		return routine;
 	}
 
 	public static void storeRoutine(final String path, final Routine routine) throws IOException {
-		OutputStreamWriter writer = null;
+		Writer writer = null;
 		try {
-			writer = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
+			writer = new FileWriter(path);
 			gson.toJson(routine, writer);
 		} finally {
-			writer.close();
+			if (writer != null)
+				writer.close();
 		}
 	}
 
@@ -71,7 +74,8 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+				throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 			final byte numberOfNodes = jsonObject.get(NUMBER_OF_NODES_ATT).getAsByte();
 			final Step[] steps = context.deserialize(jsonObject.get(STEPS_ATT), Step[].class);
@@ -80,7 +84,8 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public JsonElement serialize(final Routine routine, final Type typeOfSrc, final JsonSerializationContext context) {
+		public JsonElement serialize(final Routine routine, final Type typeOfSrc,
+				final JsonSerializationContext context) {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(NUMBER_OF_NODES_ATT, routine.getNumberOfNodes());
@@ -100,12 +105,14 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public Step deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+		public Step deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+				throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
 			final String expression = jsonObject.get(EXPRESSION_ATT).getAsString();
 			final long timeOut = jsonObject.get(TIME_OUT_ATT).getAsLong();
-			final NodeConfiguration[] nodesConfiguration = context.deserialize(jsonObject.get(NODES_CONFIGURATION_ATT), NodeConfiguration[].class);
+			final NodeConfiguration[] nodesConfiguration = context.deserialize(jsonObject.get(NODES_CONFIGURATION_ATT),
+					NodeConfiguration[].class);
 
 			return new Step(new LinkedList<>(Arrays.asList(nodesConfiguration)), timeOut, expression);
 		}
@@ -123,7 +130,8 @@ public final class RoutineManager {
 
 	}
 
-	private static class NodeConfigurationSerializer implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
+	private static class NodeConfigurationSerializer
+			implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
 
 		private static final String ID_ATT = "id";
 		private static final String DELAY_ATT = "delay";
@@ -133,7 +141,8 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public NodeConfiguration deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+		public NodeConfiguration deserialize(final JsonElement json, final Type typeOfT,
+				final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
 			final int id = jsonObject.get(ID_ATT).getAsInt();
@@ -144,7 +153,8 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public JsonElement serialize(final NodeConfiguration nodeConfiguration, final Type typeOfSrc, final JsonSerializationContext context) {
+		public JsonElement serialize(final NodeConfiguration nodeConfiguration, final Type typeOfSrc,
+				final JsonSerializationContext context) {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(ID_ATT, nodeConfiguration.getId());
@@ -166,7 +176,8 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public Color deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+		public Color deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+				throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
 			final short red = jsonObject.get(RED_ATT).getAsShort();
@@ -189,9 +200,9 @@ public final class RoutineManager {
 	}
 
 	public static void main(final String[] args) throws IOException {
-		final String INPUT_PATH = "/ar/com/qsy/model/utils/input.json";
-		final String OUTPUT_PATH = "src/ar/com/qsy/model/utils/output.json";
-		final String PATH = "/ar/com/qsy/model/utils/output.json";
+		final String INPUT_PATH = "ar/com/qsy/model/utils/input.json";
+		final String OUTPUT_PATH = "ar/com/qsy/model/utils/output.json";
+		final String PATH = "ar/com/qsy/model/utils/output.json";
 
 		RoutineManager.storeRoutine(OUTPUT_PATH, RoutineManager.loadRoutine(INPUT_PATH));
 
