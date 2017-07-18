@@ -168,10 +168,14 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		throws NotEnoughConnectedNodesException {
 		HashMap<Integer, Node> nodesAddresses;
 		if(nodesIdsAssociations == null) {
-			nodesAddresses = getNodesAssociationsInOrder(numberOfNodes);
+			synchronized (nodes) {
+				nodesAddresses = getNodesAssociationsInOrder(numberOfNodes);
+			}
 			if (nodesAddresses == null) throw new NotEnoughConnectedNodesException();
 		} else {
-			nodesAddresses = getNodesAssociationsFromIds(nodesIdsAssociations);
+			synchronized (nodes) {
+				nodesAddresses = getNodesAssociationsFromIds(nodesIdsAssociations);
+			}
 			if(nodesAddresses == null) throw new NotEnoughConnectedNodesException();
 		}
 		return nodesAddresses;
@@ -217,11 +221,9 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 
 		HashMap<Integer, Node> nodesAddresses = new HashMap<>();
 		for(Map.Entry<Integer, Integer> entry : nodesIdsAssociations.entrySet()) {
-			if(nodes.containsKey(entry.getKey())) {
-				nodesAddresses.put(entry.getValue(), nodes.get(entry.getKey()));
-			} else {
+			if(!nodes.containsKey(entry.getKey()))
 				return null;
-			}
+			nodesAddresses.put(entry.getValue(), nodes.get(entry.getKey()));
 		}
 		return nodesAddresses;
 	}
