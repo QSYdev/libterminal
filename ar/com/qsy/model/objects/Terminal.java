@@ -91,7 +91,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						node.close();
 						sendEvent(new Event(EventType.disconnectedNode, node));
 						//TODO: al testear esto muuuuuuy pocas veces anda mal
-						System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
 						break;
 					}
 					case executorStepTimeout: {
@@ -101,7 +100,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case executorDoneExecuting: {
-						System.out.println("Termino la rutina");
 						executor.stop();
 						executor = null;
 						// TODO: falta agregar si le decimos algo al usuario
@@ -142,22 +140,16 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	public void stopExecutor() {
 		if (executor != null) {
 			executor.stop();
-			System.out.println("Rutina stopeada");
 		}
 	}
 
 	public void executePlayer(ArrayList<Color> playersAndColors, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled,
-	                          long maxExecTime, int totalSteps, int timeout) throws NotEnoughConnectedNodesException {
-		//TODO: por ahora nodesIdsAssociation recibe null. Por lo que lo simulamos con getNodesAssociations
-		//Hardcodeamos a un solo nodo
-		int cant=1;
-		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(1);
-		if (nodesAddresses == null) {
-			throw new NotEnoughConnectedNodesException();
-		}
+	                          long maxExecTime, int totalSteps, int timeout, int numberOfNodes, int delay) throws NotEnoughConnectedNodesException {
+
+		HashMap<Integer, Node> nodesAddresses = associateNodes(nodesIdsAssociations, numberOfNodes);
 
 		executor = new PlayerExecutor(playersAndColors, nodesAddresses, soundEnabled, touchEnabled, maxExecTime,
-			totalSteps, timeout);
+			totalSteps, timeout, delay);
 		executor.addListener(this);
 		executor.start();
 	}
@@ -165,18 +157,28 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	public void executeCustom(Routine routine, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled,
 	                          boolean touchEnabled) throws NotEnoughConnectedNodesException {
 
-		HashMap<Integer, Node> nodesAddresses = getNodesAssociations(routine.getNumberOfNodes());
-		if (nodesAddresses == null) {
-			throw new NotEnoughConnectedNodesException();
-		}
+		HashMap<Integer, Node> nodesAddresses = associateNodes(nodesIdsAssociations, routine.getNumberOfNodes());
 
 		executor = new CustomExecutor(routine, nodesAddresses, soundEnabled, touchEnabled);
 		executor.addListener(this);
 		executor.start();
 	}
 
+	private HashMap<Integer, Node> associateNodes(HashMap<Integer, Integer> nodesIdsAssociations, int numberOfNodes)
+		throws NotEnoughConnectedNodesException {
+		HashMap<Integer, Node> nodesAddresses;
+		if(nodesIdsAssociations == null) {
+			nodesAddresses = getNodesAssociationsInOrder(numberOfNodes);
+			if (nodesAddresses == null) throw new NotEnoughConnectedNodesException();
+		} else {
+			nodesAddresses = getNodesAssociationsFromIds(nodesIdsAssociations);
+			if(nodesAddresses == null) throw new NotEnoughConnectedNodesException();
+		}
+		return nodesAddresses;
+	}
+
 	/**
-	 * getNodesAssociations genera una estructura donde se le asignan nodos fisicos a direcciones logicas
+	 * getNodesAssociationsInOrder genera una estructura donde se le asignan nodos fisicos a direcciones logicas
 	 * empezando en la direccion 1.
 	 *
 	 * @param numberOfNodes: indica la cantidad de nodos que necesitamos
@@ -184,7 +186,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	 * En caso de que se tenga devuelve un HashMap donde para cada clave logica(empezando en 1 hasta numberOfNodes)
 	 * se le asigna un nodo correspondiente. Esto seria en orden de conexion de los nodos
 	 */
-	private HashMap<Integer, Node> getNodesAssociations(int numberOfNodes) {
+	private HashMap<Integer, Node> getNodesAssociationsInOrder(int numberOfNodes) {
 		if (numberOfNodes > nodes.size()) {
 			return null;
 		}
@@ -194,6 +196,32 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		for (Map.Entry<Integer, Node> entry : nodes.entrySet()) {
 			nodesAddresses.put(i++, entry.getValue());
 			if(i>numberOfNodes) break;
+		}
+		return nodesAddresses;
+	}
+
+	/**
+	 * getNodesAssociationsFromIds genera una estructura donde se le asignan nodos fisicos a direcciones logicas
+	 * empezando en la direccion 1.
+	 *
+	 * @param nodesIdsAssociations: asociacion de ids logico-fisico precargada
+	 * @return HashMap<Integer, Node>: devuelve null si no se tiene la cantidad de nodos fisicos necesaria o si el
+	 * algun id fisico requerido no esta conectado.
+	 * En caso de que se tenga devuelve un HashMap donde para cada clave logica(empezando en 1 hasta numberOfNodes)
+	 * se le asigna un nodo correspondiente. Esto seria en orden de conexion de los nodos
+	 */
+	private HashMap<Integer, Node> getNodesAssociationsFromIds(HashMap<Integer, Integer> nodesIdsAssociations) {
+		if (nodesIdsAssociations.size() > nodes.size()) {
+			return null;
+		}
+
+		HashMap<Integer, Node> nodesAddresses = new HashMap<>();
+		for(Map.Entry<Integer, Integer> entry : nodesIdsAssociations.entrySet()) {
+			if(nodes.containsKey(entry.getKey())) {
+				nodesAddresses.put(entry.getValue(), nodes.get(entry.getKey()));
+			} else {
+				return null;
+			}
 		}
 		return nodesAddresses;
 	}

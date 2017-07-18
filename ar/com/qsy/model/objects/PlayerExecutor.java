@@ -16,12 +16,12 @@ public class PlayerExecutor extends Executor {
 	private RoutineTimeoutTask routineTimeoutTask;
 	private ArrayList<Color> playersAndColors, stepsWinners;
 	private ArrayList<NodeConfiguration> currentStepConfiguration;
-	private int stepTimeout, executedSteps, totalSteps;
+	private int stepTimeout, executedSteps, totalSteps, stepDelay;
 	private long maxExecTime;
 	private boolean soundEnabled, touchEnabled;
 
 	public PlayerExecutor(ArrayList<Color> playersAndColors, HashMap<Integer, Node> nodesAssociations,
-	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout) {
+	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout, int delay) {
 
 		this.running = new AtomicBoolean(false);
 		this.timer = new Timer("Step timeouts");
@@ -34,6 +34,7 @@ public class PlayerExecutor extends Executor {
 		this.totalSteps = totalSteps;
 		this.stepsWinners = new ArrayList<>();
 		this.stepTimeoutTask = new StepTimeoutTask();
+		this.stepDelay = delay;
 		this.executedSteps = 0;
 	}
 
@@ -124,11 +125,9 @@ public class PlayerExecutor extends Executor {
 		currentStepConfiguration = new ArrayList<>();
 		String stepExpression = "";
 		int numberOfPlayers = playersAndColors.size();
-		//TODO: el delay que tarda en prenderse cada nodo deberia ser configurable
-		int delayStep=1000;
 		if(numberOfPlayers == 1) {
 			Integer randLogicId = ThreadLocalRandom.current().nextInt(1, nodesAssociations.size()+1);
-			currentStepConfiguration.add(new NodeConfiguration(randLogicId, delayStep, playersAndColors.get(0)));
+			currentStepConfiguration.add(new NodeConfiguration(randLogicId, stepDelay, playersAndColors.get(0)));
 			return new Step(currentStepConfiguration, this.stepTimeout, randLogicId.toString());
 		}
 
@@ -139,7 +138,7 @@ public class PlayerExecutor extends Executor {
 		for (Color color : playersAndColors) {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
-			currentStepConfiguration.add(new NodeConfiguration(logicId, 0, color));
+			currentStepConfiguration.add(new NodeConfiguration(logicId, stepDelay, color));
 			stepExpression = stepExpression.concat(logicId.toString().concat("&"));
 		}
 		stepExpression = stepExpression.substring(0, stepExpression.length()-1);

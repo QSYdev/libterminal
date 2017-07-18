@@ -35,14 +35,14 @@ public class RoutinePanel extends JPanel implements AutoCloseable {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 ArrayList<Color> playersAndColors = new ArrayList<>();
-                //TODO
-                //un solo jugador
+                //TODO un solo jugador
                 playersAndColors.add(Color.red);
                 startRoutine();
                 try {
                     int steps=10;
                     int timeout=1000;
-                    parent.getTerminal().executePlayer(playersAndColors, null, false, false, 0, steps,timeout);
+                    parent.getTerminal().executePlayer(playersAndColors, null, false,
+                            false, 0, steps,timeout, 1, 0);
                 } catch (Exception exc) {
                     exc.printStackTrace();
                 }

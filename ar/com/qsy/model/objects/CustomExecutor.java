@@ -43,7 +43,7 @@ public class CustomExecutor extends Executor {
 
 	@Override
 	public void stepTimeout() {
-		// TODO: registrar el paso como no terminado
+		// TODO: registrar el paso como no terminado, vemos que usar para cuando hagamos los logs
 		turnOffCurrentStep();
 		continueExecution();
 	}
