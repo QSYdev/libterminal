@@ -6,7 +6,7 @@ import ar.com.qsy.model.patterns.observer.EventSource;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketSent;
+import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketRequest;
 import static ar.com.qsy.model.patterns.observer.Event.EventType.executorStepTimeout;
 
 public abstract class Executor extends EventSource {
@@ -63,7 +63,7 @@ public abstract class Executor extends EventSource {
 				null,
 				0);
 			try {
-				sendEvent(new Event(commandPacketSent, qsyPacket));
+				sendEvent(new Event(commandPacketRequest, qsyPacket));
 			} catch (Exception e) {
 				// TODO: manejo de excepciones
 				e.printStackTrace();
@@ -104,7 +104,7 @@ public abstract class Executor extends EventSource {
 				nodeConfiguration.getColor(),
 				delay);
 			try {
-				sendEvent(new Event(commandPacketSent, qsyPacket));
+				sendEvent(new Event(commandPacketRequest, qsyPacket));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

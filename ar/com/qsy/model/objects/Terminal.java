@@ -105,7 +105,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						// TODO: falta agregar si le decimos algo al usuario
 						break;
 					}
-					case commandPacketSent: {
+					case commandPacketRequest: {
 						final QSYPacket packet= (QSYPacket) event.getContent();
 						sendQSYPacket(packet);
 					}

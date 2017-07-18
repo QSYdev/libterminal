@@ -39,6 +39,16 @@ public final class Event {
 		commandPacketSent,
 
 		/**
+		 * Algun modulo desea enviar un comando a un nodo. En Content esta el QSYPacket command construido.
+		 * Listeners:
+		 * - <b>Terminal</b>: es la encargada de hacer el trigger del evento commandPacketSent para avisarle al
+		 * SenderSelector y que este envie.
+		 * Senders:
+		 * - <b>Executor</b>: le avisa a la terminal que quiere mandar un comando.
+		 */
+		commandPacketRequest,
+
+		/**
 		 * El modulo keepalive detecto que un nodo no ha enviado a tiempo su
 		 * keepalive. En Content se encuentra la instancia del nodo
 		 * desconectado.
