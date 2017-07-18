@@ -47,8 +47,10 @@ public class PlayerExecutor extends Executor {
 	@Override
 	public void start() {
 		this.running.set(true);
-		routineTimeoutTask = new RoutineTimeoutTask();
-		if(maxExecTime > 0) this.timer.schedule(routineTimeoutTask, maxExecTime);
+		if(maxExecTime > 0) {
+			routineTimeoutTask = new RoutineTimeoutTask();
+			this.timer.schedule(routineTimeoutTask, maxExecTime);
+		}
 		continueExecution();
 	}
 
