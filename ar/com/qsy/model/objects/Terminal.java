@@ -144,10 +144,19 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	}
 
 	public void executePlayer(ArrayList<Color> playersAndColors, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled,
-	                          long maxExecTime, int totalSteps, int timeout, int numberOfNodes, int delay, String condition) throws NotEnoughConnectedNodesException {
+	                          long maxExecTime, int totalSteps, int timeout, int numberOfNodes, int delay, String condition) {
+
+		int connectedNodes;
+		synchronized (nodes) {
+			connectedNodes = nodes.size();
+		}
+		if((playersAndColors == null) || (playersAndColors.size() < 1) || (maxExecTime < 0) || (totalSteps < 1) ||
+			(timeout < 0) || (connectedNodes < numberOfNodes) || (delay < 0) ||
+			((!condition.equals("&")) && (!condition.equals("|")))) {
+			throw new IllegalArgumentException("<< Terminal >> los parametros enviados a executePlayer no son permitidos");
+		}
 
 		HashMap<Integer, Node> nodesAddresses = associateNodes(nodesIdsAssociations, numberOfNodes);
-
 		executor = new PlayerExecutor(playersAndColors, nodesAddresses, soundEnabled, touchEnabled, maxExecTime,
 			totalSteps, timeout, delay, condition);
 		executor.addListener(this);
@@ -155,28 +164,32 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	}
 
 	public void executeCustom(Routine routine, HashMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled,
-	                          boolean touchEnabled) throws NotEnoughConnectedNodesException {
+	                          boolean touchEnabled) {
+
+		int connectedNodes;
+		synchronized (nodes) {
+			connectedNodes = nodes.size();
+		}
+		if((routine == null) || (connectedNodes < routine.getNumberOfNodes())) {
+			throw new IllegalArgumentException("<< Terminal >> los parametros enviados a executeCustom no son permitidos");
+		}
 
 		HashMap<Integer, Node> nodesAddresses = associateNodes(nodesIdsAssociations, routine.getNumberOfNodes());
-
 		executor = new CustomExecutor(routine, nodesAddresses, soundEnabled, touchEnabled);
 		executor.addListener(this);
 		executor.start();
 	}
 
-	private HashMap<Integer, Node> associateNodes(HashMap<Integer, Integer> nodesIdsAssociations, int numberOfNodes)
-		throws NotEnoughConnectedNodesException {
+	private HashMap<Integer, Node> associateNodes(HashMap<Integer, Integer> nodesIdsAssociations, int numberOfNodes) {
 		HashMap<Integer, Node> nodesAddresses;
 		if(nodesIdsAssociations == null) {
 			synchronized (nodes) {
 				nodesAddresses = getNodesAssociationsInOrder(numberOfNodes);
 			}
-			if (nodesAddresses == null) throw new NotEnoughConnectedNodesException();
 		} else {
 			synchronized (nodes) {
 				nodesAddresses = getNodesAssociationsFromIds(nodesIdsAssociations);
 			}
-			if(nodesAddresses == null) throw new NotEnoughConnectedNodesException();
 		}
 		return nodesAddresses;
 	}
@@ -191,10 +204,6 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	 * se le asigna un nodo correspondiente. Esto seria en orden de conexion de los nodos
 	 */
 	private HashMap<Integer, Node> getNodesAssociationsInOrder(int numberOfNodes) {
-		if (numberOfNodes > nodes.size()) {
-			return null;
-		}
-
 		HashMap<Integer, Node> nodesAddresses = new HashMap<>();
 		int i = 1;
 		for (Map.Entry<Integer, Node> entry : nodes.entrySet()) {
