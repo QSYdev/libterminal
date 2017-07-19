@@ -141,7 +141,7 @@ public class PlayerExecutor extends Executor {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
 			currentStepConfiguration.add(new NodeConfiguration(logicId, stepDelay, color));
-			stepExpressionStringBuilder.append(logicId.toString()+stepCondition);
+			stepExpressionStringBuilder.append(logicId.toString()).append(stepCondition);
 		}
 		stepExpressionStringBuilder.deleteCharAt(stepExpressionStringBuilder.length()-1);
 		return new Step(currentStepConfiguration, this.stepTimeout, stepExpressionStringBuilder.toString());
