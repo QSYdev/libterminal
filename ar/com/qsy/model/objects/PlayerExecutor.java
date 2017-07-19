@@ -1,6 +1,7 @@
 package ar.com.qsy.model.objects;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,7 +16,6 @@ import static ar.com.qsy.model.patterns.observer.Event.EventType.executorDoneExe
 public class PlayerExecutor extends Executor {
 	private RoutineTimeoutTask routineTimeoutTask;
 	private ArrayList<Color> playersAndColors, stepsWinners;
-	private ArrayList<NodeConfiguration> currentStepConfiguration;
 	private int stepTimeout, executedSteps, totalSteps, stepDelay;
 	private long maxExecTime;
 	private boolean soundEnabled, touchEnabled;
@@ -74,7 +74,7 @@ public class PlayerExecutor extends Executor {
 	}
 
 	private Color getPlayerColorFromLogicId(int logicId) {
-		for(NodeConfiguration nodeConfiguration : currentStepConfiguration) {
+		for(NodeConfiguration nodeConfiguration : currentStep.getNodes()) {
 			if(nodeConfiguration.getId() == logicId) {
 				return nodeConfiguration.getColor();
 			}
@@ -114,9 +114,8 @@ public class PlayerExecutor extends Executor {
 		}
 		stepTimeoutTask.cancel();
 		timer.purge();
-		touchedNodes = new HashSet<>();
 		currentStep = generateNextStep();
-
+		touchedNodes = new boolean[currentStep.getNodes().size()];
 		super.executeNextStep();
 	}
 
@@ -125,7 +124,7 @@ public class PlayerExecutor extends Executor {
 	 * del paso random.
 	 */
 	private Step generateNextStep() {
-		currentStepConfiguration = new ArrayList<>();
+		ArrayList<NodeConfiguration> currentStepConfiguration = new ArrayList<>();
 		String stepExpression = "";
 		int numberOfPlayers = playersAndColors.size();
 		if(numberOfPlayers == 1) {

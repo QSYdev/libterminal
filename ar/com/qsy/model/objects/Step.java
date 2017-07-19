@@ -21,8 +21,8 @@ public final class Step {
     public int getTimeout(){
         return timeout;
     }
-    public boolean isFinished(Set<Integer> ids){
-        return expression.evaluateExpressionTree(ids);
+    public boolean isFinished(boolean[] nodeIds){
+        return expression.evaluateExpressionTree(nodeIds);
     }
-    
+
 }

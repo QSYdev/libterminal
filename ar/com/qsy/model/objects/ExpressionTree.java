@@ -26,21 +26,20 @@ public final class ExpressionTree {
 		return stack.pop();
 	}
 
-	public boolean evaluateExpressionTree(Set<Integer> ids) {
-		return evaluateExpressionTree(expressionRootNode,ids);
+	public boolean evaluateExpressionTree(boolean[] nodeIds) {
+		return evaluateExpressionTree(expressionRootNode, nodeIds);
 	}
 
-	private boolean evaluateExpressionTree(ExpressionNode node, Set<Integer> ids) {
+	private boolean evaluateExpressionTree(ExpressionNode node, boolean[] nodeIds) {
 		if (node.isLeaf()) {
-			final int nodeId = node.getValue();
-			return ids.contains(nodeId);
+			return nodeIds[node.getValue()];
 		} else {
 			switch (node.getValue()) {
 			case Utils.AND_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft(),ids) && evaluateExpressionTree(node.getRight(),ids);
+				return evaluateExpressionTree(node.getLeft(),nodeIds) && evaluateExpressionTree(node.getRight(),nodeIds);
 			}
 			case Utils.OR_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft(),ids) || evaluateExpressionTree(node.getRight(),ids);
+				return evaluateExpressionTree(node.getLeft(),nodeIds) || evaluateExpressionTree(node.getRight(),nodeIds);
 			}
 			default: {
 				return false;

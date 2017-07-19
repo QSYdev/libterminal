@@ -78,8 +78,8 @@ public class CustomExecutor extends Executor {
 		}
 		stepTimeoutTask.cancel();
 		timer.purge();
-		touchedNodes = new HashSet<>();
 		currentStep = routine.next();
+		touchedNodes = new boolean[currentStep.getNodes().size()+1];
 		super.executeNextStep();
 	}
 }

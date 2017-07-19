@@ -14,7 +14,7 @@ public abstract class Executor extends EventSource {
 	protected Timer timer;
 	protected StepTimeoutTask stepTimeoutTask;
 	protected Step currentStep;
-	protected Set<Integer> touchedNodes;
+	protected boolean[] touchedNodes;
 	protected HashMap<Integer, Node> nodesAssociations;
 
 	public void stop() {
@@ -35,7 +35,7 @@ public abstract class Executor extends EventSource {
 			// se toco un nodo que no es de la rutina, nose cuando puede pasar
 			return;
 		}
-		touchedNodes.add(logicId);
+		touchedNodes[logicId] = true;
 	}
 
 	public boolean isRunning() {
@@ -54,7 +54,7 @@ public abstract class Executor extends EventSource {
 		QSYPacket qsyPacket;
 		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
 		for (NodeConfiguration nodeConfiguration : stepNodes) {
-			if (touchedNodes.contains(nodeConfiguration.getId())) {
+			if (touchedNodes[nodeConfiguration.getId()]) {
 				continue;
 			}
 			int logicId = nodeConfiguration.getId();
@@ -126,7 +126,7 @@ public abstract class Executor extends EventSource {
 			if(!running.get())
 				return;
 
-			if (currentStep.isFinished(touchedNodes))
+			if(currentStep.isFinished(touchedNodes))
 				return;
 
 			try {

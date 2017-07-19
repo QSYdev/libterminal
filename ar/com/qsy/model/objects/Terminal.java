@@ -4,7 +4,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ar.com.qsy.exceptions.NotEnoughConnectedNodesException;
 import ar.com.qsy.model.patterns.observer.AsynchronousListener;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
