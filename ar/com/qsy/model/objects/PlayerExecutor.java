@@ -125,7 +125,6 @@ public class PlayerExecutor extends Executor {
 	 */
 	private Step generateNextStep() {
 		ArrayList<NodeConfiguration> currentStepConfiguration = new ArrayList<>();
-		String stepExpression = "";
 		int numberOfPlayers = playersAndColors.size();
 		if(numberOfPlayers == 1) {
 			Integer randLogicId = ThreadLocalRandom.current().nextInt(1, nodesAssociations.size()+1);
@@ -137,14 +136,15 @@ public class PlayerExecutor extends Executor {
 			toArray()).boxed().collect(Collectors.toList()); // lista desde 1 hasta la cantidad de nodos asociados
 		Collections.shuffle(list); // desordena de manera random la lista
 		int i = 0;
+		StringBuilder stepExpressionStringBuilder = new StringBuilder();
 		for (Color color : playersAndColors) {
 			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
 			Integer logicId = list.get(i++);
 			currentStepConfiguration.add(new NodeConfiguration(logicId, stepDelay, color));
-			stepExpression += logicId.toString() + stepCondition;
+			stepExpressionStringBuilder.append(logicId.toString()+stepCondition);
 		}
-		stepExpression = stepExpression.substring(0, stepExpression.length()-1);
-		return new Step(currentStepConfiguration, this.stepTimeout, stepExpression);
+		stepExpressionStringBuilder.deleteCharAt(stepExpressionStringBuilder.length()-1);
+		return new Step(currentStepConfiguration, this.stepTimeout, stepExpressionStringBuilder.toString());
 	}
 
 	private class RoutineTimeoutTask extends TimerTask {
