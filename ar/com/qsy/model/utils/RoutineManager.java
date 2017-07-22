@@ -74,8 +74,7 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-				throws JsonParseException {
+		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 			final byte numberOfNodes = jsonObject.get(NUMBER_OF_NODES_ATT).getAsByte();
 			final Step[] steps = context.deserialize(jsonObject.get(STEPS_ATT), Step[].class);
@@ -84,8 +83,7 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public JsonElement serialize(final Routine routine, final Type typeOfSrc,
-				final JsonSerializationContext context) {
+		public JsonElement serialize(final Routine routine, final Type typeOfSrc, final JsonSerializationContext context) {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(NUMBER_OF_NODES_ATT, routine.getNumberOfNodes());
@@ -99,22 +97,22 @@ public final class RoutineManager {
 
 		private static final String EXPRESSION_ATT = "expression";
 		private static final String TIME_OUT_ATT = "timeOut";
+		private static final String STOP_ON_TIMEOUT_ATT = "stopOnTimeout";
 		private static final String NODES_CONFIGURATION_ATT = "nodesConfigurations";
 
 		public StepSerializer() {
 		}
 
 		@Override
-		public Step deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-				throws JsonParseException {
+		public Step deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
 			final String expression = jsonObject.get(EXPRESSION_ATT).getAsString();
 			final long timeOut = jsonObject.get(TIME_OUT_ATT).getAsLong();
-			final NodeConfiguration[] nodesConfiguration = context.deserialize(jsonObject.get(NODES_CONFIGURATION_ATT),
-					NodeConfiguration[].class);
+			final boolean stopOnTimeout = jsonObject.get(STOP_ON_TIMEOUT_ATT).getAsBoolean();
+			final NodeConfiguration[] nodesConfiguration = context.deserialize(jsonObject.get(NODES_CONFIGURATION_ATT), NodeConfiguration[].class);
 
-			return new Step(new LinkedList<>(Arrays.asList(nodesConfiguration)), timeOut, expression);
+			return new Step(new LinkedList<>(Arrays.asList(nodesConfiguration)), timeOut, expression, stopOnTimeout);
 		}
 
 		@Override
@@ -123,6 +121,7 @@ public final class RoutineManager {
 
 			jsonObject.addProperty(EXPRESSION_ATT, step.getExpression());
 			jsonObject.addProperty(TIME_OUT_ATT, step.getTimeOut());
+			jsonObject.addProperty(STOP_ON_TIMEOUT_ATT, step.getStopOnTimeout());
 			jsonObject.add(NODES_CONFIGURATION_ATT, context.serialize(step.getNodesConfiguration()));
 
 			return jsonObject;
@@ -130,8 +129,7 @@ public final class RoutineManager {
 
 	}
 
-	private static class NodeConfigurationSerializer
-			implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
+	private static class NodeConfigurationSerializer implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
 
 		private static final String ID_ATT = "id";
 		private static final String DELAY_ATT = "delay";
@@ -141,8 +139,7 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public NodeConfiguration deserialize(final JsonElement json, final Type typeOfT,
-				final JsonDeserializationContext context) throws JsonParseException {
+		public NodeConfiguration deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
 			final int id = jsonObject.get(ID_ATT).getAsInt();
@@ -153,8 +150,7 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public JsonElement serialize(final NodeConfiguration nodeConfiguration, final Type typeOfSrc,
-				final JsonSerializationContext context) {
+		public JsonElement serialize(final NodeConfiguration nodeConfiguration, final Type typeOfSrc, final JsonSerializationContext context) {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(ID_ATT, nodeConfiguration.getId());
@@ -176,13 +172,12 @@ public final class RoutineManager {
 		}
 
 		@Override
-		public Color deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-				throws JsonParseException {
+		public Color deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 
-			final short red = jsonObject.get(RED_ATT).getAsShort();
-			final short green = jsonObject.get(GREEN_ATT).getAsShort();
-			final short blue = jsonObject.get(BLUE_ATT).getAsShort();
+			final byte red = jsonObject.get(RED_ATT).getAsByte();
+			final byte green = jsonObject.get(GREEN_ATT).getAsByte();
+			final byte blue = jsonObject.get(BLUE_ATT).getAsByte();
 
 			return new Color(red, green, blue);
 		}

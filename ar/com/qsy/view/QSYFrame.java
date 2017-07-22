@@ -29,6 +29,7 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 
 	private final SearchPanel searchPanel;
 	private final CommandPanel commandPanel;
+	private final RoutinePanel routinePanel;
 
 	private final Terminal terminal;
 
@@ -54,10 +55,14 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 
 		searchPanel = new SearchPanel(this);
 		commandPanel = new CommandPanel(this);
+		routinePanel = new RoutinePanel(this);
 
 		final Container rightPane = new Container();
 		rightPane.setLayout(new BoxLayout(rightPane, BoxLayout.Y_AXIS));
 		rightPane.add(commandPanel);
+		rightPane.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Integer.MAX_VALUE), new Dimension(0, Integer.MAX_VALUE)));
+
+		rightPane.add(routinePanel);
 		rightPane.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Integer.MAX_VALUE), new Dimension(0, Integer.MAX_VALUE)));
 
 		final JPanel contentPane = (JPanel) this.getContentPane();

@@ -1,12 +1,11 @@
 package ar.com.qsy.model.objects;
 
-import java.awt.Color;
 import java.net.InetAddress;
 import java.util.Arrays;
 
 public final class QSYPacket {
 
-	public static final long QSY_PROTOCOL_VERSION = 130617;
+	public static final long QSY_PROTOCOL_VERSION = 200717;
 
 	public static final byte PACKET_SIZE = 12;
 	public static final int KEEP_ALIVE_MS = 500;
@@ -26,19 +25,13 @@ public final class QSYPacket {
 	private static final byte TYPE_INDEX = 0x03;
 	private static final byte ID_INDEX = 0x04;
 	private static final byte COLOR_RG_INDEX = 0x06;
-	private static final byte COLOR_BW_INDEX = 0x07;
+	private static final byte COLOR_B_INDEX = 0x07;
 	private static final byte DELAY_INDEX = 0x08;
 
 	private static final byte TYPE_HELLO = 0x00;
 	private static final byte TYPE_COMMAND = 0x01;
 	private static final byte TYPE_TOUCHE = 0x02;
 	private static final byte TYPE_KEEPALIVE = 0x03;
-
-	private static final int RED_VALUE = 0xF000;
-	private static final int GREEN_VALUE = 0x0F00;
-	private static final int BLUE_VALUE = 0x00F0;
-	private static final int WHITE_VALUE = 0x000F;
-	private static final int NO_COLOR_VALUE = 0x0000;
 
 	public enum PacketType {
 		Hello, Command, Touche, Keepalive
@@ -69,66 +62,41 @@ public final class QSYPacket {
 
 	public QSYPacket(final InetAddress nodeAddress, final byte[] data) throws IllegalArgumentException {
 		if (data.length != PACKET_SIZE) {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El tama�o del QSYPacket debe ser de " + PACKET_SIZE + ".");
+			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> La longitud del QSYPacket debe ser de " + PACKET_SIZE + ".");
 		} else if (data[Q_INDEX] != 'Q' || data[S_INDEX] != 'S' || data[Y_INDEX] != 'Y') {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket posee una firma inv�lida.");
+			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket posee una firma invalida.");
 		}
 
 		this.nodeAddress = nodeAddress;
 		this.packetType = getPacketTypeFromShort(((short) convertBytesToLong(data, TYPE_INDEX, TYPE_INDEX)));
 		this.id = (int) convertBytesToLong(data, ID_INDEX, (byte) (ID_INDEX + 1));
-		this.color = getColorFromInt((int) convertBytesToLong(data, COLOR_RG_INDEX, COLOR_BW_INDEX));
+		// this.color = getColorFromInt((int) convertBytesToLong(data,
+		// COLOR_RG_INDEX, COLOR_B_INDEX));
+		this.color = getColorFromInt(data);
 		this.delay = (long) convertBytesToLong(data, DELAY_INDEX, (byte) (DELAY_INDEX + 3));
 
 		rawData = Arrays.copyOf(data, PACKET_SIZE);
 	}
 
-	private static Color getColorFromInt(final int typeColor) throws IllegalArgumentException {
-		final Color color;
-		switch (typeColor) {
-		case RED_VALUE: {
-			color = Color.red;
-			break;
-		}
-		case GREEN_VALUE: {
-			color = Color.green;
-			break;
-		}
-		case BLUE_VALUE: {
-			color = Color.blue;
-			break;
-		}
-		case WHITE_VALUE: {
-			color = Color.white;
-			break;
-		}
-		case NO_COLOR_VALUE: {
-			color = null;
-			break;
-		}
-		default: {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");
-		}
-		}
-		return color;
+	// private static Color getColorFromInt(final int typeColor) {
+	// final byte red = (byte) convertBytesToLong(new byte[] { (byte)
+	// ((typeColor >> 12) & 0x0F) }, (byte) 0, (byte) 0);
+	// final byte green = (byte) convertBytesToLong(new byte[] { (byte)
+	// ((typeColor >> 8) & 0x0F) }, (byte) 0, (byte) 0);
+	// final byte blue = (byte) convertBytesToLong(new byte[] { (byte)
+	// ((typeColor >> 4) & 0x0F) }, (byte) 0, (byte) 0);
+	// return new Color(red, green, blue);
+	// }
+
+	private Color getColorFromInt(final byte[] data) {
+		final byte red = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX] >> 12) & 0x0F) }, (byte) 0, (byte) 0);
+		final byte green = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX] >> 8) & 0x0F) }, (byte) 0, (byte) 0);
+		final byte blue = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_B_INDEX] >> 4) & 0x0F) }, (byte) 0, (byte) 0);
+		return new Color(red, green, blue);
 	}
 
 	private static int getIntFromColor(final Color color) throws IllegalArgumentException {
-		final int result;
-		if (color == null) {
-			result = NO_COLOR_VALUE;
-		} else if (color.equals(Color.red)) {
-			result = RED_VALUE;
-		} else if (color.equals(Color.green)) {
-			result = GREEN_VALUE;
-		} else if (color.equals(Color.blue)) {
-			result = BLUE_VALUE;
-		} else if (color.equals(Color.white)) {
-			result = WHITE_VALUE;
-		} else {
-			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");
-		}
-		return result;
+		return (int) (color.getRed() * Math.pow(2, 12) + color.getGreen() * Math.pow(2, 8) + color.getBlue() * Math.pow(2, 4));
 	}
 
 	private static PacketType getPacketTypeFromShort(final short type) throws IllegalArgumentException {
@@ -256,33 +224,28 @@ public final class QSYPacket {
 		}
 		stringBuilder.append(" From = " + getNodeAddress() + "\n");
 		stringBuilder.append("ID = " + getId() + " || ");
-		stringBuilder.append("COLOR = ");
-		if (color == null) {
-			stringBuilder.append("No Color");
-		} else if (color.equals(Color.red)) {
-			stringBuilder.append("Red");
-		} else if (color.equals(Color.green)) {
-			stringBuilder.append("Green");
-		} else if (color.equals(Color.blue)) {
-			stringBuilder.append("Blue");
-		} else if (color.equals(Color.white)) {
-			stringBuilder.append("White");
-		}
+		stringBuilder.append(getColor());
 		stringBuilder.append(" || DELAY = " + getDelay());
 
 		return stringBuilder.toString();
 	}
 
-	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final int nodeId, final Color color, final long delay) throws IllegalArgumentException {
+	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final int nodeId, final Color color, final long delay, final boolean touchEnabled, final boolean soundEnabled)
+			throws IllegalArgumentException {
 		if (nodeId < MIN_ID_SIZE || nodeId > MAX_ID_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El id debe estar entre [" + MIN_ID_SIZE + " ; " + MAX_ID_SIZE + "]");
-		} else if (color != null && !color.equals(Color.red) && !color.equals(Color.green) && !color.equals(Color.blue) && !color.equals(Color.white)) {
+		} else if (color == null) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");
 		} else if (delay < MIN_DELAY_SIZE || delay > MAX_DELAY_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El delay debe estar entre [" + MIN_DELAY_SIZE + " ; " + MAX_DELAY_SIZE + "]");
 		} else {
 			return new QSYPacket(nodeAddress, PacketType.Command, nodeId, color, delay);
 		}
+	}
+
+	public static void main(String[] args) {
+		final QSYPacket qsyPacket = createCommandPacket(null, 11, new Color((byte) 12, (byte) 1, (byte) 0), 100, false, false);
+		System.out.println(qsyPacket);
 	}
 
 }

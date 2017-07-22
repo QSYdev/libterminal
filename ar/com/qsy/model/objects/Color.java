@@ -2,46 +2,48 @@ package ar.com.qsy.model.objects;
 
 public final class Color {
 
-	private final short red;
-	private final short green;
-	private final short blue;
+	private static final byte MAX_AMOUNT_COLOR = 15;
 
-	public Color(final short red, final short green, final short blue) {
-		if (checkAmountOfColor(red) && checkAmountOfColor(green) && checkAmountOfColor(blue)) {
-			this.red = red;
-			this.green = green;
-			this.blue = blue;
+	private final byte redAmount;
+	private final byte greenAmount;
+	private final byte blueAmount;
+
+	public Color(final byte redAmount, final byte greenAmount, final byte blueAmount) {
+		if (checkAmountOfColor(redAmount) && checkAmountOfColor(greenAmount) && checkAmountOfColor(blueAmount)) {
+			this.redAmount = redAmount;
+			this.greenAmount = greenAmount;
+			this.blueAmount = blueAmount;
 		} else {
-			throw new IllegalArgumentException("<< COLOR >> La cantidad de color ingresada debe ser un valor entre 0 y 255");
+			throw new IllegalArgumentException("<< COLOR >> La cantidad de color ingresada debe ser un valor entre 0 y " + MAX_AMOUNT_COLOR);
 		}
 	}
 
-	private boolean checkAmountOfColor(final short color) {
-		return color >= 0 && color < 256;
+	private boolean checkAmountOfColor(final byte color) {
+		return color >= 0 && color < MAX_AMOUNT_COLOR + 1;
 	}
 
-	public short getRed() {
-		return red;
+	public byte getRed() {
+		return redAmount;
 	}
 
-	public short getGreen() {
-		return green;
+	public byte getGreen() {
+		return greenAmount;
 	}
 
-	public short getBlue() {
-		return blue;
+	public byte getBlue() {
+		return blueAmount;
 	}
 
 	@Override
 	public String toString() {
-		return "RED = " + red + " || GREEN = " + green + " || BLUE = " + blue;
+		return "RED = " + redAmount + " || GREEN = " + greenAmount + " || BLUE = " + blueAmount;
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj instanceof Color) {
 			final Color c = (Color) obj;
-			return red == c.red && green == c.green && blue == c.blue;
+			return redAmount == c.redAmount && greenAmount == c.greenAmount && blueAmount == c.blueAmount;
 		} else {
 			return false;
 		}
