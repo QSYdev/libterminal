@@ -1,0 +1,153 @@
+package ar.com.qsy.model.objects;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import ar.com.qsy.model.patterns.observer.EventSource;
+import ar.com.qsy.model.utils.BiMap;
+
+public abstract class Executor extends EventSource {
+
+	private final AtomicBoolean running;
+
+	private final BiMap biMap;
+
+	private Step currentStep;
+	private final boolean[] touchedNodes;
+	private ExpressionTree expressionTree;
+
+	private final Timer timer;
+	private StepTimeOutTimerTask timerTask;
+
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
+		this.running = new AtomicBoolean(false);
+		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
+
+		this.currentStep = null;
+		this.touchedNodes = new boolean[numberOfNodes + 1];
+		this.expressionTree = null;
+
+		this.timer = new Timer("Step Time Out", false);
+		this.timerTask = null;
+	}
+
+	public void start() throws Exception {
+		running.set(true);
+		currentStep = getNextStep();
+		prepareStep();
+	}
+
+	public void stop() throws Exception {
+		if (running.get()) {
+			finalizeStep();
+			timer.cancel();
+			running.set(false);
+		}
+
+	}
+
+	public void touche(final int physicalIdOfNode) throws Exception {
+		if (running.get()) {
+			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
+			// TODO comprobar si pertenece al paso actual, modificar el protocolo para incluir el paso
+			touchedNodes[logicalId] = true;
+			// TODO almacenar en log aca.
+			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
+				finalizeStep();
+				if (hasNextStep()) {
+					currentStep = getNextStep();
+					prepareStep();
+				} else {
+					sendEvent(new Event(EventType.executorDoneExecuting, null));
+				}
+			}
+		}
+	}
+
+	public void stepTimeout() throws Exception {
+		if(currentStep.getStopOnTimeout()) {
+			sendEvent(new Event(EventType.executorDoneExecuting, null));
+			return;
+		}
+		if(!hasNextStep()) {
+			sendEvent(new Event(EventType.executorDoneExecuting, null));
+			return;
+		}
+		finalizeStep();
+		currentStep = getNextStep();
+		prepareStep();
+	}
+
+	public boolean isRunning() {
+		return running.get();
+	}
+
+	private void prepareStep() throws Exception {
+		long maxDelay = 0;
+		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
+			final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
+			final long delay = nodeConfiguration.getDelay();
+			if (delay > maxDelay) {
+				maxDelay = delay;
+			}
+			final Color color = nodeConfiguration.getColor();
+			final CommandParameters parameters = new CommandParameters(physicalId, delay, color);
+			sendEvent(new Event(EventType.commandRequest, parameters));
+		}
+		if (currentStep.getTimeOut() > 0) {
+			timer.schedule(timerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
+		}
+		expressionTree = new ExpressionTree(currentStep.getExpression());
+	}
+
+	private void finalizeStep() throws Exception {
+		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
+		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
+			final int logicalId = nodeConfiguration.getId();
+			if (!touchedNodes[logicalId]) {
+				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
+				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor);
+				sendEvent(new Event(EventType.commandRequest, parameters));
+			}
+		}
+		for (int i = 0; i < touchedNodes.length; i++) {
+			touchedNodes[i] = false;
+		}
+		if (timerTask != null) {
+			timerTask.cancel();
+		}
+		timer.purge();
+		expressionTree = null;
+	}
+
+	protected BiMap getBiMap(){
+		return biMap;
+	}
+
+	protected abstract Step getNextStep();
+
+	protected abstract boolean hasNextStep();
+
+	private final class StepTimeOutTimerTask extends TimerTask {
+
+		public StepTimeOutTimerTask() {
+		}
+
+		@Override
+		public void run() {
+			if (running.get()) {
+				try {
+					sendEvent(new Event(EventType.executorStepTimeout, null));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+}

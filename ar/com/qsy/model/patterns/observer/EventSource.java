@@ -3,9 +3,7 @@ package ar.com.qsy.model.patterns.observer;
 import java.util.LinkedList;
 import java.util.List;
 
-import ar.com.qsy.model.patterns.command.Command;
-
-public abstract class EventSource {
+public abstract class EventSource implements AutoCloseable {
 
 	private final List<EventListener> listeners;
 	private final List<Command> pendingActions;
@@ -17,40 +15,19 @@ public abstract class EventSource {
 
 	public final void addListener(final EventListener eventListener) {
 		synchronized (pendingActions) {
-			pendingActions.add(new Command() {
-
-				@Override
-				public void execute() {
-					listeners.add(eventListener);
-				}
-
-			});
+			pendingActions.add(() -> listeners.add(eventListener));
 		}
 	}
 
 	public final void removeListener(final EventListener eventListener) {
 		synchronized (pendingActions) {
-			pendingActions.add(new Command() {
-
-				@Override
-				public void execute() {
-					listeners.remove(eventListener);
-				}
-
-			});
+			pendingActions.add(() -> listeners.remove(eventListener));
 		}
 	}
 
 	public final void removeAllListeners() {
 		synchronized (pendingActions) {
-			pendingActions.add(new Command() {
-
-				@Override
-				public void execute() {
-					listeners.clear();
-				}
-
-			});
+			pendingActions.add(() -> listeners.clear());
 		}
 	}
 
@@ -64,5 +41,18 @@ public abstract class EventSource {
 		for (final EventListener eventListener : listeners) {
 			eventListener.receiveEvent(event);
 		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		for (final Command action : pendingActions) {
+			action.execute();
+		}
+		listeners.clear();
+	}
+
+	private static interface Command {
+
+		void execute();
 	}
 }

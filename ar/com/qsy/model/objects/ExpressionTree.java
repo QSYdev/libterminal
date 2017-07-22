@@ -25,23 +25,21 @@ public final class ExpressionTree {
 		return stack.pop();
 	}
 
-	public boolean evaluateExpressionTree() {
-		return evaluateExpressionTree(expressionRootNode);
+	public boolean evaluateExpressionTree(final boolean[] touchedNodes) {
+		return evaluateExpressionTree(expressionRootNode, touchedNodes);
 	}
 
-	private boolean evaluateExpressionTree(final ExpressionNode node) {
+	private boolean evaluateExpressionTree(final ExpressionNode node, final boolean[] touchedNodes) {
 		if (node.isLeaf()) {
 			final int nodeId = node.getValue();
-
-			// TODO cambiar esto por si el nodo fue tocado.
-			return nodeId != 0;
+			return touchedNodes[nodeId];
 		} else {
 			switch (node.getValue()) {
 			case Utils.AND_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft()) && evaluateExpressionTree(node.getRight());
+				return evaluateExpressionTree(node.getLeft(), touchedNodes) && evaluateExpressionTree(node.getRight(), touchedNodes);
 			}
 			case Utils.OR_INT_VALUE: {
-				return evaluateExpressionTree(node.getLeft()) || evaluateExpressionTree(node.getRight());
+				return evaluateExpressionTree(node.getLeft(), touchedNodes) || evaluateExpressionTree(node.getRight(), touchedNodes);
 			}
 			default: {
 				return false;

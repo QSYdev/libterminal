@@ -6,12 +6,14 @@ public final class Step {
 
 	private final String expression;
 	private final long timeOut;
+	private final boolean stopOnTimeout;
 	private final LinkedList<NodeConfiguration> nodesConfiguration;
 
-	public Step(final LinkedList<NodeConfiguration> nodesConfiguration, final long timeOut, final String expression) {
+	public Step(final LinkedList<NodeConfiguration> nodesConfiguration, final long timeOut, final String expression, final boolean stopOnTimeout) {
 		this.expression = expression;
 		this.timeOut = timeOut;
 		this.nodesConfiguration = nodesConfiguration;
+		this.stopOnTimeout = stopOnTimeout;
 	}
 
 	public String getExpression() {
@@ -20,6 +22,10 @@ public final class Step {
 
 	public long getTimeOut() {
 		return timeOut;
+	}
+
+	public boolean getStopOnTimeout() {
+		return stopOnTimeout;
 	}
 
 	public LinkedList<NodeConfiguration> getNodesConfiguration() {

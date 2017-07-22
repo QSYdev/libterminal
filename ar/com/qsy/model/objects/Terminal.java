@@ -1,5 +1,8 @@
 package ar.com.qsy.model.objects;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,15 +12,19 @@ import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventListener;
 import ar.com.qsy.model.patterns.observer.EventSource;
 
-public final class Terminal extends EventSource implements Runnable, AutoCloseable, EventListener {
+public final class Terminal extends EventSource implements Runnable, EventListener {
 
 	private final TreeMap<Integer, Node> nodes;
 
 	private final AsynchronousListener internalListener;
 	private final KeepAlive keepAlive;
+	private volatile Executor executor;
 
 	private final AtomicBoolean searchNodes;
 	private final AtomicBoolean running;
+
+	private final AtomicBoolean touchEnabled;
+	private final AtomicBoolean soundEnabled;
 
 	public Terminal() {
 		this.nodes = new TreeMap<>();
@@ -26,6 +33,9 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		keepAlive.addListener(this);
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
+		this.executor = null;
+		this.touchEnabled = new AtomicBoolean(false);
+		this.soundEnabled = new AtomicBoolean(false);
 	}
 
 	@Override
@@ -35,6 +45,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 			try {
 				final Event event = internalListener.getEvent();
 				switch (event.getEventType()) {
+
 				case incomingQSYPacket: {
 					final QSYPacket qsyPacket = (QSYPacket) event.getContent();
 
@@ -61,8 +72,11 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 						break;
 					}
 					case Touche: {
-						// TODO cuando se recibe un touche.
-						System.out.println(qsyPacket);
+						synchronized (this) {
+							if (executor != null) {
+								executor.touche(qsyPacket.getId());
+							}
+						}
 						break;
 					}
 					default: {
@@ -71,6 +85,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 					}
 					break;
 				}
+
 				case keepAliveError: {
 					final Node node = (Node) event.getContent();
 					synchronized (nodes) {
@@ -81,6 +96,41 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 					System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
 					break;
 				}
+
+				case commandRequest: {
+					final CommandParameters parameters = (CommandParameters) event.getContent();
+					final InetAddress nodeAddress;
+					synchronized (nodes) {
+						nodeAddress = nodes.get(parameters.getPhysicalId()).getNodeAddress();
+					}
+					final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters.getPhysicalId(), parameters.getColor(), parameters.getDelay(), touchEnabled.get(),
+							soundEnabled.get());
+					sendQSYPacket(commandPacket);
+					break;
+				}
+
+				case executorStepTimeout: {
+					synchronized (this) {
+						if (executor != null) {
+							executor.stepTimeout();
+						}
+					}
+					System.out.println("StepTimeOut");
+					break;
+				}
+
+				case executorDoneExecuting: {
+					synchronized (this) {
+						if (executor != null) {
+							executor.stop();
+							executor.removeListener(this);
+							executor = null;
+						}
+					}
+					System.out.println("Se termino la rutina");
+					break;
+				}
+
 				default: {
 					break;
 				}
@@ -104,6 +154,94 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 		searchNodes.set(false);
 	}
 
+	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations) throws Exception {
+		synchronized (this) {
+			if (executor == null) {
+				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, routine.getNumberOfNodes());
+				executor = new CustomExecutor(routine, associations);
+				executor.addListener(this);
+				executor.start();
+			} else {
+				throw new Exception("<< Terminal >> Hay una rutina activa. Finalizala antes de inciar otra.");
+			}
+		}
+	}
+
+	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers,
+			final long timeOut, final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) throws Exception {
+
+		synchronized (this) {
+			if (executor == null) {
+				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0) || playersAndColors.size() != numberOfNodes) {
+					throw new IllegalArgumentException("<< Terminal >> Los parametros recibidos no son correctos");
+				}
+				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, numberOfNodes);
+				executor = new PlayerExecutor(associations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout);
+				executor.addListener(this);
+				executor.start();
+			} else {
+				throw new Exception("<< Terminal >> Hay una rutina activa. Finalizala antes de iniciar otra.");
+			}
+		}
+	}
+
+	public void stopExecution() throws Exception {
+		synchronized (this) {
+			if (executor != null) {
+				executor.stop();
+				executor.removeListener(this);
+				executor = null;
+			}
+		}
+	}
+
+	private TreeMap<Integer, Integer> associateNodes(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
+		TreeMap<Integer, Integer> nodesAddresses;
+		if (nodesIdsAssociations == null) {
+			synchronized (nodes) {
+				nodesAddresses = getNodesAssociationsInOrder(numberOfNodes);
+			}
+		} else {
+			synchronized (nodes) {
+				nodesAddresses = getNodesAssociationsFromIds(nodesIdsAssociations);
+			}
+		}
+		return nodesAddresses;
+	}
+
+	private TreeMap<Integer, Integer> getNodesAssociationsInOrder(final int numberOfNodes) {
+		if (nodes.size() >= numberOfNodes) {
+			final TreeMap<Integer, Integer> nodesAddresses = new TreeMap<>();
+			int i = 1;
+			for (final Entry<Integer, Node> entry : nodes.entrySet()) {
+				nodesAddresses.put(i++, entry.getValue().getNodeId());
+				if (i > numberOfNodes) {
+					break;
+				}
+			}
+			return nodesAddresses;
+		} else {
+			throw new IllegalArgumentException("<< Terminal >> No hay suficientes nodos para hacer la asociacion");
+		}
+	}
+
+	private TreeMap<Integer, Integer> getNodesAssociationsFromIds(final TreeMap<Integer, Integer> nodesIdsAssociations) {
+		if (nodesIdsAssociations.size() <= nodes.size()) {
+			final TreeMap<Integer, Integer> nodesAddresses = new TreeMap<>();
+			for (final Entry<Integer, Integer> entry : nodesIdsAssociations.entrySet()) {
+				if (nodes.containsKey(entry.getValue())) {
+					nodesAddresses.put(entry.getKey(), entry.getValue());
+				} else {
+					throw new IllegalArgumentException("<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion");
+				}
+			}
+			return nodesAddresses;
+		} else {
+			throw new IllegalArgumentException("<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion");
+		}
+
+	}
+
 	public void sendQSYPacket(final QSYPacket qsyPacket) throws Exception {
 		sendEvent(new Event(EventType.commandPacketSent, qsyPacket));
 	}
@@ -112,6 +250,7 @@ public final class Terminal extends EventSource implements Runnable, AutoCloseab
 	public void close() throws Exception {
 		running.set(false);
 		keepAlive.close();
+		super.close();
 	}
 
 	@Override
