@@ -1,6 +1,5 @@
 package ar.com.qsy.view;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -19,13 +18,15 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 
+import ar.com.qsy.model.objects.Color;
 import ar.com.qsy.model.objects.QSYPacket;
 
 public final class CommandPanel extends JPanel implements AutoCloseable {
 
 	private static final long serialVersionUID = 1L;
-	private static final String[] comboBoxPosibilites = { "No Color", "Red", "Green", "Blue", "White" };
-	private static final Color[] colors = { null, Color.red, Color.green, Color.blue, Color.white };
+	private static final String[] comboBoxPosibilites = { "No Color", "Red", "Green", "Blue" };
+	private static final Color[] colors = { new Color((byte) 0, (byte) 0, (byte) 0), new Color((byte) 0xF, (byte) 0, (byte) 0), new Color((byte) 0, (byte) 0xF, (byte) 0),
+			new Color((byte) 0, (byte) 0, (byte) 0xF) };
 
 	private final JComboBox<String> comboBoxColor;
 	private final JTextField textDelay;
@@ -66,7 +67,7 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 					final long delay = Long.parseLong(textDelay.getText());
 					final InetAddress nodeAddress = (InetAddress) table.getValueAt(table.getSelectedRow(), 1);
 					final int nodeId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
-					parent.getTerminal().sendQSYPacket(QSYPacket.createCommandPacket(nodeAddress, nodeId, color, delay));
+					parent.getTerminal().sendQSYPacket(QSYPacket.createCommandPacket(nodeAddress, nodeId, color, delay, false, false));
 
 				} catch (final NullPointerException exception) {
 					JOptionPane.showMessageDialog(null, "Se debe seleccionar un color", "Error", JOptionPane.ERROR_MESSAGE);
