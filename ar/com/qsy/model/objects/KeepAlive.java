@@ -7,9 +7,8 @@ import java.util.TreeMap;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventSource;
-import ar.com.qsy.model.patterns.observer.SynchronousListener;
 
-public final class KeepAlive extends EventSource implements AutoCloseable {
+public final class KeepAlive extends EventSource {
 
 	public static final int MAX_KEEP_ALIVE_DELAY = (int) ((5 / 2f) * QSYPacket.KEEP_ALIVE_MS);
 
@@ -19,7 +18,7 @@ public final class KeepAlive extends EventSource implements AutoCloseable {
 
 	public KeepAlive(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
-		this.timer = new Timer("Dead Nodes Purger");
+		this.timer = new Timer("Dead Nodes Purger", false);
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
@@ -49,6 +48,7 @@ public final class KeepAlive extends EventSource implements AutoCloseable {
 	public void close() throws Exception {
 		timer.cancel();
 		deadNodesPurgerTask.close();
+		super.close();
 	}
 
 	private final class DeadNodesPurger extends TimerTask implements AutoCloseable {

@@ -14,7 +14,7 @@ import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventListener;
 import ar.com.qsy.model.patterns.observer.EventSource;
 
-public final class ReceiverSelector extends EventSource implements Runnable, AutoCloseable, EventListener {
+public final class ReceiverSelector extends EventSource implements Runnable, EventListener {
 
 	private final Selector selector;
 	private final LinkedList<Node> pendingConnections;
@@ -79,6 +79,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Aut
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		super.close();
 	}
 
 	@Override

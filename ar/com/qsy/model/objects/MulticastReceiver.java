@@ -10,7 +10,7 @@ import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventSource;
 
-public final class MulticastReceiver extends EventSource implements Runnable, AutoCloseable {
+public final class MulticastReceiver extends EventSource implements Runnable {
 
 	private final InetAddress address;
 	private final MulticastSocket socket;
@@ -61,6 +61,7 @@ public final class MulticastReceiver extends EventSource implements Runnable, Au
 		} finally {
 			socket.close();
 		}
+		super.close();
 	}
 
 }

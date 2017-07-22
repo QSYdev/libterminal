@@ -72,7 +72,7 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 				} catch (final NullPointerException exception) {
 					JOptionPane.showMessageDialog(null, "Se debe seleccionar un color", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final NumberFormatException exception) {
-					JOptionPane.showMessageDialog(null, "Se debe colocar un nï¿½mero entero de 4 Bytes sin signo.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Se debe colocar un número entero de 4 Bytes sin signo.", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final IllegalArgumentException exception) {
 					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final InterruptedException exception) {
@@ -82,6 +82,7 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 				}
 			}
 		});
+
 	}
 
 	@Override

@@ -42,7 +42,6 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 					break;
 				}
 				default: {
-					System.out.println("Error");
 					break;
 				}
 				}

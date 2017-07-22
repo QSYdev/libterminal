@@ -60,7 +60,6 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 		final Container rightPane = new Container();
 		rightPane.setLayout(new BoxLayout(rightPane, BoxLayout.Y_AXIS));
 		rightPane.add(commandPanel);
-		rightPane.add(routinePanel);
 		rightPane.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, Integer.MAX_VALUE), new Dimension(0, Integer.MAX_VALUE)));
 
 		rightPane.add(routinePanel);
