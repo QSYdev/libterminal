@@ -1,27 +1,32 @@
 package ar.com.qsy.model.objects;
 
-import java.awt.Color;
+public final class NodeConfiguration {
 
-public class NodeConfiguration {
-	int id;
-	int delay;
-	Color color;
+	private final int id;
+	private final Color color;
+	private final long delay;
 
-	public NodeConfiguration(int id, int delay, Color color) {
+	public NodeConfiguration(final int id, final long delay, final Color color) {
 		this.id = id;
-		this.delay = delay;
 		this.color = color;
+		this.delay = delay;
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public int getDelay() {
-		return delay;
-	}
-
 	public Color getColor() {
 		return color;
 	}
+
+	public long getDelay() {
+		return delay;
+	}
+
+	@Override
+	public String toString() {
+		return "ID = " + id + " || COLOR = " + color + " || DELAY = " + delay;
+	}
+
 }

@@ -3,11 +3,9 @@ package ar.com.qsy.model.utils;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import ar.com.qsy.model.objects.Node;
-
 public final class BiMap {
 
-	private final Integer[] logicIds;
+	private final Integer[] logicalIds;
 	private final TreeMap<Integer, Integer> physicalIds;
 
 	private final int capacity;
@@ -16,33 +14,33 @@ public final class BiMap {
 		this(numLogicIds, new TreeMap<>());
 	}
 
-	public BiMap(final int numLogicIds, final TreeMap<Integer, Node> nodesAddresses) {
-		if (numLogicIds > 0) {
-			this.capacity = numLogicIds;
-			this.logicIds = new Integer[capacity];
+	public BiMap(final int numLogicalIds, final TreeMap<Integer, Integer> nodesAddresses) {
+		if (numLogicalIds > 0) {
+			this.capacity = numLogicalIds;
+			this.logicalIds = new Integer[capacity];
 			this.physicalIds = new TreeMap<>();
-			for (final Entry<Integer, Node> entry : nodesAddresses.entrySet()) {
-				addEntry(entry.getKey(), entry.getValue().getNodeId());
+			for (final Entry<Integer, Integer> entry : nodesAddresses.entrySet()) {
+				addEntry(entry.getKey(), entry.getValue());
 			}
 		} else {
 			throw new IllegalArgumentException("<< BiMap >> numLogicIds debe ser mayor a 0");
 		}
 	}
 
-	public void addEntry(final int logicId, final int physicId) {
-		if (logicId > 0 && logicId <= capacity) {
-			logicIds[logicId - 1] = physicId;
-			physicalIds.put(physicId, logicId);
+	public void addEntry(final int logicalId, final int physicId) {
+		if (logicalId > 0 && logicalId <= capacity) {
+			logicalIds[logicalId - 1] = physicId;
+			physicalIds.put(physicId, logicalId);
 		} else {
 			throw new IllegalArgumentException("<< BiMap >> logicId incorrecto el valor debe estar entre 0 y " + capacity);
 		}
 	}
 
-	public void removeByLogicId(final int logicId) {
-		if (logicId > 0 && logicId <= capacity) {
-			final Integer physicId = logicIds[logicId - 1];
+	public void removeByLogicId(final int logicalId) {
+		if (logicalId > 0 && logicalId <= capacity) {
+			final Integer physicId = logicalIds[logicalId - 1];
 			if (physicId != null) {
-				logicIds[logicId - 1] = null;
+				logicalIds[logicalId - 1] = null;
 				physicalIds.remove(physicId);
 			}
 		} else {
@@ -50,26 +48,26 @@ public final class BiMap {
 		}
 	}
 
-	public void removeByPhysicalId(final int physicId) {
-		final Integer logicId = physicalIds.remove(physicId);
-		if (logicId != null) {
-			logicIds[logicId - 1] = null;
+	public void removeByPhysicalId(final int physicalId) {
+		final Integer logicalId = physicalIds.remove(physicalId);
+		if (logicalId != null) {
+			logicalIds[logicalId - 1] = null;
 		}
 	}
 
 	public void clear() {
 		for (int i = 0; i < capacity; i++) {
-			logicIds[i] = null;
+			logicalIds[i] = null;
 		}
 		physicalIds.clear();
 	}
 
-	public Integer getPhysicalId(final int logicId) {
-		return logicIds[logicId - 1];
+	public Integer getPhysicalId(final int logicalId) {
+		return logicalIds[logicalId - 1];
 	}
 
-	public Integer getLogicId(final int physicId) {
-		return physicalIds.get(physicId);
+	public Integer getLogicalId(final int physicalId) {
+		return physicalIds.get(physicalId);
 	}
 
 	public static void main(String[] args) {

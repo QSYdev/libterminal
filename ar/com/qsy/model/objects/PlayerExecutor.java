@@ -1,80 +1,116 @@
 package ar.com.qsy.model.objects;
 
-import java.awt.*;
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 
 import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
 
-import static ar.com.qsy.model.patterns.observer.Event.EventType.executorDoneExecuting;
+public final class PlayerExecutor extends Executor {
 
-public class PlayerExecutor extends Executor {
-	private RoutineTimeoutTask routineTimeoutTask;
-	private ArrayList<Color> playersAndColors, stepsWinners;
-	private int stepTimeout, executedSteps, totalSteps, stepDelay;
-	private long maxExecTime;
-	private boolean soundEnabled, touchEnabled;
-	private String stepCondition;
+	private final ArrayList<Color> playersAndColors;
+	private final boolean waitForAllPlayers;
+	private final long timeOut;
+	private final long delay;
+	private final long maxExecTime;
+	private final int totalStep;
+	private LinkedList<NodeConfiguration> currentNodesConfiguration;
+	private ArrayList<Color> stepsWinners;
+	private final boolean stopOnTimeout;
 
-	public PlayerExecutor(ArrayList<Color> playersAndColors, HashMap<Integer, Node> nodesAssociations,
-	                      boolean soundEnabled, boolean touchEnabled, long maxExecTime, int totalSteps, int stepTimeout,
-	                      int delay, String condition) {
+	private final Timer timer;
+	private RoutineTimerTask timerTask;
+	private int stepIndex;
 
-		this.running = new AtomicBoolean(false);
-		this.timer = new Timer("Step timeouts");
-		this.nodesAssociations = nodesAssociations;
+	private final int numberOfNodes;
+
+	public PlayerExecutor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
+			final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) {
+
+		super(nodesIdsAssociations, numberOfNodes);
 		this.playersAndColors = playersAndColors;
-		this.stepTimeout = stepTimeout;
-		this.soundEnabled = soundEnabled;
-		this.touchEnabled = touchEnabled;
+		this.waitForAllPlayers = waitForAllPlayers;
+		this.timeOut = timeOut;
+		this.delay = delay;
 		this.maxExecTime = maxExecTime;
-		this.totalSteps = totalSteps;
-		this.stepsWinners = new ArrayList<>();
-		this.stepTimeoutTask = new StepTimeoutTask();
-		this.stepDelay = delay;
-		this.stepCondition = condition;
-		this.executedSteps = 0;
+		this.totalStep = totalStep;
+		this.stopOnTimeout = stopOnTimeout;
+
+		this.timer = new Timer("Routine Time Out", false);
+		this.timerTask = null;
+		this.stepIndex = 0;
+
+		this.numberOfNodes = numberOfNodes;
 	}
 
-	/**
-	 * start simplemente setea el flag de ejecutando a true y comienza la ejecucion.
-	 */
 	@Override
-	public void start() {
-		this.running.set(true);
-		if(maxExecTime > 0) {
-			routineTimeoutTask = new RoutineTimeoutTask();
-			this.timer.schedule(routineTimeoutTask, maxExecTime);
+	public void start() throws Exception {
+		stepIndex = 0;
+		if (maxExecTime > 0) {
+			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
 		}
-		continueExecution();
+		super.start();
 	}
 
-	/**
-	 * touche agrega el nodo correspondiente a los nodos tocados del paso actual.
-	 *
-	 * @param node: el nodo fisico que fue tocado por el usuario
-	 */
-	public void touche(Node node) {
-		super.touche(node);
-		Color color = getPlayerColorFromLogicId(getLogicIdFromNodeId(node.getNodeId()));
-		if(color == null) return; // el color no pertenece al paso
-		if(stepsWinners.size() < executedSteps) {
-			stepsWinners.add(color);
+	@Override
+	public void stop() throws Exception {
+		if (isRunning()) {
+			if (timerTask != null) {
+				timerTask.cancel();
+			}
+			timer.cancel();
+			super.stop();
 		}
-		if (!currentStep.isFinished(touchedNodes)) {
-			return;
+	}
+
+	@Override
+	public void touche(int physicalIdOfNode) throws Exception {
+		if(stepsWinners.size() < stepIndex)
+			stepsWinners.add(getPlayerColorFromLogicId(getBiMap().getLogicalId(physicalIdOfNode)));
+		super.touche(physicalIdOfNode);
+	}
+
+	@Override
+	protected Step getNextStep() {
+		stepsWinners = new ArrayList<>();
+		final char booleanOperator = (waitForAllPlayers) ? '&' : '|';
+		final LinkedList<Integer> usedIds = new LinkedList<>();
+		for (int i = 1; i <= numberOfNodes; i++) {
+			usedIds.add(i);
 		}
-		turnOffCurrentStep();
-		continueExecution();
+		currentNodesConfiguration = new LinkedList<>();
+		final StringBuilder sb = new StringBuilder();
+
+		for (final Color color : playersAndColors) {
+			final int id = usedIds.remove((int) (Math.random() * (numberOfNodes)));
+			currentNodesConfiguration.add(new NodeConfiguration(id, delay, color));
+			sb.append(id);
+			sb.append(booleanOperator);
+		}
+		sb.deleteCharAt(sb.length() - 1);
+
+		final String expression = sb.toString();
+
+		++stepIndex;
+		return new Step(currentNodesConfiguration, timeOut, expression, stopOnTimeout);
+	}
+
+	@Override
+	protected boolean hasNextStep() {
+		return totalStep == 0 || stepIndex < totalStep;
+	}
+
+	@Override
+	public void stepTimeout() throws Exception {
+		stepsWinners.add(null);
+		super.stepTimeout();
 	}
 
 	private Color getPlayerColorFromLogicId(int logicId) {
-		for(NodeConfiguration nodeConfiguration : currentStep.getNodes()) {
+		for(NodeConfiguration nodeConfiguration : currentNodesConfiguration) {
 			if(nodeConfiguration.getId() == logicId) {
 				return nodeConfiguration.getColor();
 			}
@@ -82,83 +118,22 @@ public class PlayerExecutor extends Executor {
 		return null;
 	}
 
-	@Override
-	public void stepTimeout() {
-		stepsWinners.add(null);
-		turnOffCurrentStep();
-		continueExecution();
-	}
+	private final class RoutineTimerTask extends TimerTask {
 
-	/**
-	 * stepTimeout procede a ejecutar el siguiente paso en caso de que corresponda. Si no lo hay entonces avisa,
-	 * a los que sea que esten escuchando, que la ejecucion de la rutina termino.
-	 */
-	private void continueExecution() {
-		if (executedSteps < totalSteps) {
-			executeNextStep();
-			executedSteps++;
-		} else {
-			try {
-				sendEvent(new Event(executorDoneExecuting, null));
-			} catch (Exception e) {
-				// TODO: manejar excepciones bien
-				e.printStackTrace();
-			}
+		public RoutineTimerTask() {
 		}
-	}
-
-	@Override
-	protected void executeNextStep() {
-		if (!running.get()) {
-			return;
-		}
-		stepTimeoutTask.cancel();
-		timer.purge();
-		currentStep = generateNextStep();
-		touchedNodes = new boolean[currentStep.getNodes().size()];
-		super.executeNextStep();
-	}
-
-	/*
-	 * generateNextStep devuelve un Step con toda la configuracion de los nodos cargada, y con la expresion
-	 * del paso random.
-	 */
-	private Step generateNextStep() {
-		ArrayList<NodeConfiguration> currentStepConfiguration = new ArrayList<>();
-		int numberOfPlayers = playersAndColors.size();
-		if(numberOfPlayers == 1) {
-			Integer randLogicId = ThreadLocalRandom.current().nextInt(1, nodesAssociations.size()+1);
-			currentStepConfiguration.add(new NodeConfiguration(randLogicId, stepDelay, playersAndColors.get(0)));
-			return new Step(currentStepConfiguration, this.stepTimeout, randLogicId.toString());
-		}
-
-		List<Integer> list = IntStream.of(IntStream.rangeClosed(1, nodesAssociations.size()).
-			toArray()).boxed().collect(Collectors.toList()); // lista desde 1 hasta la cantidad de nodos asociados
-		Collections.shuffle(list); // desordena de manera random la lista
-		int i = 0;
-		StringBuilder stepExpressionStringBuilder = new StringBuilder();
-		for (Color color : playersAndColors) {
-			// aca obtenemos uno que sabemos que va a ser unico y random gracias al shuffle
-			Integer logicId = list.get(i++);
-			currentStepConfiguration.add(new NodeConfiguration(logicId, stepDelay, color));
-			stepExpressionStringBuilder.append(logicId.toString()).append(stepCondition);
-		}
-		stepExpressionStringBuilder.deleteCharAt(stepExpressionStringBuilder.length()-1);
-		return new Step(currentStepConfiguration, this.stepTimeout, stepExpressionStringBuilder.toString());
-	}
-
-	private class RoutineTimeoutTask extends TimerTask {
 
 		@Override
 		public void run() {
-			if(!running.get())
-				return;
-			try {
-				sendEvent(new Event(executorDoneExecuting, null));
-			} catch (Exception e) {
-				// TODO: manejo de excepciones
-				e.printStackTrace();
+			if (isRunning()) {
+				try {
+					sendEvent(new Event(EventType.executorDoneExecuting, null));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
+
 	}
+
 }

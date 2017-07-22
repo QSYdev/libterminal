@@ -1,28 +1,45 @@
 package ar.com.qsy.model.objects;
 
-import javax.security.auth.login.Configuration;
-import java.util.ArrayList;
-import java.util.Set;
-
+import java.util.LinkedList;
 
 public final class Step {
-    ArrayList<NodeConfiguration> nodesConfiguration;
-    int timeout;
-    ExpressionTree expression;
 
-    public Step(ArrayList<NodeConfiguration> n, int t, String expr){
-        this.nodesConfiguration=n;
-        this.timeout=t;
-        this.expression= new ExpressionTree(expr);
-    }
-    public ArrayList<NodeConfiguration> getNodes(){
-        return nodesConfiguration;
-    }
-    public int getTimeout(){
-        return timeout;
-    }
-    public boolean isFinished(boolean[] nodeIds){
-        return expression.evaluateExpressionTree(nodeIds);
-    }
+	private final String expression;
+	private final long timeOut;
+	private final boolean stopOnTimeout;
+	private final LinkedList<NodeConfiguration> nodesConfiguration;
+
+	public Step(final LinkedList<NodeConfiguration> nodesConfiguration, final long timeOut, final String expression, final boolean stopOnTimeout) {
+		this.expression = expression;
+		this.timeOut = timeOut;
+		this.nodesConfiguration = nodesConfiguration;
+		this.stopOnTimeout = stopOnTimeout;
+	}
+
+	public String getExpression() {
+		return expression;
+	}
+
+	public long getTimeOut() {
+		return timeOut;
+	}
+
+	public boolean getStopOnTimeout() {
+		return stopOnTimeout;
+	}
+
+	public LinkedList<NodeConfiguration> getNodesConfiguration() {
+		return nodesConfiguration;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("EXPRESSION = " + expression + " || TIMEOUT = " + timeOut + "\n");
+		for (final NodeConfiguration nodeConfig : nodesConfiguration) {
+			sb.append(nodeConfig + "\n");
+		}
+		return sb.toString();
+	}
 
 }

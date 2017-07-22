@@ -1,142 +1,153 @@
 package ar.com.qsy.model.objects;
 
-import ar.com.qsy.model.patterns.observer.Event;
-import ar.com.qsy.model.patterns.observer.EventSource;
-
-import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static ar.com.qsy.model.patterns.observer.Event.EventType.commandPacketRequest;
-import static ar.com.qsy.model.patterns.observer.Event.EventType.executorStepTimeout;
+import ar.com.qsy.model.patterns.observer.Event;
+import ar.com.qsy.model.patterns.observer.Event.EventType;
+import ar.com.qsy.model.patterns.observer.EventSource;
+import ar.com.qsy.model.utils.BiMap;
 
 public abstract class Executor extends EventSource {
-	protected AtomicBoolean running;
-	protected Timer timer;
-	protected StepTimeoutTask stepTimeoutTask;
-	protected Step currentStep;
-	protected boolean[] touchedNodes;
-	protected HashMap<Integer, Node> nodesAssociations;
 
-	public void stop() {
-		running.set(false);
-		timer.cancel();
+	private final AtomicBoolean running;
+
+	private final BiMap biMap;
+
+	private Step currentStep;
+	private final boolean[] touchedNodes;
+	private ExpressionTree expressionTree;
+
+	private final Timer timer;
+	private StepTimeOutTimerTask timerTask;
+
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
+		this.running = new AtomicBoolean(false);
+		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
+
+		this.currentStep = null;
+		this.touchedNodes = new boolean[numberOfNodes + 1];
+		this.expressionTree = null;
+
+		this.timer = new Timer("Step Time Out", false);
+		this.timerTask = null;
 	}
 
-	public abstract void start();
+	public void start() throws Exception {
+		running.set(true);
+		currentStep = getNextStep();
+		prepareStep();
+	}
 
-	/**
-	 * touche agrega el nodo correspondiente a los nodos tocados del paso actual.
-	 *
-	 * @param node: el nodo fisico que fue tocado por el usuario
-	 */
-	public void touche(Node node) {
-		int logicId = getLogicIdFromNodeId(node.getNodeId());
-		if (logicId == -1) {
-			// se toco un nodo que no es de la rutina, nose cuando puede pasar
+	public void stop() throws Exception {
+		if (running.get()) {
+			finalizeStep();
+			timer.cancel();
+			running.set(false);
+		}
+
+	}
+
+	public void touche(final int physicalIdOfNode) throws Exception {
+		if (running.get()) {
+			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
+			// TODO comprobar si pertenece al paso actual, modificar el protocolo para incluir el paso
+			touchedNodes[logicalId] = true;
+			// TODO almacenar en log aca.
+			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
+				finalizeStep();
+				if (hasNextStep()) {
+					currentStep = getNextStep();
+					prepareStep();
+				} else {
+					sendEvent(new Event(EventType.executorDoneExecuting, null));
+				}
+			}
+		}
+	}
+
+	public void stepTimeout() throws Exception {
+		if(currentStep.getStopOnTimeout()) {
+			sendEvent(new Event(EventType.executorDoneExecuting, null));
 			return;
 		}
-		touchedNodes[logicId] = true;
+		if(!hasNextStep()) {
+			sendEvent(new Event(EventType.executorDoneExecuting, null));
+			return;
+		}
+		finalizeStep();
+		currentStep = getNextStep();
+		prepareStep();
 	}
 
 	public boolean isRunning() {
 		return running.get();
 	}
 
-	/**
-	 * stepTimeout hace lo que se debe hacer en caso de que se de el timeout del step.
-	 */
-	public abstract void stepTimeout();
-
-	/*
-	 * turnOffCurrentStep apaga todos los nodos del paso actual que no fueron tocados
-	 */
-	protected void turnOffCurrentStep() {
-		QSYPacket qsyPacket;
-		ArrayList<NodeConfiguration> stepNodes = currentStep.getNodes();
-		for (NodeConfiguration nodeConfiguration : stepNodes) {
-			if (touchedNodes[nodeConfiguration.getId()]) {
-				continue;
-			}
-			int logicId = nodeConfiguration.getId();
-			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
-				this.nodesAssociations.get(logicId).getNodeId(),
-				null,
-				0);
-			try {
-				sendEvent(new Event(commandPacketRequest, qsyPacket));
-			} catch (Exception e) {
-				// TODO: manejo de excepciones
-				e.printStackTrace();
-			}
-
-		}
-	}
-
-	/*
-	 * getLogicIdFromNodeId recibe el id fisico de un nodo y devuelve el id logico que tiene asociado en la rutina
-	 * actual.
-	 */
-	protected int getLogicIdFromNodeId(int nodeId) {
-		for (Map.Entry<Integer, Node> entry : nodesAssociations.entrySet()) {
-			if (entry.getValue().getNodeId() == nodeId) {
-				return entry.getKey();
-			}
-		}
-		return -1;
-	}
-
-	protected void executeNextStep() {
-		ArrayList<NodeConfiguration> nodesConfiguration = currentStep.getNodes();
-		QSYPacket qsyPacket;
-		long maxDelay = -1;
-
-		for (NodeConfiguration nodeConfiguration : nodesConfiguration) {
-			final int logicId = nodeConfiguration.getId();
-			final int delay = nodeConfiguration.getDelay();
+	private void prepareStep() throws Exception {
+		long maxDelay = 0;
+		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
+			final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
+			final long delay = nodeConfiguration.getDelay();
 			if (delay > maxDelay) {
 				maxDelay = delay;
 			}
-			// TODO: cuando se cambie el protocolo para incluir el sonido lo tenemos que mandar aca
-			// solo si soundEnabled es true
-			// TODO: touchEnabled
-			qsyPacket = QSYPacket.createCommandPacket(this.nodesAssociations.get(logicId).getNodeAddress(),
-				this.nodesAssociations.get(logicId).getNodeId(),
-				nodeConfiguration.getColor(),
-				delay);
-			try {
-				sendEvent(new Event(commandPacketRequest, qsyPacket));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			final Color color = nodeConfiguration.getColor();
+			final CommandParameters parameters = new CommandParameters(physicalId, delay, color);
+			sendEvent(new Event(EventType.commandRequest, parameters));
 		}
-
-		int timeout = currentStep.getTimeout();
-		if (timeout > 0) {
-			maxDelay = maxDelay + timeout;
-			stepTimeoutTask = new StepTimeoutTask();
-			timer.schedule(stepTimeoutTask, maxDelay);
+		if (currentStep.getTimeOut() > 0) {
+			timer.schedule(timerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
 		}
+		expressionTree = new ExpressionTree(currentStep.getExpression());
 	}
 
-	protected class StepTimeoutTask extends TimerTask {
+	private void finalizeStep() throws Exception {
+		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
+		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
+			final int logicalId = nodeConfiguration.getId();
+			if (!touchedNodes[logicalId]) {
+				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
+				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor);
+				sendEvent(new Event(EventType.commandRequest, parameters));
+			}
+		}
+		for (int i = 0; i < touchedNodes.length; i++) {
+			touchedNodes[i] = false;
+		}
+		if (timerTask != null) {
+			timerTask.cancel();
+		}
+		timer.purge();
+		expressionTree = null;
+	}
+
+	protected BiMap getBiMap(){
+		return biMap;
+	}
+
+	protected abstract Step getNextStep();
+
+	protected abstract boolean hasNextStep();
+
+	private final class StepTimeOutTimerTask extends TimerTask {
+
+		public StepTimeOutTimerTask() {
+		}
 
 		@Override
 		public void run() {
-			// TODO: que pasa si se toca el que falta cuando estamos aca
-			if(!running.get())
-				return;
-
-			if(currentStep.isFinished(touchedNodes))
-				return;
-
-			try {
-				sendEvent(new Event(executorStepTimeout, null));
-			} catch (Exception e) {
-				// TODO: manejo correcto de excepciones
-				e.printStackTrace();
+			if (running.get()) {
+				try {
+					sendEvent(new Event(EventType.executorStepTimeout, null));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
-	}
 
+	}
 
 }
