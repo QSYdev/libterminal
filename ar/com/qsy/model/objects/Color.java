@@ -2,48 +2,50 @@ package ar.com.qsy.model.objects;
 
 public final class Color {
 
-	private static final byte MAX_AMOUNT_COLOR = 15;
+	private static final byte MAX_AMOUNT_COLOR = 16;
 
-	private final byte redAmount;
-	private final byte greenAmount;
-	private final byte blueAmount;
+	private final byte red;
+	private final byte green;
+	private final byte blue;
 
-	public Color(final byte redAmount, final byte greenAmount, final byte blueAmount) {
-		if (checkAmountOfColor(redAmount) && checkAmountOfColor(greenAmount) && checkAmountOfColor(blueAmount)) {
-			this.redAmount = redAmount;
-			this.greenAmount = greenAmount;
-			this.blueAmount = blueAmount;
+	public Color(final byte red, final byte green, final byte blue) {
+		if (checkAmountOfColor(red) && checkAmountOfColor(green) && checkAmountOfColor(blue)) {
+			this.red = red;
+			this.green = green;
+			this.blue = blue;
 		} else {
-			throw new IllegalArgumentException("<< COLOR >> La cantidad de color ingresada debe ser un valor entre 0 y " + MAX_AMOUNT_COLOR);
+			throw new IllegalArgumentException("<< COLOR >> La cantidad de color ingresada debe ser un valor entre 0 y " + MAX_AMOUNT_COLOR + "exclusive");
 		}
 	}
 
 	private boolean checkAmountOfColor(final byte color) {
-		return color >= 0 && color < MAX_AMOUNT_COLOR + 1;
+		return color >= 0 && color < MAX_AMOUNT_COLOR;
 	}
 
 	public byte getRed() {
-		return redAmount;
+		return red;
 	}
 
 	public byte getGreen() {
-		return greenAmount;
+		return green;
 	}
 
 	public byte getBlue() {
-		return blueAmount;
+		return blue;
 	}
 
 	@Override
 	public String toString() {
-		return "RED = " + redAmount + " || GREEN = " + greenAmount + " || BLUE = " + blueAmount;
+		return "RED = " + red + " || GREEN = " + green + " || BLUE = " + blue;
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof Color) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof Color) {
 			final Color c = (Color) obj;
-			return redAmount == c.redAmount && greenAmount == c.greenAmount && blueAmount == c.blueAmount;
+			return red == c.red && green == c.green && blue == c.blue;
 		} else {
 			return false;
 		}
