@@ -25,6 +25,11 @@ public class Main {
 			nodesConfig.add(new NodeConfiguration(1, 500, new Color((byte) 0x3, (byte) 0x4, (byte) 0x5)));
 			steps.add(new Step(nodesConfig, 2000L, "1", false));
 		}
+		{
+			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
+			nodesConfig.add(new NodeConfiguration(1, 500, new Color((byte) 0x3, (byte) 0x4, (byte) 0x5)));
+			steps.add(new Step(nodesConfig, 2000L, "1", false));
+		}
 		final Routine routine = new Routine((byte) 1, steps);
 
 		RoutineManager.storeRoutine("ar/com/qsy/io/routine1.json", routine);

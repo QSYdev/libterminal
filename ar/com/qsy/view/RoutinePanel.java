@@ -50,7 +50,7 @@ public final class RoutinePanel extends JPanel {
 				try {
 					final ArrayList<Color> playersAndColors = new ArrayList<>();
 					playersAndColors.add(new Color((byte) 0xF, (byte) 0, (byte) 0));
-					parent.getTerminal().executePlayer(null, 1, playersAndColors, true, 2000, 500, 7000, 0, false);
+					parent.getTerminal().executePlayer(null, 1, playersAndColors, true, 2000, 500, 17000, 0, false);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}

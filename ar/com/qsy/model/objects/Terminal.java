@@ -19,6 +19,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	private final AsynchronousListener internalListener;
 	private final KeepAlive keepAlive;
 	private volatile Executor executor;
+	private final Object executorLock;
 
 	private final AtomicBoolean searchNodes;
 	private final AtomicBoolean running;
@@ -34,6 +35,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		this.searchNodes = new AtomicBoolean(false);
 		this.running = new AtomicBoolean(true);
 		this.executor = null;
+		this.executorLock = new Object();
 		this.touchEnabled = new AtomicBoolean(false);
 		this.soundEnabled = new AtomicBoolean(false);
 	}
@@ -72,7 +74,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 						break;
 					}
 					case Touche: {
-						synchronized (this) {
+						synchronized (executorLock) {
 							if (executor != null) {
 								executor.touche(qsyPacket.getId());
 							}
@@ -110,17 +112,12 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 				}
 
 				case executorStepTimeout: {
-					synchronized (this) {
-						if (executor != null) {
-							executor.stepTimeout();
-						}
-					}
 					System.out.println("StepTimeOut");
 					break;
 				}
 
 				case executorDoneExecuting: {
-					synchronized (this) {
+					synchronized (executorLock) {
 						if (executor != null) {
 							executor.stop();
 							executor.removeListener(this);
@@ -155,7 +152,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	}
 
 	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations) throws Exception {
-		synchronized (this) {
+		synchronized (executorLock) {
 			if (executor == null) {
 				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, routine.getNumberOfNodes());
 				executor = new CustomExecutor(routine, associations);
@@ -170,7 +167,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers,
 			final long timeOut, final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) throws Exception {
 
-		synchronized (this) {
+		synchronized (executorLock) {
 			if (executor == null) {
 				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0) || playersAndColors.size() != numberOfNodes) {
 					throw new IllegalArgumentException("<< Terminal >> Los parametros recibidos no son correctos");
@@ -186,7 +183,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	}
 
 	public void stopExecution() throws Exception {
-		synchronized (this) {
+		synchronized (executorLock) {
 			if (executor != null) {
 				executor.stop();
 				executor.removeListener(this);

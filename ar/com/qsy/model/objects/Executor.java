@@ -15,33 +15,36 @@ public abstract class Executor extends EventSource {
 	private final AtomicBoolean running;
 
 	private final BiMap biMap;
-
-	private Step currentStep;
 	private final boolean[] touchedNodes;
 	private ExpressionTree expressionTree;
+
+	private Step currentStep;
+	private int numberOfStep;
 
 	private final Timer timer;
 	private StepTimeOutTimerTask timerTask;
 
 	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
 		this.running = new AtomicBoolean(false);
-		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
 
-		this.currentStep = null;
+		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
 		this.touchedNodes = new boolean[numberOfNodes + 1];
 		this.expressionTree = null;
+
+		this.currentStep = null;
+		this.numberOfStep = 0;
 
 		this.timer = new Timer("Step Time Out", false);
 		this.timerTask = null;
 	}
 
-	public void start() throws Exception {
+	public synchronized void start() throws Exception {
 		running.set(true);
 		currentStep = getNextStep();
 		prepareStep();
 	}
 
-	public void stop() throws Exception {
+	public synchronized void stop() throws Exception {
 		if (running.get()) {
 			finalizeStep();
 			timer.cancel();
@@ -50,10 +53,11 @@ public abstract class Executor extends EventSource {
 
 	}
 
-	public void touche(final int physicalIdOfNode) throws Exception {
+	public synchronized void touche(final int physicalIdOfNode) throws Exception {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
-			// TODO comprobar si pertenece al paso actual, modificar el protocolo para incluir el paso
+			// TODO comprobar si pertenece al paso actual, modificar el
+			// protocolo para incluir el paso
 			touchedNodes[logicalId] = true;
 			// TODO almacenar en log aca.
 			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
@@ -68,18 +72,19 @@ public abstract class Executor extends EventSource {
 		}
 	}
 
-	public void stepTimeout() throws Exception {
-		if(currentStep.getStopOnTimeout()) {
-			sendEvent(new Event(EventType.executorDoneExecuting, null));
-			return;
+	protected synchronized void stepTimeout() throws Exception {
+		if (running.get()) {
+			sendEvent(new Event(EventType.executorStepTimeout, null));
+			if (currentStep.getStopOnTimeout()) {
+				sendEvent(new Event(EventType.executorDoneExecuting, null));
+			} else if (!hasNextStep()) {
+				sendEvent(new Event(EventType.executorDoneExecuting, null));
+			} else {
+				finalizeStep();
+				currentStep = getNextStep();
+				prepareStep();
+			}
 		}
-		if(!hasNextStep()) {
-			sendEvent(new Event(EventType.executorDoneExecuting, null));
-			return;
-		}
-		finalizeStep();
-		currentStep = getNextStep();
-		prepareStep();
 	}
 
 	public boolean isRunning() {
@@ -87,6 +92,7 @@ public abstract class Executor extends EventSource {
 	}
 
 	private void prepareStep() throws Exception {
+		++numberOfStep;
 		long maxDelay = 0;
 		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
 			final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
@@ -124,7 +130,7 @@ public abstract class Executor extends EventSource {
 		expressionTree = null;
 	}
 
-	protected BiMap getBiMap(){
+	protected BiMap getBiMap() {
 		return biMap;
 	}
 
@@ -139,12 +145,10 @@ public abstract class Executor extends EventSource {
 
 		@Override
 		public void run() {
-			if (running.get()) {
-				try {
-					sendEvent(new Event(EventType.executorStepTimeout, null));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			try {
+				stepTimeout();
+			} catch (final Exception e) {
+				e.printStackTrace();
 			}
 		}
 
