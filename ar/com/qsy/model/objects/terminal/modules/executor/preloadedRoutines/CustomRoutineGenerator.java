@@ -1,16 +1,18 @@
-package ar.com.qsy.io;
+package ar.com.qsy.model.objects.terminal.modules.executor.preloadedRoutines;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import ar.com.qsy.model.objects.Color;
-import ar.com.qsy.model.objects.NodeConfiguration;
-import ar.com.qsy.model.objects.Routine;
-import ar.com.qsy.model.objects.Step;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.NodeConfiguration;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Routine;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Step;
 import ar.com.qsy.model.utils.RoutineManager;
 
-public class Main {
+public class CustomRoutineGenerator {
+
+	private static final String PATH = "ar/com/qsy/model/objects/terminal/modules/executor/preloadedRoutines/";
 
 	public static void main(String[] args) throws IOException {
 
@@ -32,7 +34,7 @@ public class Main {
 		}
 		final Routine routine = new Routine((byte) 1, steps);
 
-		RoutineManager.storeRoutine("ar/com/qsy/io/routine1.json", routine);
+		RoutineManager.storeRoutine(PATH + "routine1.json", routine);
 	}
 
 }

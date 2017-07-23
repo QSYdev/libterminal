@@ -4,7 +4,7 @@ import java.util.TreeMap;
 
 import javax.swing.table.DefaultTableModel;
 
-import ar.com.qsy.model.objects.Node;
+import ar.com.qsy.model.objects.externalObjects.Node;
 
 public final class QSYTableModel extends DefaultTableModel {
 

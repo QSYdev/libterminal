@@ -15,8 +15,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import ar.com.qsy.model.objects.Node;
-import ar.com.qsy.model.objects.Terminal;
+import ar.com.qsy.model.objects.externalObjects.Node;
+import ar.com.qsy.model.objects.terminal.Terminal;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.EventListener;
 

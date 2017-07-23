@@ -21,10 +21,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import ar.com.qsy.model.objects.Color;
-import ar.com.qsy.model.objects.NodeConfiguration;
-import ar.com.qsy.model.objects.Routine;
-import ar.com.qsy.model.objects.Step;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.NodeConfiguration;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Routine;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Step;
 
 public final class RoutineManager {
 

@@ -1,4 +1,4 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.terminal.modules.executor;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -6,6 +6,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.NodeConfiguration;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Step;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 

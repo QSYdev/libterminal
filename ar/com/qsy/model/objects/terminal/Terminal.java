@@ -1,4 +1,4 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.terminal;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -6,6 +6,15 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.model.objects.externalObjects.Node;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
+import ar.com.qsy.model.objects.terminal.modules.executor.CustomExecutor;
+import ar.com.qsy.model.objects.terminal.modules.executor.Executor;
+import ar.com.qsy.model.objects.terminal.modules.executor.PlayerExecutor;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.CommandParameters;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Routine;
+import ar.com.qsy.model.objects.terminal.modules.keepAlive.KeepAlive;
 import ar.com.qsy.model.patterns.observer.AsynchronousListener;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;

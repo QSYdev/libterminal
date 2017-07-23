@@ -1,4 +1,4 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.externalObjects;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.model.objects.protocol.QSYPacket;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventSource;

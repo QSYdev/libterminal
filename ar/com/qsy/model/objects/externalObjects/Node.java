@@ -1,4 +1,4 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.externalObjects;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -6,7 +6,9 @@ import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
 
-import ar.com.qsy.model.objects.QSYPacket.PacketType;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
+import ar.com.qsy.model.objects.protocol.QSYPacket.PacketType;
+import ar.com.qsy.model.objects.terminal.modules.keepAlive.KeepAlive;
 
 public final class Node implements Comparable<Node>, AutoCloseable {
 

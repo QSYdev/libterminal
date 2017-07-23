@@ -1,10 +1,10 @@
 package ar.com.qsy.main;
 
-import ar.com.qsy.model.objects.MulticastReceiver;
-import ar.com.qsy.model.objects.QSYPacket;
-import ar.com.qsy.model.objects.ReceiverSelector;
-import ar.com.qsy.model.objects.SenderSelector;
-import ar.com.qsy.model.objects.Terminal;
+import ar.com.qsy.model.objects.externalObjects.MulticastReceiver;
+import ar.com.qsy.model.objects.externalObjects.ReceiverSelector;
+import ar.com.qsy.model.objects.externalObjects.SenderSelector;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
+import ar.com.qsy.model.objects.terminal.Terminal;
 import ar.com.qsy.view.QSYFrame;
 
 public final class Main {

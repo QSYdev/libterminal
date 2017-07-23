@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
 
-import ar.com.qsy.model.objects.QSYPacket;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
 
 public final class Utils {
 

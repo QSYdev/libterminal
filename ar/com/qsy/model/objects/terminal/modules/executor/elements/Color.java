@@ -1,4 +1,4 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.terminal.modules.executor.elements;
 
 public final class Color {
 

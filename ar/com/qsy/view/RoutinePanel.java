@@ -10,7 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 
-import ar.com.qsy.model.objects.Color;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
 import ar.com.qsy.model.utils.RoutineManager;
 
 public final class RoutinePanel extends JPanel {

@@ -1,9 +1,11 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.terminal.modules.keepAlive;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import ar.com.qsy.model.objects.externalObjects.Node;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventSource;
@@ -22,7 +24,7 @@ public final class KeepAlive extends EventSource {
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
-	protected void newNodeCreated(final Node node) throws Exception {
+	public void newNodeCreated(final Node node) throws Exception {
 		final long currentTime = System.currentTimeMillis();
 		final boolean nodeAlive;
 
@@ -34,7 +36,7 @@ public final class KeepAlive extends EventSource {
 		}
 	}
 
-	protected void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
+	public void qsyKeepAlivePacketReceived(final QSYPacket qsyPacket) {
 		final long currentTime = System.currentTimeMillis();
 
 		final Node node;

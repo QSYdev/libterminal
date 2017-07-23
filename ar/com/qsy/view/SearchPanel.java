@@ -15,7 +15,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import ar.com.qsy.model.objects.Node;
+import ar.com.qsy.model.objects.externalObjects.Node;
 
 public final class SearchPanel extends JPanel implements AutoCloseable {
 

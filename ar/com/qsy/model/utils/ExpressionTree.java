@@ -1,8 +1,6 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.utils;
 
 import java.util.Stack;
-
-import ar.com.qsy.model.utils.Utils;
 
 public final class ExpressionTree {
 

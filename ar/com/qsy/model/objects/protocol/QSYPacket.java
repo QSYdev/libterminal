@@ -1,7 +1,9 @@
-package ar.com.qsy.model.objects;
+package ar.com.qsy.model.objects.protocol;
 
 import java.net.InetAddress;
 import java.util.Arrays;
+
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
 
 public final class QSYPacket {
 

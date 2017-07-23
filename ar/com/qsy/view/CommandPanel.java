@@ -18,8 +18,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 
-import ar.com.qsy.model.objects.Color;
-import ar.com.qsy.model.objects.QSYPacket;
+import ar.com.qsy.model.objects.protocol.QSYPacket;
+import ar.com.qsy.model.objects.terminal.modules.executor.elements.Color;
 
 public final class CommandPanel extends JPanel implements AutoCloseable {
 
