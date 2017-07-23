@@ -3,6 +3,8 @@ package ar.com.qsy.model.patterns.observer;
 import java.util.LinkedList;
 import java.util.List;
 
+import ar.com.qsy.model.patterns.command.Command;
+
 public abstract class EventSource implements AutoCloseable {
 
 	private final List<EventListener> listeners;
@@ -51,8 +53,4 @@ public abstract class EventSource implements AutoCloseable {
 		listeners.clear();
 	}
 
-	private static interface Command {
-
-		void execute();
-	}
 }

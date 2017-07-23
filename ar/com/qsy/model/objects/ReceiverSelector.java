@@ -9,6 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.model.patterns.command.Command;
 import ar.com.qsy.model.patterns.observer.Event;
 import ar.com.qsy.model.patterns.observer.Event.EventType;
 import ar.com.qsy.model.patterns.observer.EventListener;
@@ -17,7 +18,7 @@ import ar.com.qsy.model.patterns.observer.EventSource;
 public final class ReceiverSelector extends EventSource implements Runnable, EventListener {
 
 	private final Selector selector;
-	private final LinkedList<Node> pendingConnections;
+	private final LinkedList<Command> pendingActions;
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
@@ -25,18 +26,27 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 
 	public ReceiverSelector() throws IOException {
 		this.selector = Selector.open();
-		this.pendingConnections = new LinkedList<>();
-		this.running = new AtomicBoolean(true);
+		this.pendingActions = new LinkedList<>();
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 		this.data = new byte[QSYPacket.PACKET_SIZE];
+
+		this.running = new AtomicBoolean(true);
 	}
 
 	@Override
 	public void run() {
 		while (running.get()) {
 			try {
-				addNewConnections();
+
+				synchronized (pendingActions) {
+					for (final Command action : pendingActions) {
+						action.execute();
+					}
+					pendingActions.clear();
+				}
+
 				selector.select();
+
 				for (final SelectionKey key : selector.selectedKeys()) {
 					if (key.isReadable()) {
 						final SocketChannel channel = (SocketChannel) key.channel();
@@ -54,21 +64,18 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 		}
 	}
 
-	private void newNodeCreated(final Node node) throws IOException {
-		synchronized (pendingConnections) {
-			pendingConnections.add(node);
+	private void newNodeCreated(final Node node) {
+		synchronized (pendingActions) {
+			pendingActions.add(() -> {
+				final SocketChannel s = node.getNodeSocketChannel();
+				try {
+					s.register(selector, SelectionKey.OP_READ, null);
+				} catch (ClosedChannelException e) {
+					e.printStackTrace();
+				}
+			});
 		}
 		selector.wakeup();
-	}
-
-	private void addNewConnections() throws ClosedChannelException {
-		synchronized (pendingConnections) {
-			for (final Node node : pendingConnections) {
-				final SocketChannel s = node.getNodeSocketChannel();
-				s.register(selector, SelectionKey.OP_READ, null);
-			}
-			pendingConnections.clear();
-		}
 	}
 
 	@Override
