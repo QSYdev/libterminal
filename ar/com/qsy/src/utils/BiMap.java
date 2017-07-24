@@ -36,7 +36,7 @@ public final class BiMap {
 		}
 	}
 
-	public void removeByLogicId(final int logicalId) {
+	public void removeByLogicalId(final int logicalId) {
 		if (logicalId > 0 && logicalId <= capacity) {
 			final Integer physicId = logicalIds[logicalId - 1];
 			if (physicId != null) {
@@ -68,20 +68,6 @@ public final class BiMap {
 
 	public Integer getLogicalId(final int physicalId) {
 		return physicalIds.get(physicalId);
-	}
-
-	public static void main(String[] args) {
-		final BiMap biMap = new BiMap(10);
-		biMap.addEntry(1, 1592);
-		biMap.addEntry(2, 58741);
-		biMap.addEntry(4, 1515);
-		for (int i = 0; i < 10; i++) {
-			System.out.println("Logic : " + (i + 1) + " \t || value = " + biMap.getPhysicalId(i + 1));
-		}
-		biMap.clear();
-		for (int i = 0; i < 10; i++) {
-			System.out.println("Logic : " + (i + 1) + " \t || value = " + biMap.getPhysicalId(i + 1));
-		}
 	}
 
 }
