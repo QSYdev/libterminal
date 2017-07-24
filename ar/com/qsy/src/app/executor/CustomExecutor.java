@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 
-public final class CustomExecutor extends Executor {
+public class CustomExecutor extends Executor {
 
 	private final Iterator<Step> routineIterator;
 
