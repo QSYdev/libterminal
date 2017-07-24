@@ -1,11 +1,9 @@
-package ar.com.qsy.src.test.executor;
+package ar.com.qsy.src.test.unit.executor;
 
 import ar.com.qsy.src.app.routine.NodeConfiguration;
 import ar.com.qsy.src.app.routine.Routine;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.TreeMap;
 
 import ar.com.qsy.src.app.routine.Step;

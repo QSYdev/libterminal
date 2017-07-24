@@ -1,4 +1,4 @@
-package ar.com.qsy.src.test.executor;
+package ar.com.qsy.src.test.unit.executor;
 
 import ar.com.qsy.src.app.executor.PlayerExecutor;
 import ar.com.qsy.src.app.routine.Color;
