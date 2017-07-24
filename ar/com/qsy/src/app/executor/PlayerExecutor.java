@@ -12,7 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-public final class PlayerExecutor extends Executor {
+public class PlayerExecutor extends Executor {
 
 	private final ArrayList<Color> playersAndColors;
 	private final ArrayList<Color> stepsWinners;
