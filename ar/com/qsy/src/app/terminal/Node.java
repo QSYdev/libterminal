@@ -1,0 +1,68 @@
+package ar.com.qsy.src.app.terminal;
+
+import ar.com.qsy.src.app.keepalive.KeepAlive;
+import ar.com.qsy.src.app.protocol.QSYPacket;
+import ar.com.qsy.src.app.protocol.QSYPacket.PacketType;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
+import java.nio.channels.SocketChannel;
+
+public final class Node implements Comparable<Node>, AutoCloseable {
+
+	private final int nodeId;
+	private final InetAddress nodeAddress;
+	private final SocketChannel nodeSocketChannel;
+	private boolean keepAliveIsUp = false;
+
+	private long previousKeepalive;
+
+	public Node(final QSYPacket qsyPacket) throws IOException, IllegalArgumentException {
+		if (qsyPacket.getType() == PacketType.Hello) {
+			final InetSocketAddress hostAddress = new InetSocketAddress(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT);
+			final SocketChannel nodeSocketChannel = SocketChannel.open(hostAddress);
+			nodeSocketChannel.configureBlocking(false);
+			nodeSocketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
+			nodeSocketChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, false);
+			this.nodeId = qsyPacket.getId();
+			this.nodeAddress = qsyPacket.getNodeAddress();
+			this.nodeSocketChannel = nodeSocketChannel;
+		} else {
+			throw new IllegalArgumentException("<< NODE >> El QSYPacket recibido no es un QSYHelloPacket.");
+		}
+	}
+
+	public int getNodeId() {
+		return nodeId;
+	}
+
+	public InetAddress getNodeAddress() {
+		return nodeAddress;
+	}
+
+	public SocketChannel getNodeSocketChannel() {
+		return nodeSocketChannel;
+	}
+
+	public synchronized void keepAlive(final long now) {
+		keepAliveIsUp = true;
+		this.previousKeepalive = now;
+	}
+
+	public synchronized boolean isAlive(final long now) {
+		return !keepAliveIsUp || (now - this.previousKeepalive < KeepAlive.MAX_KEEP_ALIVE_DELAY);
+	}
+
+	@Override
+	public int compareTo(final Node node) {
+		return nodeId - node.nodeId;
+	}
+
+	@Override
+	public void close() throws Exception {
+		nodeSocketChannel.close();
+	}
+
+}
