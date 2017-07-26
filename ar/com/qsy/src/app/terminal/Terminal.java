@@ -2,6 +2,7 @@ package ar.com.qsy.src.app.terminal;
 
 import ar.com.qsy.src.app.executor.*;
 import ar.com.qsy.src.app.keepalive.KeepAlive;
+import ar.com.qsy.src.app.node.Node;
 import ar.com.qsy.src.app.protocol.CommandParameters;
 import ar.com.qsy.src.app.protocol.QSYPacket;
 import ar.com.qsy.src.app.routine.Color;

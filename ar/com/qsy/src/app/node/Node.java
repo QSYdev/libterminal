@@ -1,4 +1,4 @@
-package ar.com.qsy.src.app.terminal;
+package ar.com.qsy.src.app.node;
 
 import ar.com.qsy.src.app.keepalive.KeepAlive;
 import ar.com.qsy.src.app.protocol.QSYPacket;
@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
 
-public final class Node implements Comparable<Node>, AutoCloseable {
+public class Node implements Comparable<Node>, AutoCloseable {
 
 	private final int nodeId;
 	private final InetAddress nodeAddress;

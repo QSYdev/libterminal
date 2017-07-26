@@ -5,7 +5,7 @@ import ar.com.qsy.src.app.routine.Color;
 import java.net.InetAddress;
 import java.util.Arrays;
 
-public final class QSYPacket {
+public class QSYPacket {
 
 	public static final long QSY_PROTOCOL_VERSION = 200717;
 
