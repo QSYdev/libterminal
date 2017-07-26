@@ -232,7 +232,6 @@ public class QSYPacket {
 		return stringBuilder.toString();
 	}
 
-//	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final int nodeId, final Color color, final long delay, final boolean touchEnabled, final boolean soundEnabled)
 	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, CommandParameters commandParameters, final boolean touchEnabled, final boolean soundEnabled)
 			throws IllegalArgumentException {
 		if (commandParameters.getPhysicalId() < MIN_ID_SIZE || commandParameters.getPhysicalId() > MAX_ID_SIZE) {

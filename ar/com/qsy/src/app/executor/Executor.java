@@ -43,7 +43,7 @@ public abstract class Executor extends EventSource {
 		this.timerTask = null;
 	}
 
-	public synchronized void start() throws Exception {
+	public synchronized void start() {
 		running.set(true);
 		currentStep = getNextStep();
 		prepareStep();
@@ -77,7 +77,7 @@ public abstract class Executor extends EventSource {
 		}
 	}
 
-	protected synchronized void stepTimeout() throws Exception {
+	protected synchronized void stepTimeout() {
 		if (running.get()) {
 			sendEvent(new Event(Event.EventType.executorStepTimeout, null));
 			if (currentStep.getStopOnTimeout()) {

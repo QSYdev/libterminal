@@ -189,7 +189,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		}
 	}
 
-	public void stopExecution() throws Exception {
+	public void stopExecution() {
 		synchronized (executorLock) {
 			if (executor != null) {
 				executor.stop();

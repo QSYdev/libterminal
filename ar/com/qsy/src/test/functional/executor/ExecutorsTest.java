@@ -33,11 +33,7 @@ public class ExecutorsTest {
 		runner = new ExecutorRunner(executor);
 		executor.addListener(runner);
 
-		try {
-			executor.start();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+		executor.start();
 		for(NodeConfiguration nodeConfig : steps.get(0).getNodesConfiguration()) {
 			touche(nodesIdsAssociations.get(nodeConfig.getId()));
 		}
@@ -49,16 +45,6 @@ public class ExecutorsTest {
 			runner.getNumberOfRequestedCommands());
 		assertEquals(1, runner.getNumberOfTimeouts());
 		assertEquals(1, runner.getNumberOfDoneExecuting());
-	}
-
-	private Event getEvent() {
-		Event event = null;
-		try {
-			event = runner.getEvent();
-		} catch(InterruptedException e) {
-			e.printStackTrace();
-		}
-		return event;
 	}
 
 	private void sleep(long time) {

@@ -34,11 +34,7 @@ public class CustomExecutorMockTest {
 		NUMBER_OF_STEPS = steps.size();
 		nodesIdsAssociations = new TreeMap<>(); nodesIdsAssociations.put(1, 0); nodesIdsAssociations.put(2, 3);
 		executor = new CustomExecutorMock(routine, nodesIdsAssociations);
-		try {
-			executor.start();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+		executor.start();
 	}
 
 	@Test

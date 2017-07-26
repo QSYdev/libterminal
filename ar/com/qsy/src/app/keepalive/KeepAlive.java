@@ -24,7 +24,7 @@ public final class KeepAlive extends EventSource {
 		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
-	public void newNodeCreated(final Node node) throws Exception {
+	public void newNodeCreated(final Node node) {
 		final long currentTime = System.currentTimeMillis();
 		final boolean nodeAlive;
 
@@ -84,7 +84,7 @@ public final class KeepAlive extends EventSource {
 		}
 
 		@Override
-		public void close() throws Exception {
+		public void close() {
 			return;
 		}
 

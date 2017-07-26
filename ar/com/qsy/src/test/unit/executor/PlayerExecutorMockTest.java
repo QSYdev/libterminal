@@ -36,11 +36,7 @@ class PlayerExecutorMockTest {
 
 		executor = new PlayerExecutorMock(idsAssociations, idsAssociations.size(), playersAndColors,
 			waitForAllPlayers, timeout, delay, maxExecTime, totalStep, stopOnTimeout);
-		try {
-			executor.start();
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+		executor.start();
 	}
 
 	@Test

@@ -56,7 +56,7 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	public synchronized void start() throws Exception {
+	public synchronized void start() {
 		stepIndex = 0;
 		if (maxExecTime > 0) {
 			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
@@ -120,7 +120,7 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	protected synchronized void stepTimeout() throws Exception {
+	protected synchronized void stepTimeout() {
 		stepsWinners.add(null);
 		super.stepTimeout();
 	}
