@@ -55,7 +55,7 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		running.set(false);
 	}
 

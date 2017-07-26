@@ -49,7 +49,7 @@ public abstract class Executor extends EventSource {
 		prepareStep();
 	}
 
-	public synchronized void stop() throws Exception {
+	public synchronized void stop() {
 		if (running.get()) {
 			finalizeStep();
 			timer.cancel();
@@ -58,7 +58,7 @@ public abstract class Executor extends EventSource {
 
 	}
 
-	public synchronized void touche(final int physicalIdOfNode) throws Exception {
+	public synchronized void touche(final int physicalIdOfNode) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
 			// TODO comprobar si pertenece al paso actual, modificar el
@@ -96,7 +96,7 @@ public abstract class Executor extends EventSource {
 		return running.get();
 	}
 
-	private void prepareStep() throws Exception {
+	private void prepareStep() {
 		++numberOfStep;
 		long maxDelay = 0;
 		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
@@ -115,7 +115,7 @@ public abstract class Executor extends EventSource {
 		expressionTree = new ExpressionTree(currentStep.getExpression());
 	}
 
-	private void finalizeStep() throws Exception {
+	private void finalizeStep() {
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
 		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
 			final int logicalId = nodeConfiguration.getId();

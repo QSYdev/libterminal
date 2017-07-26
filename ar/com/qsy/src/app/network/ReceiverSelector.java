@@ -39,7 +39,6 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 	public void run() {
 		while (running.get()) {
 			try {
-
 				synchronized (pendingActions) {
 					for (final Command action : pendingActions) {
 						action.execute();
@@ -92,7 +91,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 	}
 
 	@Override
-	public void receiveEvent(final Event event) throws InterruptedException, IOException {
+	public void receiveEvent(final Event event) {
 		switch (event.getEventType()) {
 		case newNode: {
 			final Node node = (Node) event.getContent();

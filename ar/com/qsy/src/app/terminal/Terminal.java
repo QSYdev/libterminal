@@ -258,7 +258,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	}
 
 	@Override
-	public void receiveEvent(final Event event) throws InterruptedException {
+	public void receiveEvent(final Event event) {
 		internalListener.receiveEvent(event);
 	}
 

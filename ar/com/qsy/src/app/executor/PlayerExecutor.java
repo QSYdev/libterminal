@@ -65,7 +65,7 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	public synchronized void stop() throws Exception {
+	public synchronized void stop() {
 		if (isRunning()) {
 			if (timerTask != null) {
 				timerTask.cancel();
@@ -79,7 +79,7 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	public synchronized void touche(int physicalIdOfNode) throws Exception {
+	public synchronized void touche(int physicalIdOfNode)  {
 		if (stepsWinners.size() < stepIndex) {
 			final Color colorWinner = logicalIdsAndColors.get(getBiMap().getLogicalId(physicalIdOfNode));
 			stepsWinners.add(colorWinner);

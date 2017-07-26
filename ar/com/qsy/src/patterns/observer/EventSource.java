@@ -33,7 +33,7 @@ public abstract class EventSource implements AutoCloseable {
 		}
 	}
 
-	public final void sendEvent(final Event event) throws Exception {
+	public final void sendEvent(final Event event)  {
 		synchronized (pendingActions) {
 			for (final Command action : pendingActions) {
 				action.execute();

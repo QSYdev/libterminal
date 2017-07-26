@@ -21,7 +21,7 @@ public class ExecutorRunner implements EventListener {
 	}
 
 	@Override
-	public void receiveEvent(Event event) throws Exception {
+	public void receiveEvent(Event event) {
 		System.out.println("<< RUNNER >> event: " + event.getEventType());
 		switch (event.getEventType()) {
 			case executorDoneExecuting:
