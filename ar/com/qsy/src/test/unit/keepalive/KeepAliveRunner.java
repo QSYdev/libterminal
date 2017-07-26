@@ -25,6 +25,8 @@ public class KeepAliveRunner implements EventListener{
 				} else if(node.getNodeId() == 2)
 					keepAliveErrorCountNode2++;
 				break;
+			default:
+				break;
 		}
 	}
 
