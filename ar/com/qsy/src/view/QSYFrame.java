@@ -114,7 +114,7 @@ public final class QSYFrame extends JFrame implements AutoCloseable, EventListen
 	}
 
 	@Override
-	public void receiveEvent(final Event event) throws Exception {
+	public void receiveEvent(final Event event) {
 		switch (event.getEventType()) {
 		case newNode: {
 			final Node node = (Node) event.getContent();

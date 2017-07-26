@@ -12,8 +12,8 @@ public class AsynchronousListener implements EventListener {
 	}
 
 	@Override
-	public void receiveEvent(final Event event) throws InterruptedException {
-		eventQueue.put(event);
+	public void receiveEvent(final Event event) {
+		this.eventQueue.add(event);
 	}
 
 	public final Event getEvent() throws InterruptedException {
