@@ -8,7 +8,6 @@ import ar.com.qsy.src.app.routine.Step;
 import ar.com.qsy.src.patterns.observer.Event;
 import ar.com.qsy.src.utils.RoutineManager;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

@@ -1,7 +1,6 @@
 package ar.com.qsy.src.test.unit.utils;
 
 import ar.com.qsy.src.app.routine.Routine;
-import ar.com.qsy.src.app.routine.Step;
 import ar.com.qsy.src.utils.RoutineManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -9,9 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 

@@ -34,6 +34,8 @@ public class ExecutorRunner implements EventListener {
 			case commandRequest:
 				commandRequest++;
 				break;
+		default:
+			break;
 		}
 	}
 
