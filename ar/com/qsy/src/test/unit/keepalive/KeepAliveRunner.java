@@ -14,7 +14,7 @@ public class KeepAliveRunner implements EventListener{
 	}
 
 	@Override
-	public void receiveEvent(Event event) throws Exception {
+	public void receiveEvent(Event event) {
 		Event.EventType eventType = event.getEventType();
 		Node node = (Node) event.getContent();
 

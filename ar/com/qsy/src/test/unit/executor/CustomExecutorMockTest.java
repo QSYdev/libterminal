@@ -10,9 +10,12 @@ import ar.com.qsy.src.app.routine.Step;
 import ar.com.qsy.src.utils.RoutineManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(JUnitPlatform.class)
 public class CustomExecutorMockTest {
 	public CustomExecutorMock executor;
 	public int NUMBER_OF_STEPS;

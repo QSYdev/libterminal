@@ -2,9 +2,12 @@ package ar.com.qsy.src.test.unit.utils;
 
 import ar.com.qsy.src.utils.ExpressionTree;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@RunWith(JUnitPlatform.class)
 public class ExpressionTreeTest {
 	private ExpressionTree expressionTree;
 	private final String UNEXPECTED_FALSE = "La evaluacion de la expresion deberia indicar que termino";

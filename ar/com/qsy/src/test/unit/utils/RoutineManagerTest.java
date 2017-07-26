@@ -4,6 +4,8 @@ import ar.com.qsy.src.app.routine.Routine;
 import ar.com.qsy.src.utils.RoutineManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+@RunWith(JUnitPlatform.class)
 public class RoutineManagerTest {
 	private static final String FACTORY_TEST_ROUTINE_LOAD_PATH = "ar/com/qsy/src/test/factory/routine.json";
 	private static final String UNEXISTENT_ROUTINE = "ar/com/qsy/src/test/factory/ASASADS";

@@ -5,11 +5,15 @@ import ar.com.qsy.src.app.routine.NodeConfiguration;
 import ar.com.qsy.src.app.routine.Step;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+@RunWith(JUnitPlatform.class)
 class PlayerExecutorMockTest {
 	public PlayerExecutorMock executor;
 	public ArrayList<Color> playersAndColors;

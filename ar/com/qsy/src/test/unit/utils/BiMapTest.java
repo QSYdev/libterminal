@@ -2,11 +2,14 @@ package ar.com.qsy.src.test.unit.utils;
 
 import ar.com.qsy.src.utils.BiMap;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(JUnitPlatform.class)
 public class BiMapTest {
 	private BiMap biMap;
 	private final String UNEXPECTED_NOT_NULL = "La clave deberia ser null";

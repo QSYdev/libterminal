@@ -5,6 +5,8 @@ import ar.com.qsy.src.app.protocol.QSYPacket;
 import ar.com.qsy.src.app.node.Node;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 import java.util.TreeMap;
 
@@ -14,6 +16,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(JUnitPlatform.class)
 public class KeepAliveTest {
 	private Node node;
 	private Node newNode;
