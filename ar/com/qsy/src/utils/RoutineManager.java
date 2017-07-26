@@ -185,21 +185,4 @@ public final class RoutineManager {
 			return jsonObject;
 		}
 	}
-
-	public static void main(final String[] args) throws IOException {
-		final String INPUT_PATH = "ar/com/qsy/model/utils/input.json";
-		final String OUTPUT_PATH = "ar/com/qsy/model/utils/output.json";
-		final String PATH = "ar/com/qsy/model/utils/output.json";
-
-		RoutineManager.storeRoutine(OUTPUT_PATH, RoutineManager.loadRoutine(INPUT_PATH));
-
-		final Routine routine = RoutineManager.loadRoutine(PATH);
-		byte id = 0;
-		System.out.println("NUMBER OF NODES = " + routine.getNumberOfNodes());
-		for (final Step step : routine.getSteps()) {
-			System.out.println("Step " + (++id));
-			System.out.println(step);
-		}
-	}
-
 }

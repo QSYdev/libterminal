@@ -245,11 +245,4 @@ public class QSYPacket {
 			return new QSYPacket(nodeAddress, PacketType.Command, commandParameters.getPhysicalId(), commandParameters.getColor(), commandParameters.getDelay());
 		}
 	}
-
-	public static void main(String[] args) {
-		CommandParameters commandParameters = new CommandParameters(11, 100, new Color((byte) 12, (byte) 1, (byte) 0));
-		final QSYPacket qsyPacket = createCommandPacket(null, commandParameters, false, false);
-		System.out.println(qsyPacket);
-	}
-
 }
