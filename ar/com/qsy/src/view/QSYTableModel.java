@@ -1,6 +1,6 @@
 package ar.com.qsy.src.view;
 
-import ar.com.qsy.src.app.terminal.Node;
+import ar.com.qsy.src.app.node.Node;
 
 import java.util.TreeMap;
 

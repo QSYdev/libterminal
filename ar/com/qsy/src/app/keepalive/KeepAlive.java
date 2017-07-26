@@ -1,7 +1,7 @@
 package ar.com.qsy.src.app.keepalive;
 
 import ar.com.qsy.src.app.protocol.QSYPacket;
-import ar.com.qsy.src.app.terminal.Node;
+import ar.com.qsy.src.app.node.Node;
 import ar.com.qsy.src.patterns.observer.Event;
 import ar.com.qsy.src.patterns.observer.Event.EventType;
 import ar.com.qsy.src.patterns.observer.EventSource;
