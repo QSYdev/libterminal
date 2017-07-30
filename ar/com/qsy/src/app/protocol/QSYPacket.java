@@ -63,7 +63,9 @@ public class QSYPacket {
 	}
 
 	public QSYPacket(final InetAddress nodeAddress, final byte[] data) throws IllegalArgumentException {
-		if (data.length != PACKET_SIZE) {
+		if(nodeAddress == null) {
+			throw new IllegalArgumentException("<< QSY_NODE_ADDRESS_ERROR >> La direccion del nodo debe ser valida");
+		} else if (data.length != PACKET_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> La longitud del QSYPacket debe ser de " + PACKET_SIZE + ".");
 		} else if (data[Q_INDEX] != 'Q' || data[S_INDEX] != 'S' || data[Y_INDEX] != 'Y') {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket posee una firma invalida.");
@@ -234,7 +236,9 @@ public class QSYPacket {
 
 	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, CommandParameters commandParameters, final boolean touchEnabled, final boolean soundEnabled)
 			throws IllegalArgumentException {
-		if (commandParameters.getPhysicalId() < MIN_ID_SIZE || commandParameters.getPhysicalId() > MAX_ID_SIZE) {
+		if(nodeAddress == null) {
+			throw new IllegalArgumentException("<< QSY_NODE_ADDRESS_ERROR >> La direccion del nodo debe ser valida");
+		} else if (commandParameters.getPhysicalId() < MIN_ID_SIZE || commandParameters.getPhysicalId() > MAX_ID_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El id debe estar entre [" + MIN_ID_SIZE + " ; " + MAX_ID_SIZE + "]");
 		} else if (commandParameters.getColor() == null) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");

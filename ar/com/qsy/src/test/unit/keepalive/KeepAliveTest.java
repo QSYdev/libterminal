@@ -69,7 +69,7 @@ public class KeepAliveTest {
 		nodes.put(2, newNode);
 		keepAlive.newNodeCreated(newNode);
 		assertEquals(0, runner.getKeepAliveErrorCountNode2());
-		sleep(KeepAlive.MAX_KEEP_ALIVE_DELAY*2);
+		sleep(KeepAlive.MAX_KEEP_ALIVE_DELAY*4);
 		assertNotEquals(0, runner.getKeepAliveErrorCountNode2());
 	}
 
