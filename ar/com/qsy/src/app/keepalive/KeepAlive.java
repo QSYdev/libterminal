@@ -1,14 +1,14 @@
 package ar.com.qsy.src.app.keepalive;
 
-import ar.com.qsy.src.app.protocol.QSYPacket;
-import ar.com.qsy.src.app.node.Node;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.Event.EventType;
-import ar.com.qsy.src.patterns.observer.EventSource;
-
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+
+import ar.com.qsy.src.app.node.Node;
+import ar.com.qsy.src.app.protocol.QSYPacket;
+import ar.com.qsy.src.patterns.observer.Event;
+import ar.com.qsy.src.patterns.observer.Event.EventType;
+import ar.com.qsy.src.patterns.observer.EventSource;
 
 public final class KeepAlive extends EventSource {
 
@@ -75,11 +75,7 @@ public final class KeepAlive extends EventSource {
 			}
 
 			if (!nodeAlive) {
-				try {
-					sendEvent(new Event(EventType.keepAliveError, disconnectedNode));
-				} catch (final Exception e) {
-					e.printStackTrace();
-				}
+				sendEvent(new Event(EventType.keepAliveError, disconnectedNode));
 			}
 		}
 

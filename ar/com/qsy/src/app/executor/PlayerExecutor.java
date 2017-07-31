@@ -1,16 +1,16 @@
 package ar.com.qsy.src.app.executor;
 
-import ar.com.qsy.src.app.routine.Color;
-import ar.com.qsy.src.app.routine.NodeConfiguration;
-import ar.com.qsy.src.app.routine.Step;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.Event.EventType;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+
+import ar.com.qsy.src.app.routine.Color;
+import ar.com.qsy.src.app.routine.NodeConfiguration;
+import ar.com.qsy.src.app.routine.Step;
+import ar.com.qsy.src.patterns.observer.Event;
+import ar.com.qsy.src.patterns.observer.Event.EventType;
 
 public class PlayerExecutor extends Executor {
 
@@ -73,13 +73,10 @@ public class PlayerExecutor extends Executor {
 			timer.cancel();
 		}
 		super.stop();
-		for (int i = 0; i < stepsWinners.size(); i++) {
-			System.out.println("ON STEP " + (i + 1) + " THE WINNER IS " + stepsWinners.get(i));
-		}
 	}
 
 	@Override
-	public synchronized void touche(int physicalIdOfNode)  {
+	public synchronized void touche(int physicalIdOfNode) {
 		if (stepsWinners.size() < stepIndex) {
 			final Color colorWinner = logicalIdsAndColors.get(getBiMap().getLogicalId(physicalIdOfNode));
 			stepsWinners.add(colorWinner);
@@ -133,11 +130,7 @@ public class PlayerExecutor extends Executor {
 		@Override
 		public void run() {
 			if (isRunning()) {
-				try {
-					sendEvent(new Event(EventType.executorDoneExecuting, null));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				sendEvent(new Event(EventType.executorDoneExecuting, null));
 			}
 		}
 
