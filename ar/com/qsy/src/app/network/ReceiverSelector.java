@@ -1,13 +1,5 @@
 package ar.com.qsy.src.app.network;
 
-import ar.com.qsy.src.app.protocol.QSYPacket;
-import ar.com.qsy.src.app.node.Node;
-import ar.com.qsy.src.patterns.command.Command;
-import ar.com.qsy.src.patterns.observer.EventListener;
-import ar.com.qsy.src.patterns.observer.EventSource;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.Event.EventType;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -17,10 +9,17 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ar.com.qsy.src.app.node.Node;
+import ar.com.qsy.src.app.protocol.QSYPacket;
+import ar.com.qsy.src.patterns.observer.Event;
+import ar.com.qsy.src.patterns.observer.Event.EventType;
+import ar.com.qsy.src.patterns.observer.EventListener;
+import ar.com.qsy.src.patterns.observer.EventSource;
+
 public final class ReceiverSelector extends EventSource implements Runnable, EventListener {
 
 	private final Selector selector;
-	private final LinkedList<Command> pendingActions;
+	private final LinkedList<Runnable> pendingActions;
 	private final ByteBuffer byteBuffer;
 	private final byte[] data;
 
@@ -40,8 +39,8 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 		while (running.get()) {
 			try {
 				synchronized (pendingActions) {
-					for (final Command action : pendingActions) {
-						action.execute();
+					for (final Runnable task : pendingActions) {
+						task.run();
 					}
 					pendingActions.clear();
 				}

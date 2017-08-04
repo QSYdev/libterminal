@@ -1,14 +1,12 @@
 package ar.com.qsy.src.patterns.observer;
 
-import ar.com.qsy.src.patterns.command.Command;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class EventSource implements AutoCloseable {
 
 	private final List<EventListener> listeners;
-	private final List<Command> pendingActions;
+	private final List<Runnable> pendingActions;
 
 	public EventSource() {
 		this.listeners = new LinkedList<>();
@@ -33,10 +31,10 @@ public abstract class EventSource implements AutoCloseable {
 		}
 	}
 
-	public final void sendEvent(final Event event)  {
+	public final void sendEvent(final Event event) {
 		synchronized (pendingActions) {
-			for (final Command action : pendingActions) {
-				action.execute();
+			for (final Runnable task : pendingActions) {
+				task.run();
 			}
 			pendingActions.clear();
 		}
@@ -47,9 +45,10 @@ public abstract class EventSource implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		for (final Command action : pendingActions) {
-			action.execute();
+		for (final Runnable task : pendingActions) {
+			task.run();
 		}
+		pendingActions.clear();
 		listeners.clear();
 	}
 
