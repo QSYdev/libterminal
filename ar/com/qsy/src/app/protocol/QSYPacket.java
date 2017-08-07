@@ -1,9 +1,9 @@
 package ar.com.qsy.src.app.protocol;
 
-import ar.com.qsy.src.app.routine.Color;
-
 import java.net.InetAddress;
 import java.util.Arrays;
+
+import ar.com.qsy.src.app.routine.Color;
 
 public class QSYPacket {
 
@@ -63,7 +63,7 @@ public class QSYPacket {
 	}
 
 	public QSYPacket(final InetAddress nodeAddress, final byte[] data) throws IllegalArgumentException {
-		if(nodeAddress == null) {
+		if (nodeAddress == null) {
 			throw new IllegalArgumentException("<< QSY_NODE_ADDRESS_ERROR >> La direccion del nodo debe ser valida");
 		} else if (data.length != PACKET_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> La longitud del QSYPacket debe ser de " + PACKET_SIZE + ".");
@@ -74,27 +74,15 @@ public class QSYPacket {
 		this.nodeAddress = nodeAddress;
 		this.packetType = getPacketTypeFromShort(((short) convertBytesToLong(data, TYPE_INDEX, TYPE_INDEX)));
 		this.id = (int) convertBytesToLong(data, ID_INDEX, (byte) (ID_INDEX + 1));
-		// this.color = getColorFromInt((int) convertBytesToLong(data,
-		// COLOR_RG_INDEX, COLOR_B_INDEX));
 		this.color = getColorFromInt(data);
 		this.delay = (long) convertBytesToLong(data, DELAY_INDEX, (byte) (DELAY_INDEX + 3));
 
 		rawData = Arrays.copyOf(data, PACKET_SIZE);
 	}
 
-	// private static Color getColorFromInt(final int typeColor) {
-	// final byte red = (byte) convertBytesToLong(new byte[] { (byte)
-	// ((typeColor >> 12) & 0x0F) }, (byte) 0, (byte) 0);
-	// final byte green = (byte) convertBytesToLong(new byte[] { (byte)
-	// ((typeColor >> 8) & 0x0F) }, (byte) 0, (byte) 0);
-	// final byte blue = (byte) convertBytesToLong(new byte[] { (byte)
-	// ((typeColor >> 4) & 0x0F) }, (byte) 0, (byte) 0);
-	// return new Color(red, green, blue);
-	// }
-
-	private Color getColorFromInt(final byte[] data) {
-		final byte red = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX] >> 12) & 0x0F) }, (byte) 0, (byte) 0);
-		final byte green = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX] >> 8) & 0x0F) }, (byte) 0, (byte) 0);
+	private static Color getColorFromInt(final byte[] data) {
+		final byte red = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX] >> 4) & 0x0F) }, (byte) 0, (byte) 0);
+		final byte green = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_RG_INDEX]) & 0x0F) }, (byte) 0, (byte) 0);
 		final byte blue = (byte) convertBytesToLong(new byte[] { (byte) ((data[COLOR_B_INDEX] >> 4) & 0x0F) }, (byte) 0, (byte) 0);
 		return new Color(red, green, blue);
 	}
@@ -236,7 +224,7 @@ public class QSYPacket {
 
 	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, CommandParameters commandParameters, final boolean touchEnabled, final boolean soundEnabled)
 			throws IllegalArgumentException {
-		if(nodeAddress == null) {
+		if (nodeAddress == null) {
 			throw new IllegalArgumentException("<< QSY_NODE_ADDRESS_ERROR >> La direccion del nodo debe ser valida");
 		} else if (commandParameters.getPhysicalId() < MIN_ID_SIZE || commandParameters.getPhysicalId() > MAX_ID_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El id debe estar entre [" + MIN_ID_SIZE + " ; " + MAX_ID_SIZE + "]");
