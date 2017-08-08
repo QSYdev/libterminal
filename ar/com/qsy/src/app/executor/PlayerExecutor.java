@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import ar.com.qsy.src.app.routine.Color;
 import ar.com.qsy.src.app.routine.NodeConfiguration;
@@ -97,7 +98,7 @@ public class PlayerExecutor extends Executor {
 		final StringBuilder sb = new StringBuilder();
 
 		for (final Color color : playersAndColors) {
-			final int id = usedIds.remove((int) (Math.random() * (numberOfNodes)));
+			final int id = usedIds.remove(ThreadLocalRandom.current().nextInt(0, usedIds.size()));
 			currentNodesConfiguration.add(new NodeConfiguration(id, delay, color));
 			logicalIdsAndColors.put(id, color);
 			sb.append(id);
