@@ -1,5 +1,10 @@
 package ar.com.qsy.src.app.executor;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import ar.com.qsy.src.app.protocol.CommandParameters;
 import ar.com.qsy.src.app.routine.Color;
 import ar.com.qsy.src.app.routine.NodeConfiguration;
@@ -9,11 +14,6 @@ import ar.com.qsy.src.patterns.observer.Event.EventType;
 import ar.com.qsy.src.patterns.observer.EventSource;
 import ar.com.qsy.src.utils.BiMap;
 import ar.com.qsy.src.utils.ExpressionTree;
-
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Executor extends EventSource {
 
@@ -46,6 +46,11 @@ public abstract class Executor extends EventSource {
 	public synchronized void start() {
 		running.set(true);
 		currentStep = getNextStep();
+		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
+		for (int i = 0; i < touchedNodes.length - 1; i++) {
+			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor);
+			sendEvent(new Event(EventType.commandRequest, parameters));
+		}
 		prepareStep();
 	}
 

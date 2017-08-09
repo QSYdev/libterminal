@@ -1,6 +1,14 @@
 package ar.com.qsy.src.app.terminal;
 
-import ar.com.qsy.src.app.executor.*;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import ar.com.qsy.src.app.executor.CustomExecutor;
+import ar.com.qsy.src.app.executor.Executor;
+import ar.com.qsy.src.app.executor.PlayerExecutor;
 import ar.com.qsy.src.app.keepalive.KeepAlive;
 import ar.com.qsy.src.app.node.Node;
 import ar.com.qsy.src.app.protocol.CommandParameters;
@@ -12,12 +20,6 @@ import ar.com.qsy.src.patterns.observer.Event;
 import ar.com.qsy.src.patterns.observer.Event.EventType;
 import ar.com.qsy.src.patterns.observer.EventListener;
 import ar.com.qsy.src.patterns.observer.EventSource;
-
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Terminal extends EventSource implements Runnable, EventListener {
 
@@ -112,8 +114,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 					synchronized (nodes) {
 						nodeAddress = nodes.get(parameters.getPhysicalId()).getNodeAddress();
 					}
-					final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters, touchEnabled.get(),
-							soundEnabled.get());
+					final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters, touchEnabled.get(), soundEnabled.get());
 					sendQSYPacket(commandPacket);
 					break;
 				}
@@ -172,11 +173,11 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	}
 
 	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers,
-	                          final long timeOut, final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) throws Exception {
+			final long timeOut, final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) throws Exception {
 
 		synchronized (executorLock) {
 			if (executor == null) {
-				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0) || playersAndColors.size() != numberOfNodes) {
+				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0) || playersAndColors.size() > numberOfNodes) {
 					throw new IllegalArgumentException("<< Terminal >> Los parametros recibidos no son correctos");
 				}
 				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, numberOfNodes);
