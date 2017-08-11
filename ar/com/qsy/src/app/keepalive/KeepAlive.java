@@ -21,7 +21,7 @@ public final class KeepAlive extends EventSource {
 	public KeepAlive(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
 		this.timer = new Timer("Dead Nodes Purger", false);
-		this.timer.scheduleAtFixedRate(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
+		this.timer.schedule(deadNodesPurgerTask = new DeadNodesPurger(), 0, MAX_KEEP_ALIVE_DELAY);
 	}
 
 	public void newNodeCreated(final Node node) {
@@ -75,6 +75,7 @@ public final class KeepAlive extends EventSource {
 			}
 
 			if (!nodeAlive) {
+				System.out.println("Tiempo que tardo = " + (System.currentTimeMillis() - currentTime));
 				sendEvent(new Event(EventType.keepAliveError, disconnectedNode));
 			}
 		}
