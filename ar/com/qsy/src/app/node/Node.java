@@ -61,7 +61,7 @@ public class Node implements Comparable<Node>, AutoCloseable {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		nodeSocketChannel.close();
 	}
 

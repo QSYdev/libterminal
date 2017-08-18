@@ -2,7 +2,9 @@ package ar.com.qsy.src.app.network;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -37,7 +39,6 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 	@Override
 	public void run() {
 		while (running.get()) {
-			try {
 				synchronized (pendingActions) {
 					for (final Runnable task : pendingActions) {
 						task.run();
@@ -45,22 +46,30 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 					pendingActions.clear();
 				}
 
-				selector.select();
-
-				for (final SelectionKey key : selector.selectedKeys()) {
-					if (key.isReadable()) {
-						final SocketChannel channel = (SocketChannel) key.channel();
-						channel.read(byteBuffer);
-						byteBuffer.flip();
-						byteBuffer.get(data);
-						sendEvent(new Event(EventType.incomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
-						byteBuffer.clear();
+				try {
+					selector.select();
+					if(Thread.interrupted())
+						throw new InterruptedException();
+					for (final SelectionKey key : selector.selectedKeys()) {
+						if (key.isReadable()) {
+							final SocketChannel channel = (SocketChannel) key.channel();
+							channel.read(byteBuffer);
+							byteBuffer.flip();
+							byteBuffer.get(data);
+							sendEvent(new Event(EventType.incomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
+							byteBuffer.clear();
+						}
 					}
+					selector.selectedKeys().clear();
+				} catch (ClosedByInterruptException | InterruptedException e) {
+					try {
+						this.close();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				selector.selectedKeys().clear();
-			} catch (final Exception e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

@@ -31,7 +31,7 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 			try {
 				final Event event = getEvent();
 				switch (event.getEventType()) {
-				case commandPacketSent: {
+				case commandPacketSent:
 					final QSYPacket qsyPacket = (QSYPacket) event.getContent();
 					final SocketChannel channel;
 					synchronized (nodes) {
@@ -42,12 +42,12 @@ public final class SenderSelector extends AsynchronousListener implements Runnab
 					channel.write(byteBuffer);
 					byteBuffer.clear();
 					break;
-				}
-				default: {
+				default:
 					break;
 				}
-				}
-			} catch (final InterruptedException | IOException e) {
+			} catch (InterruptedException e) {
+				this.close();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

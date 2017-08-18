@@ -77,8 +77,6 @@ public final class CommandPanel extends JPanel implements AutoCloseable {
 					JOptionPane.showMessageDialog(null, "Se debe colocar un n�mero entero de 4 Bytes sin signo.", "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final IllegalArgumentException exception) {
 					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-				} catch (final InterruptedException exception) {
-					JOptionPane.showMessageDialog(null, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				} catch (final Exception exception) {
 					exception.printStackTrace();
 				}

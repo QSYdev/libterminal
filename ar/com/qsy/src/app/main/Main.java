@@ -1,5 +1,7 @@
 package ar.com.qsy.src.app.main;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import ar.com.qsy.src.app.network.MulticastReceiver;
 import ar.com.qsy.src.app.network.ReceiverSelector;
@@ -12,7 +14,8 @@ public final class Main {
 
 	public static void main(final String[] args) throws Exception {
 
-		final MulticastReceiver multicastReceiver = new MulticastReceiver(QSYPacket.MULTICAST_ADDRESS, QSYPacket.MULTICAST_PORT);
+		final InetSocketAddress addr = new InetSocketAddress(InetAddress.getByName("192.168.0.18"), QSYPacket.MULTICAST_PORT);
+		final MulticastReceiver multicastReceiver = new MulticastReceiver(addr, QSYPacket.MULTICAST_ADDRESS);
 		final Terminal terminal = new Terminal();
 		final ReceiverSelector receiverSelector = new ReceiverSelector();
 		final SenderSelector senderSelector = new SenderSelector(terminal.getNodes());
