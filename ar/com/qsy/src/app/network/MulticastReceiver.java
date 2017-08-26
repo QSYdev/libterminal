@@ -23,7 +23,7 @@ public final class MulticastReceiver extends EventSource implements Runnable {
 	public MulticastReceiver(InetSocketAddress localAddress, String group) throws IOException, UnknownHostException {
 		this.multicastGroupAddress = InetAddress.getByName(group);
 		this.channel = DatagramChannel.open(StandardProtocolFamily.INET);
-		this.channel.bind(localAddress);
+		this.channel.bind(new InetSocketAddress(localAddress.getPort()));
 		this.channel.join(multicastGroupAddress, NetworkInterface.getByInetAddress(localAddress.getAddress()));
 
 		this.packet = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
