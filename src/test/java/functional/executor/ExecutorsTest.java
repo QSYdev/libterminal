@@ -24,7 +24,6 @@ public class ExecutorsTest {
 		nodesIdsAssociations = new TreeMap<>(); nodesIdsAssociations.put(1, 0); nodesIdsAssociations.put(2, 3);
 	}
 
-	@Test
 	public void execution() {
 		Routine routine = setupCustom();
 		ArrayList<Step> steps = routine.getSteps();
@@ -65,7 +64,7 @@ public class ExecutorsTest {
 	private Routine setupCustom() {
 		Routine routine = null;
 		try {
-			routine = RoutineManager.loadRoutine("factory/routine.json");
+			routine = RoutineManager.loadRoutine("src/test/java/factory/routine.json");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

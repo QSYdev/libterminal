@@ -16,9 +16,9 @@ import java.nio.file.Paths;
 
 @RunWith(JUnitPlatform.class)
 public class RoutineManagerTest {
-	private static final String FACTORY_TEST_ROUTINE_LOAD_PATH = "factory/routine.json";
+	private static final String FACTORY_TEST_ROUTINE_LOAD_PATH = "src/test/java/factory/routine.json";
 	private static final String UNEXISTENT_ROUTINE = "factory/ASASADS";
-	private static final String FACTORY_TEST_ROUTINE_STORE_PATH = "factory/routine-manager-test.json";
+	private static final String FACTORY_TEST_ROUTINE_STORE_PATH = "src/test/java/factory/routine-manager-test.json";
 
 	private final String UNEXPECTED_NULL = "La rutina no deberia ser null";
 

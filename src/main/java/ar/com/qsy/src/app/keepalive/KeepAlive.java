@@ -75,7 +75,6 @@ public final class KeepAlive extends EventSource {
 			}
 
 			if (!nodeAlive) {
-				System.out.println("Tiempo que tardo = " + (System.currentTimeMillis() - currentTime));
 				sendEvent(new Event(EventType.keepAliveError, disconnectedNode));
 			}
 		}

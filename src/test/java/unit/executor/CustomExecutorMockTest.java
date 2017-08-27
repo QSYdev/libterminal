@@ -26,7 +26,7 @@ public class CustomExecutorMockTest {
 	@BeforeEach
 	public void setUp() {
 		try{
-			routine = RoutineManager.loadRoutine("factory/routine.json");
+			routine = RoutineManager.loadRoutine("src/test/java/factory/routine.json");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

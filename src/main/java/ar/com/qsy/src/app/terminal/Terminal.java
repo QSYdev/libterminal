@@ -104,7 +104,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 					executor = null;
 				}
 			}
-			System.out.println("Se terminó la rutina");
+			System.out.println("Se termino la rutina");
 			break;
 		default:
 			break;
@@ -250,12 +250,12 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 					nodesAddresses.put(entry.getKey(), entry.getValue());
 				} else {
 					throw new IllegalStateException(
-							"<< Terminal >> No hay suficientes nodos registrados para hacer la asociación.");
+							"<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion.");
 				}
 			}
 			return nodesAddresses;
 		} else {
-			throw new IllegalStateException("<< Terminal >> No hay suficientes nodos registrados para hacer la asociación.");
+			throw new IllegalStateException("<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion.");
 		}
 
 	}

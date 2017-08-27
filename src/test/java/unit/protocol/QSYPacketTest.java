@@ -3,7 +3,6 @@ package unit.protocol;
 import ar.com.qsy.src.app.protocol.CommandParameters;
 import ar.com.qsy.src.app.protocol.QSYPacket;
 import ar.com.qsy.src.app.routine.Color;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
