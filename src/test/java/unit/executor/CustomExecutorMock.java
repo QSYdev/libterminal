@@ -1,8 +1,8 @@
 package unit.executor;
 
-import ar.com.qsy.src.app.executor.CustomExecutor;
-import ar.com.qsy.src.app.routine.Routine;
-import ar.com.qsy.src.app.routine.Step;
+import libterminal.lib.executor.CustomExecutor;
+import libterminal.lib.routine.Routine;
+import libterminal.lib.routine.Step;
 
 import java.util.TreeMap;
 

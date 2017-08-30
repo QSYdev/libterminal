@@ -1,10 +1,10 @@
 package unit.network;
 
-import ar.com.qsy.src.app.network.SenderSelector;
-import ar.com.qsy.src.app.node.Node;
-import ar.com.qsy.src.app.protocol.QSYPacket;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.EventSource;
+import libterminal.lib.network.SenderSelector;
+import libterminal.lib.node.Node;
+import libterminal.lib.protocol.QSYPacket;
+import libterminal.patterns.observer.Event;
+import libterminal.patterns.observer.EventSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

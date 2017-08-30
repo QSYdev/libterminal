@@ -1,8 +1,8 @@
 package unit.executor;
 
-import ar.com.qsy.src.app.executor.PlayerExecutor;
-import ar.com.qsy.src.app.routine.Color;
-import ar.com.qsy.src.app.routine.Step;
+import libterminal.lib.executor.PlayerExecutor;
+import libterminal.lib.routine.Color;
+import libterminal.lib.routine.Step;
 
 import java.util.ArrayList;
 import java.util.TreeMap;

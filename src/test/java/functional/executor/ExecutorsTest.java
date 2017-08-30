@@ -1,13 +1,12 @@
 package functional.executor;
 
-import ar.com.qsy.src.app.executor.CustomExecutor;
-import ar.com.qsy.src.app.executor.Executor;
-import ar.com.qsy.src.app.routine.NodeConfiguration;
-import ar.com.qsy.src.app.routine.Routine;
-import ar.com.qsy.src.app.routine.Step;
-import ar.com.qsy.src.utils.RoutineManager;
+import libterminal.lib.executor.CustomExecutor;
+import libterminal.lib.executor.Executor;
+import libterminal.lib.routine.NodeConfiguration;
+import libterminal.lib.routine.Routine;
+import libterminal.lib.routine.Step;
+import libterminal.utils.RoutineManager;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.TreeMap;

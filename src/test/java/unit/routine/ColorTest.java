@@ -1,6 +1,6 @@
 package unit.routine;
 
-import ar.com.qsy.src.app.routine.Color;
+import libterminal.lib.routine.Color;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;

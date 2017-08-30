@@ -1,6 +1,6 @@
 package unit.utils;
 
-import ar.com.qsy.src.utils.BiMap;
+import libterminal.utils.BiMap;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;

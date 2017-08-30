@@ -1,7 +1,7 @@
 package unit.utils;
 
-import ar.com.qsy.src.app.routine.Routine;
-import ar.com.qsy.src.utils.RoutineManager;
+import libterminal.lib.routine.Routine;
+import libterminal.utils.RoutineManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;

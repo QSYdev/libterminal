@@ -1,10 +1,10 @@
 package unit.routine;
 
 
-import ar.com.qsy.src.app.routine.Color;
-import ar.com.qsy.src.app.routine.NodeConfiguration;
-import ar.com.qsy.src.app.routine.Routine;
-import ar.com.qsy.src.app.routine.Step;
+import libterminal.lib.routine.Color;
+import libterminal.lib.routine.NodeConfiguration;
+import libterminal.lib.routine.Routine;
+import libterminal.lib.routine.Step;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;

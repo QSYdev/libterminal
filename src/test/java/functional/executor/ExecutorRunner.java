@@ -1,9 +1,9 @@
 package functional.executor;
 
-import ar.com.qsy.src.app.executor.Executor;
-import ar.com.qsy.src.patterns.observer.AsynchronousListener;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.EventListener;
+import libterminal.lib.executor.Executor;
+import libterminal.patterns.observer.AsynchronousListener;
+import libterminal.patterns.observer.Event;
+import libterminal.patterns.observer.EventListener;
 
 public class ExecutorRunner implements EventListener {
 	private final AsynchronousListener internalListener;

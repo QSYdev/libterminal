@@ -1,7 +1,7 @@
 package unit.routine;
 
-import ar.com.qsy.src.app.routine.Color;
-import ar.com.qsy.src.app.routine.NodeConfiguration;
+import libterminal.lib.routine.Color;
+import libterminal.lib.routine.NodeConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

@@ -1,8 +1,8 @@
 package unit.keepalive;
 
-import ar.com.qsy.src.app.node.Node;
-import ar.com.qsy.src.patterns.observer.Event;
-import ar.com.qsy.src.patterns.observer.EventListener;
+import libterminal.lib.node.Node;
+import libterminal.patterns.observer.Event;
+import libterminal.patterns.observer.EventListener;
 
 public class KeepAliveRunner implements EventListener{
 	private int keepAliveErrorCountNode1;

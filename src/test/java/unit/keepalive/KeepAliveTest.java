@@ -1,8 +1,8 @@
 package unit.keepalive;
 
-import ar.com.qsy.src.app.keepalive.KeepAlive;
-import ar.com.qsy.src.app.protocol.QSYPacket;
-import ar.com.qsy.src.app.node.Node;
+import libterminal.lib.keepalive.KeepAlive;
+import libterminal.lib.protocol.QSYPacket;
+import libterminal.lib.node.Node;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

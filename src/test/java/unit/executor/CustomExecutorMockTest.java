@@ -1,13 +1,13 @@
 package unit.executor;
 
-import ar.com.qsy.src.app.routine.NodeConfiguration;
-import ar.com.qsy.src.app.routine.Routine;
+import libterminal.lib.routine.NodeConfiguration;
+import libterminal.lib.routine.Routine;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import ar.com.qsy.src.app.routine.Step;
-import ar.com.qsy.src.utils.RoutineManager;
+import libterminal.lib.routine.Step;
+import libterminal.utils.RoutineManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

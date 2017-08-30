@@ -1,6 +1,6 @@
 package unit.utils;
 
-import ar.com.qsy.src.utils.Utils;
+import libterminal.utils.Utils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
