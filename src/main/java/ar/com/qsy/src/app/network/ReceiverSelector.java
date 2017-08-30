@@ -75,12 +75,15 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 
 	private void newNodeCreated(final Node node) {
 		synchronized (pendingActions) {
-			pendingActions.add(() -> {
-				final SocketChannel s = node.getNodeSocketChannel();
-				try {
-					s.register(selector, SelectionKey.OP_READ, null);
-				} catch (ClosedChannelException e) {
-					e.printStackTrace();
+			pendingActions.add(new Runnable() {
+				@Override
+				public void run() {
+					final SocketChannel s = node.getNodeSocketChannel();
+					try {
+						s.register(selector, SelectionKey.OP_READ, null);
+					} catch (ClosedChannelException e) {
+						e.printStackTrace();
+					}
 				}
 			});
 		}

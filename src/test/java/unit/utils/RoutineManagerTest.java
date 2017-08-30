@@ -4,6 +4,7 @@ import ar.com.qsy.src.app.routine.Routine;
 import ar.com.qsy.src.utils.RoutineManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -24,7 +25,12 @@ public class RoutineManagerTest {
 
 	@Test
 	public void loadRoutine() {
-		assertThrows(IOException.class, () -> RoutineManager.loadRoutine(UNEXISTENT_ROUTINE));
+		assertThrows(IOException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				RoutineManager.loadRoutine(UNEXISTENT_ROUTINE);
+			}
+		});
 		assertNotNull(loadRoutineMethod(), UNEXPECTED_NULL);
 	}
 

@@ -269,12 +269,13 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		running.set(false);
 		keepAlive.close();
 		synchronized (nodes) {
-			nodes.forEach((key, node) -> {
-			try {
-				node.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}});
+			for(Entry<Integer, Node> entry : nodes.entrySet()){
+				try {
+					entry.getValue().close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		super.close();
 	}

@@ -2,6 +2,7 @@ package unit.routine;
 
 import ar.com.qsy.src.app.routine.Color;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -18,9 +19,25 @@ public class ColorTest {
 	@Test
 	public void colorTest() {
 		Color color;
-		assertThrows(IllegalArgumentException.class, () -> new Color((byte) 17, (byte) 0, (byte) 0));
-		assertThrows(IllegalArgumentException.class, () -> new Color((byte) 0, (byte) 17, (byte) 0));
-		assertThrows(IllegalArgumentException.class, () -> new Color((byte) 0, (byte) 0, (byte) 17));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new Color((byte) 17, (byte) 0, (byte) 0);
+			}
+		});
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new Color((byte) 0, (byte) 17, (byte) 0);
+			}
+		});
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new Color((byte) 0, (byte) 17, (byte) 0);
+				new Color((byte) 0, (byte) 0, (byte) 17);
+			}
+		});
 
 		color = new Color(RED, GREEN, BLUE);
 		assertEquals(RED, color.getRed());

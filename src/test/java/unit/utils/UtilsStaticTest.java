@@ -2,6 +2,7 @@ package unit.utils;
 
 import ar.com.qsy.src.utils.Utils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -15,15 +16,17 @@ public class UtilsStaticTest {
 
 	@Test
 	public void fromInfixToPostfix() {
-		int[] result = {1, 2, Utils.AND_INT_VALUE, 3, 4, Utils.AND_INT_VALUE, Utils.OR_INT_VALUE};
-		int[] numbers = Utils.fromInfixToPostfix("(1&2)|(3&4)");
-		assertAll("resultado",
-			() -> {
+		final int[] result = {1, 2, Utils.AND_INT_VALUE, 3, 4, Utils.AND_INT_VALUE, Utils.OR_INT_VALUE};
+		final int[] numbers = Utils.fromInfixToPostfix("(1&2)|(3&4)");
+		assertAll("resultado", new Executable() {
+			@Override
+			public void execute() throws Throwable {
 				assertEquals(7, numbers.length, UNEXPECTED_LENGTH);
 
 				for (int i = 0; i < result.length; i++)
 					assertEquals(result[i], numbers[i], UNEXPECTED_VALUE);
+
 			}
-		);
+		});
 	}
 }

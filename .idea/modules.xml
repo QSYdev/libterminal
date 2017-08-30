@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/libterminal.iml" filepath="$PROJECT_DIR$/libterminal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libterminal_main.iml" filepath="$PROJECT_DIR$/.idea/modules/libterminal_main.iml" group="libterminal" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libterminal_test.iml" filepath="$PROJECT_DIR$/.idea/modules/libterminal_test.iml" group="libterminal" />
     </modules>
   </component>
 </project>

@@ -11,7 +11,7 @@ public final class BiMap {
 	private final int capacity;
 
 	public BiMap(final int numLogicIds) {
-		this(numLogicIds, new TreeMap<>());
+		this(numLogicIds, new TreeMap<Integer, Integer>());
 	}
 
 	public BiMap(final int numLogicalIds, final TreeMap<Integer, Integer> nodesAddresses) {

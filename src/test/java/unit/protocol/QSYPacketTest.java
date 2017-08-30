@@ -4,6 +4,7 @@ import ar.com.qsy.src.app.protocol.CommandParameters;
 import ar.com.qsy.src.app.protocol.QSYPacket;
 import ar.com.qsy.src.app.routine.Color;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -32,29 +33,54 @@ public class QSYPacketTest {
 
 	@Test
 	public void qsyPacketConstruction() {
-		InetAddress nodeAddress = mock(InetAddress.class);
+		final InetAddress nodeAddress = mock(InetAddress.class);
 		qsyPacketData = new byte[PACKET_SIZE];
 		qsyPacketData[Q_INDEX] = 's';
-		assertThrows(IllegalArgumentException.class, () -> new QSYPacket(nodeAddress, qsyPacketData));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new QSYPacket(nodeAddress, qsyPacketData);
+			}
+		});
 		qsyPacketData[Q_INDEX] = 'Q';
 		qsyPacketData[S_INDEX] = 'q';
-		assertThrows(IllegalArgumentException.class, () -> new QSYPacket(nodeAddress, qsyPacketData));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new QSYPacket(nodeAddress, qsyPacketData);
+			}
+		});
 		qsyPacketData[S_INDEX] = 'S';
 		qsyPacketData[Y_INDEX] = 'l';
-		assertThrows(IllegalArgumentException.class, () -> new QSYPacket(nodeAddress, qsyPacketData));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new QSYPacket(nodeAddress, qsyPacketData);
+			}
+		});
 
 		qsyPacketData[Q_INDEX] = 'Q';
 		qsyPacketData[S_INDEX] = 'S';
 		qsyPacketData[Y_INDEX] = 'Y';
-		assertThrows(IllegalArgumentException.class, () -> new QSYPacket(null, qsyPacketData));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				new QSYPacket(null, qsyPacketData);
+			}
+		});
 		assertNotNull(new QSYPacket(nodeAddress, qsyPacketData), "QSYPacket no deberia ser null");
 	}
 
 	@Test
 	public void createCommandPacket() {
-		CommandParameters commandParameters = new CommandParameters(1,1000, new Color((byte)15, (byte)0, (byte)0));
-		assertThrows(IllegalArgumentException.class, () -> QSYPacket.createCommandPacket(null,
-			commandParameters, false, false));
+		final CommandParameters commandParameters = new CommandParameters(1,1000, new Color((byte)15, (byte)0, (byte)0));
+		assertThrows(IllegalArgumentException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				QSYPacket.createCommandPacket(null,
+					commandParameters, false, false);
+			}
+		});
 		InetAddress nodeAddress = mock(InetAddress.class);
 		assertNotNull(QSYPacket.createCommandPacket(nodeAddress, commandParameters, false, false),
 			"El QSYPacket creado no deberia ser null");

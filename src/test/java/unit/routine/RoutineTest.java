@@ -7,6 +7,7 @@ import ar.com.qsy.src.app.routine.Routine;
 import ar.com.qsy.src.app.routine.Step;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -50,11 +51,16 @@ public class RoutineTest {
 
 	@Test
 	public void getIterator() {
-		Iterator iterator = routine.iterator();
+		final Iterator iterator = routine.iterator();
 		assertEquals(true, iterator.hasNext());
 		assertNotNull(iterator.next());
 		iterator.next(); iterator.next();
 		assertEquals(false, iterator.hasNext());
-		assertThrows(IndexOutOfBoundsException.class, () -> iterator.next());
+		assertThrows(IndexOutOfBoundsException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				iterator.next();
+			}
+		});
 	}
 }

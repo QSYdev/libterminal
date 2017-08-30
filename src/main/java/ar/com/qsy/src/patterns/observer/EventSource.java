@@ -15,19 +15,34 @@ public abstract class EventSource implements AutoCloseable {
 
 	public final void addListener(final EventListener eventListener) {
 		synchronized (pendingActions) {
-			pendingActions.add(() -> listeners.add(eventListener));
+			pendingActions.add(new Runnable() {
+				@Override
+				public void run() {
+					listeners.add(eventListener);
+				}
+			});
 		}
 	}
 
 	public final void removeListener(final EventListener eventListener) {
 		synchronized (pendingActions) {
-			pendingActions.add(() -> listeners.remove(eventListener));
+			pendingActions.add(new Runnable() {
+				@Override
+				public void run() {
+					listeners.remove(eventListener);
+				}
+			});
 		}
 	}
 
 	public final void removeAllListeners() {
 		synchronized (pendingActions) {
-			pendingActions.add(() -> listeners.clear());
+			pendingActions.add(new Runnable() {
+				@Override
+				public void run() {
+					listeners.clear();
+				}
+			});
 		}
 	}
 
