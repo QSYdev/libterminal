@@ -6,53 +6,42 @@ import libterminal.patterns.observer.EventSource;
 
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.DatagramChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class MulticastReceiver extends EventSource implements Runnable {
 
-	private final InetAddress multicastGroupAddress;
-	private final DatagramChannel channel;
-	private final ByteBuffer packet;
-
+    private final MulticastSocket socket;
+	private final DatagramPacket packet;
 	private final AtomicBoolean running;
 
-	public MulticastReceiver(InetSocketAddress localAddress, String group) throws IOException, UnknownHostException {
-		this.multicastGroupAddress = InetAddress.getByName(group);
-		this.channel = DatagramChannel.open(StandardProtocolFamily.INET);
-		this.channel.bind(new InetSocketAddress(localAddress.getPort()));
-		this.channel.join(multicastGroupAddress, NetworkInterface.getByInetAddress(localAddress.getAddress()));
+	public MulticastReceiver(Inet4Address interfaceAddress, Inet4Address multicastAddress, int port) throws IOException {
+		this.socket = new MulticastSocket(port);
+		this.socket.joinGroup(new InetSocketAddress(multicastAddress, port), NetworkInterface.getByInetAddress(interfaceAddress));
 
-		this.packet = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
+		this.packet = new DatagramPacket(new byte[QSYPacket.PACKET_SIZE],QSYPacket.PACKET_SIZE);
 		this.running = new AtomicBoolean(true);
 	}
 
 	@Override
 	public void run() {
 		while (running.get()) {
-			InetSocketAddress sender;
+			InetAddress sender;
 			try {
-				sender = (InetSocketAddress) this.channel.receive(packet);
-				sendEvent(new Event(Event.EventType.incomingQSYPacket, new QSYPacket(sender.getAddress(), packet.array())));
-			} catch (ClosedByInterruptException e) {
-				try {
-					this.close();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+				socket.receive(packet);
+				sender = packet.getAddress();
+				sendEvent(new Event(Event.EventType.incomingQSYPacket, new QSYPacket(sender, packet.getData())));
 			} catch (IOException e) {
-				e.printStackTrace();
+				if (!socket.isClosed())
+					e.printStackTrace();
+				running.set(false);
 			}
-
 		}
 	}
 
 	@Override
 	public void close() throws Exception {
 		running.set(false);
-		channel.close();
+		socket.close();
 		super.close();
 	}
 
