@@ -13,6 +13,7 @@ import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.EventSource;
 import libterminal.utils.BiMap;
 import libterminal.utils.ExpressionTree;
+import libterminal.lib.results.Results;
 
 public abstract class Executor extends EventSource {
 
@@ -27,8 +28,9 @@ public abstract class Executor extends EventSource {
 
 	private final Timer timer;
 	private StepTimeOutTimerTask timerTask;
+	private Results results;
 
-	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results) {
 		this.running = new AtomicBoolean(false);
 
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
@@ -40,6 +42,7 @@ public abstract class Executor extends EventSource {
 
 		this.timer = new Timer("Step Time Out", false);
 		this.timerTask = null;
+		this.results = results;
 	}
 
 	public synchronized void start() {
@@ -51,6 +54,7 @@ public abstract class Executor extends EventSource {
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		prepareStep();
+		results.start();
 	}
 
 	public synchronized void stop() {
@@ -62,19 +66,20 @@ public abstract class Executor extends EventSource {
 
 	}
 
-	public synchronized void touche(final int physicalIdOfNode) {
+	public synchronized void touche(final int physicalIdOfNode, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
 			// TODO comprobar si pertenece al paso actual, modificar el
 			// protocolo para incluir el paso
 			touchedNodes[logicalId] = true;
-			// TODO almacenar en log aca.
+			results.touche(logicalId, toucheColor, toucheDelay);
 			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
 				finalizeStep();
 				if (hasNextStep()) {
 					currentStep = getNextStep();
 					prepareStep();
 				} else {
+					results.finish();
 					sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 				}
 			}
@@ -83,10 +88,13 @@ public abstract class Executor extends EventSource {
 
 	protected synchronized void stepTimeout() {
 		if (running.get()) {
+			results.stepTimeout();
 			sendEvent(new Event(Event.EventType.executorStepTimeout, null));
 			if (currentStep.getStopOnTimeout()) {
+				results.finish();
 				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			} else if (!hasNextStep()) {
+				results.finish();
 				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			} else {
 				finalizeStep();
@@ -146,6 +154,10 @@ public abstract class Executor extends EventSource {
 	protected abstract Step getNextStep();
 
 	protected abstract boolean hasNextStep();
+
+	public final Results getResults(){
+		return this.results;
+	}
 
 	private final class StepTimeOutTimerTask extends TimerTask {
 

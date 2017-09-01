@@ -7,6 +7,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import libterminal.lib.results.PlayersResults;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.NodeConfiguration;
 import libterminal.lib.routine.Step;
@@ -34,7 +35,8 @@ public class PlayerExecutor extends Executor {
 	public PlayerExecutor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
 			final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) {
 
-		super(nodesIdsAssociations, numberOfNodes);
+		super(nodesIdsAssociations, numberOfNodes, new PlayersResults(numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout));
+
 
 		this.playersAndColors = playersAndColors;
 		this.stepsWinners = new ArrayList<>();
@@ -76,12 +78,14 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	public synchronized void touche(int physicalIdOfNode) {
+	public synchronized void touche(int physicalIdOfNode, final Color toucheColor, final long toucheDelay) {
 		if (stepsWinners.size() < stepIndex) {
-			final Color colorWinner = logicalIdsAndColors.get(getBiMap().getLogicalId(physicalIdOfNode));
+			final int logicalId = getBiMap().getLogicalId(physicalIdOfNode);
+			final Color colorWinner = logicalIdsAndColors.get(logicalId);
 			stepsWinners.add(colorWinner);
+			//TODO: en este caso solo guarda el ganador del paso
 		}
-		super.touche(physicalIdOfNode);
+		super.touche(physicalIdOfNode, toucheColor, toucheDelay);
 	}
 
 	@Override

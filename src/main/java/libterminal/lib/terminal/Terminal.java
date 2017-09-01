@@ -142,7 +142,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		case Touche:
 			synchronized (executorLock) {
 				if (executor != null) {
-					executor.touche(qsyPacket.getId());
+					executor.touche(qsyPacket.getId(), qsyPacket.getColor(), qsyPacket.getDelay());
 				}
 			}
 			break;

@@ -1,6 +1,6 @@
-package ar.com.qsy.src.app.results;
+package libterminal.lib.results;
 
-import ar.com.qsy.src.app.routine.Color;
+import libterminal.lib.routine.Color;
 
 import java.util.ArrayList;
 

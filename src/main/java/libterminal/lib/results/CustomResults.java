@@ -1,7 +1,7 @@
-package ar.com.qsy.src.app.results;
+package libterminal.lib.results;
 
-import ar.com.qsy.src.app.routine.Color;
-import ar.com.qsy.src.app.routine.Routine;
+import libterminal.lib.routine.Color;
+import libterminal.lib.routine.Routine;
 
 public class CustomResults extends Results {
 	private StringBuilder buffer;
