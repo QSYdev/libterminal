@@ -49,3 +49,8 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+.classpath
+.project
+.settings
+libterminal.ipr
+bin
