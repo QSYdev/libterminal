@@ -9,7 +9,7 @@ public class QSYPacket {
 
 	public static final long QSY_PROTOCOL_VERSION = 200717;
 
-	public static final byte PACKET_SIZE = 12;
+	public static final byte PACKET_SIZE = 12+4;
 	public static final int KEEP_ALIVE_MS = 500;
 
 	public static final String MULTICAST_ADDRESS = "224.0.0.12";
