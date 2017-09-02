@@ -47,7 +47,7 @@ public abstract class Executor extends EventSource {
 		currentStep = getNextStep();
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
 		for (int i = 0; i < touchedNodes.length - 1; i++) {
-			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor);
+			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor, numberOfStep);
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		prepareStep();
@@ -110,7 +110,7 @@ public abstract class Executor extends EventSource {
 				maxDelay = delay;
 			}
 			final Color color = nodeConfiguration.getColor();
-			final CommandParameters parameters = new CommandParameters(physicalId, delay, color);
+			final CommandParameters parameters = new CommandParameters(physicalId, delay, color, numberOfStep);
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		if (currentStep.getTimeOut() > 0) {
@@ -125,7 +125,7 @@ public abstract class Executor extends EventSource {
 			final int logicalId = nodeConfiguration.getId();
 			if (!touchedNodes[logicalId]) {
 				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
-				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor);
+				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor, numberOfStep);
 				sendEvent(new Event(Event.EventType.commandRequest, parameters));
 			}
 		}
