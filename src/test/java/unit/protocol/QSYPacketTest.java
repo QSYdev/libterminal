@@ -73,7 +73,7 @@ public class QSYPacketTest {
 
 	@Test
 	public void createCommandPacket() {
-		final CommandParameters commandParameters = new CommandParameters(1,1000, new Color((byte)15, (byte)0, (byte)0));
+		final CommandParameters commandParameters = new CommandParameters(1,1000, new Color((byte)15, (byte)0, (byte)0),0);
 		assertThrows(IllegalArgumentException.class, new Executable() {
 			@Override
 			public void execute() throws Throwable {
