@@ -95,7 +95,7 @@ public class QSYPacket {
 		this.numberOfStep = (int) convertBytesToLong(data, STEP_INDEX, (byte) (STEP_INDEX + 1));
 
 		final short configuration = (short) convertBytesToLong(data, CONFIGURATION_INDEX, (byte) (CONFIGURATION_INDEX + 1));
-		System.out.println(configuration & 0x0002);
+		//System.out.println(configuration & 0x0002);
 		this.touch = ((configuration & 0x0002) == 0x0002);
 		this.sound = ((configuration & 0x0001) == 0x0001);
 		rawData = Arrays.copyOf(data, PACKET_SIZE);
