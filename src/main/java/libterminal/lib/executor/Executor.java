@@ -66,13 +66,13 @@ public abstract class Executor extends EventSource {
 
 	}
 
-	public synchronized void touche(final int physicalIdOfNode, final Color toucheColor, final long toucheDelay) {
+	public synchronized void touche(final int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
 			// TODO comprobar si pertenece al paso actual, modificar el
 			// protocolo para incluir el paso
 			touchedNodes[logicalId] = true;
-			results.touche(logicalId, toucheColor, toucheDelay);
+			results.touche(logicalId, stepId, toucheColor, toucheDelay);
 			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
 				finalizeStep();
 				if (hasNextStep()) {

@@ -78,14 +78,14 @@ public class PlayerExecutor extends Executor {
 	}
 
 	@Override
-	public synchronized void touche(int physicalIdOfNode, final Color toucheColor, final long toucheDelay) {
+	public synchronized void touche(int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (stepsWinners.size() < stepIndex) {
 			final int logicalId = getBiMap().getLogicalId(physicalIdOfNode);
 			final Color colorWinner = logicalIdsAndColors.get(logicalId);
 			stepsWinners.add(colorWinner);
 			//TODO: en este caso solo guarda el ganador del paso
 		}
-		super.touche(physicalIdOfNode, toucheColor, toucheDelay);
+		super.touche(physicalIdOfNode, stepId, toucheColor, toucheDelay);
 	}
 
 	@Override

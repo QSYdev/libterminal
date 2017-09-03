@@ -13,7 +13,7 @@ public class CustomExecutor extends Executor {
 	private final Iterator<Step> routineIterator;
 
 	public CustomExecutor(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations) {
-		super(nodesIdsAssociations, routine.getNumberOfNodes(), new CustomResults(routine));
+		super(nodesIdsAssociations, routine.getNumberOfNodes(), new CustomResults(routine,/* TODO: totalTimeout*/0));
 		this.routineIterator = routine.iterator();
 	}
 
