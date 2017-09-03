@@ -2,8 +2,6 @@ package libterminal.lib.executor;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -11,7 +9,6 @@ import libterminal.lib.results.PlayersResults;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.NodeConfiguration;
 import libterminal.lib.routine.Step;
-import libterminal.patterns.observer.Event;
 
 public class PlayerExecutor extends Executor {
 
@@ -22,21 +19,17 @@ public class PlayerExecutor extends Executor {
 	private final boolean waitForAllPlayers;
 	private final long timeOut;
 	private final long delay;
-	private final long maxExecTime;
 	private final int totalStep;
 	private final boolean stopOnTimeout;
 	private final int numberOfNodes;
-
-	private final Timer timer;
-	private RoutineTimerTask timerTask;
 
 	private int stepIndex;
 
 	public PlayerExecutor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
 			final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) {
 
-		super(nodesIdsAssociations, numberOfNodes, new PlayersResults(numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout));
-
+		super(nodesIdsAssociations, numberOfNodes, new PlayersResults(numberOfNodes, playersAndColors,
+				waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout), maxExecTime);
 
 		this.playersAndColors = playersAndColors;
 		this.stepsWinners = new ArrayList<>();
@@ -45,36 +38,11 @@ public class PlayerExecutor extends Executor {
 		this.waitForAllPlayers = waitForAllPlayers;
 		this.timeOut = timeOut;
 		this.delay = delay;
-		this.maxExecTime = maxExecTime;
 		this.totalStep = totalStep;
 		this.stopOnTimeout = stopOnTimeout;
 		this.numberOfNodes = numberOfNodes;
 
-		this.timer = new Timer("Routine Time Out", false);
-		this.timerTask = null;
-
 		this.stepIndex = 0;
-
-	}
-
-	@Override
-	public synchronized void start() {
-		stepIndex = 0;
-		if (maxExecTime > 0) {
-			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
-		}
-		super.start();
-	}
-
-	@Override
-	public synchronized void stop() {
-		if (isRunning()) {
-			if (timerTask != null) {
-				timerTask.cancel();
-			}
-			timer.cancel();
-		}
-		super.stop();
 	}
 
 	@Override
@@ -124,20 +92,6 @@ public class PlayerExecutor extends Executor {
 	protected synchronized void stepTimeout() {
 		stepsWinners.add(null);
 		super.stepTimeout();
-	}
-
-	private final class RoutineTimerTask extends TimerTask {
-
-		public RoutineTimerTask() {
-		}
-
-		@Override
-		public void run() {
-			if (isRunning()) {
-				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
-			}
-		}
-
 	}
 
 }

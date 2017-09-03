@@ -12,8 +12,8 @@ public class CustomExecutor extends Executor {
 
 	private final Iterator<Step> routineIterator;
 
-	public CustomExecutor(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations) {
-		super(nodesIdsAssociations, routine.getNumberOfNodes(), new CustomResults(routine,/* TODO: totalTimeout*/0));
+	public CustomExecutor(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations, final long maxExecTime) {
+		super(nodesIdsAssociations, routine.getNumberOfNodes(), new CustomResults(routine, maxExecTime), maxExecTime);
 		this.routineIterator = routine.iterator();
 	}
 

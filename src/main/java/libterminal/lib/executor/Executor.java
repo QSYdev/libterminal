@@ -20,17 +20,23 @@ public abstract class Executor extends EventSource {
 	private final AtomicBoolean running;
 
 	private final BiMap biMap;
+
 	private final boolean[] touchedNodes;
 	private ExpressionTree expressionTree;
 
 	private Step currentStep;
 	private int numberOfStep;
+	private final long maxExecTime;
+
+	private final Timer stepTimer;
+	private StepTimeOutTimerTask stepTimerTask;
 
 	private final Timer timer;
-	private StepTimeOutTimerTask timerTask;
+	private RoutineTimerTask timerTask;
+
 	private Results results;
 
-	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results) {
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long maxExecTime) {
 		this.running = new AtomicBoolean(false);
 
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
@@ -39,13 +45,21 @@ public abstract class Executor extends EventSource {
 
 		this.currentStep = null;
 		this.numberOfStep = 0;
+		this.maxExecTime = maxExecTime;
 
-		this.timer = new Timer("Step Time Out", false);
+		this.stepTimer = new Timer("Step Time Out", false);
+		this.stepTimerTask = null;
+
+		this.timer = new Timer("Routine Time Out", false);
 		this.timerTask = null;
+
 		this.results = results;
 	}
 
 	public synchronized void start() {
+		if (maxExecTime > 0) {
+			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
+		}
 		running.set(true);
 		currentStep = getNextStep();
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
@@ -58,9 +72,15 @@ public abstract class Executor extends EventSource {
 	}
 
 	public synchronized void stop() {
+		if (isRunning()) {
+			if (timerTask != null) {
+				timerTask.cancel();
+			}
+			timer.cancel();
+		}
 		if (running.get()) {
 			finalizeStep();
-			timer.cancel();
+			stepTimer.cancel();
 			running.set(false);
 		}
 
@@ -125,7 +145,7 @@ public abstract class Executor extends EventSource {
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		if (currentStep.getTimeOut() > 0) {
-			timer.schedule(timerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
+			stepTimer.schedule(stepTimerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
 		}
 		expressionTree = new ExpressionTree(currentStep.getExpression());
 	}
@@ -143,10 +163,10 @@ public abstract class Executor extends EventSource {
 		for (int i = 0; i < touchedNodes.length; i++) {
 			touchedNodes[i] = false;
 		}
-		if (timerTask != null) {
-			timerTask.cancel();
+		if (stepTimerTask != null) {
+			stepTimerTask.cancel();
 		}
-		timer.purge();
+		stepTimer.purge();
 		expressionTree = null;
 	}
 
@@ -173,6 +193,20 @@ public abstract class Executor extends EventSource {
 				stepTimeout();
 			} catch (final Exception e) {
 				e.printStackTrace();
+			}
+		}
+
+	}
+
+	private final class RoutineTimerTask extends TimerTask {
+
+		public RoutineTimerTask() {
+		}
+
+		@Override
+		public void run() {
+			if (isRunning()) {
+				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			}
 		}
 
