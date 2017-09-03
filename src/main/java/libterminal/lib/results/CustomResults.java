@@ -23,46 +23,45 @@ public class CustomResults extends Results{
 		this.start = null;
 		this.end = null;
 		this.executionLog = null;
-		//debug
-		buffer = new StringBuilder(64);
-		buffer.append("Custom Execution\n");
-		buffer.append("Routine ID: "+/* TODO: ID de la rutina */"\n");
-		buffer.append("Total Timeout: "+totalTimeout+"\n");
 	}
-
 
 	@Override
 	public void start() {
 		start = new Date();
 		executionLog = new ArrayList<CustomAction>();
-		//debug
-		buffer.append("Started at: "+start.toString()+"\n");
 	}
 
 	@Override
 	public void touche(final int logicId, final int stepId, final Color color, final long delay) {
 		executionLog.add(new CustomAction(logicId, delay, stepId));
-		//debug
-		buffer.append("   Touche: \n");
-		buffer.append("   Step Id: "+stepId+"\n");
-		buffer.append("   Logic Id: "+logicId+"\n");
-		buffer.append("   Delay: "+delay+"\n");
 	}
 
 	@Override
 	public void stepTimeout() {
 		//TODO: por ahora action vacia representa el timeout
 		executionLog.add(new CustomAction(0,0,0));
-		//debug
-		buffer.append("   Step Timeout\n");
 	}
 
 	@Override
 	public void finish() {
 		end = new Date();
 		//debug
+		classToFile("customLog");
+	}
+
+	private void classToFile(String fileName){
+		buffer = new StringBuilder(512);
+		buffer.append("Players Results\n");
+		buffer.append("Started at: "+start.toString()+"\n");
 		buffer.append("Finished at: "+end.toString()+"\n");
-		super.bufferToFile(buffer, "test");
+		buffer.append("Initial configuration:\n");
+		buffer.append("    Total timeout: "+totalTimeout+"\n");
+		buffer.append("Execution log:\n");
+		for(CustomAction aux : executionLog){
+			buffer.append("    "+aux.toString()+"\n");
+		}
+		buffer.append("EOF");
+		super.bufferToFile(buffer,fileName);
 	}
 }
 

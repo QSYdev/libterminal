@@ -10,4 +10,8 @@ public class CustomAction {
 		this.delay = delay;
 		this.stepId = stepId;
 	}
+
+	public String toString(){
+		return "Step: "+stepId+" / Logic Id: "+logicId+" / Delay: "+delay;
+	}
 }
