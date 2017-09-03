@@ -86,6 +86,32 @@ public class PlayersResults extends Results{
 		//debug
 		buffer.append("Finished at: "+end.toString()+"\n");
 		super.bufferToFile(buffer, "test");
+		classToFile("test2");
+	}
+	private void classToFile(String fileName){
+		buffer = new StringBuilder(512);
+		buffer.append("Players Results\n");
+		buffer.append("Started at: "+start.toString()+"\n");
+		buffer.append("Finished at: "+end.toString()+"\n");
+		buffer.append("Initial configuration:\n");
+		buffer.append("    Number of nodes: "+numberOfNodes+"\n");
+		buffer.append("    Total steps: "+totalSteps+"\n");
+		buffer.append("    Step timeout: "+stepTimeout+"\n");
+		buffer.append("    Total timeout: "+maxExecTime+"\n");
+		buffer.append("    Delay: "+delay+"\n");
+		buffer.append("    Stop on timeout: "+stopOnTimeout+"\n");
+		buffer.append("    Wait for all players: "+waitForAllPlayers+"\n");
+		buffer.append("Players and colors:\n");
+		int i=0;
+		for(Color c : playersAndColors){
+			buffer.append("    Player "+(i++)+": "+c.toString()+"\n");
+		}
+		buffer.append("Execution log:\n");
+		for(PlayerAction aux : executionLog){
+			buffer.append("    "+aux.toString()+"\n");
+		}
+		buffer.append("EOF");
+		super.bufferToFile(buffer,fileName);
 	}
 }
 

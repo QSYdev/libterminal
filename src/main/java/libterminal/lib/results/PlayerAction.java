@@ -12,4 +12,7 @@ public class PlayerAction {
 		this.stepId = stepId;
 		this.playerId = playerId;
 	}
+	public String toString(){
+		return "Step: "+stepId+" / Logic Id: "+logicId+" / Delay: "+delay+" / Player Id: "+playerId;
+	}
 }
