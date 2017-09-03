@@ -50,7 +50,7 @@ public abstract class Executor extends EventSource {
 		currentStep = getNextStep();
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
 		for (int i = 0; i < touchedNodes.length - 1; i++) {
-			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor, numberOfStep);
+			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor, 0);
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		prepareStep();
@@ -133,7 +133,7 @@ public abstract class Executor extends EventSource {
 			final int logicalId = nodeConfiguration.getId();
 			if (!touchedNodes[logicalId]) {
 				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
-				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor, numberOfStep);
+				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor, 0);
 				sendEvent(new Event(Event.EventType.commandRequest, parameters));
 			}
 		}
