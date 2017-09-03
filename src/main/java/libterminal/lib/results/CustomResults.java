@@ -8,14 +8,12 @@ import java.util.ArrayList;
 
 public class CustomResults extends Results{
 
-	private StringBuilder buffer; //debug
-
-	private final Routine routine;
-	//TODO: implementar totalTimeout del lado de executor
-	private long totalTimeout;
+	private final String TYPE = "Custom";
 	private Date start;
 	private Date end;
+	private long totalTimeout; //TODO: implementar totalTimeout del lado de executor
 	private ArrayList<CustomAction> executionLog;
+	private final Routine routine;// no se usa pero se guarda junto a los resultados
 
 	public CustomResults(final Routine routine, final long totalTimeout){
 		this.routine = routine;
@@ -45,23 +43,8 @@ public class CustomResults extends Results{
 	@Override
 	public void finish() {
 		end = new Date();
-		//debug
-		classToFile("customLog");
-	}
-
-	private void classToFile(String fileName){
-		buffer = new StringBuilder(512);
-		buffer.append("Players Results\n");
-		buffer.append("Started at: "+start.toString()+"\n");
-		buffer.append("Finished at: "+end.toString()+"\n");
-		buffer.append("Initial configuration:\n");
-		buffer.append("    Total timeout: "+totalTimeout+"\n");
-		buffer.append("Execution log:\n");
-		for(CustomAction aux : executionLog){
-			buffer.append("    "+aux.toString()+"\n");
-		}
-		buffer.append("EOF");
-		super.bufferToFile(buffer,fileName);
+		//TODO: esto seria en el caso de que se desea guardar
+		super.classToJSON(this, "customResults");
 	}
 }
 
