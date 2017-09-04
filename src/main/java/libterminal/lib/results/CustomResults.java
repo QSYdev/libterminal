@@ -37,7 +37,7 @@ public class CustomResults extends Results{
 	@Override
 	public void stepTimeout() {
 		//TODO: por ahora action vacia representa el timeout
-		executionLog.add(new CustomAction(0,0,0));
+		executionLog.add(null);
 	}
 
 	@Override

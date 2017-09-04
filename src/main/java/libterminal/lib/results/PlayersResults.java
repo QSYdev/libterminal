@@ -47,7 +47,7 @@ public class PlayersResults extends Results{
 	@Override
 	public void stepTimeout() {
 		//TODO: por ahora action vacia representa el timeout
-		executionLog.add(new PlayerAction(0,0,0,0));
+		executionLog.add(null);
 	}
 
 	@Override
