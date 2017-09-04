@@ -89,11 +89,9 @@ public abstract class Executor extends EventSource {
 	public synchronized void touche(final int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
-			/*// TODO comprobar si pertenece al paso actual
 			if(stepId != numberOfStep){
 				throw new IllegalStateException("<< Executor >> Se recibio un paquete de un paso distinto al actual");
 			}
-			//TODO: resolver que se hace en esos casos */
 			touchedNodes[logicalId] = true;
 			results.touche(logicalId, stepId, toucheColor, toucheDelay);
 			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
