@@ -13,22 +13,30 @@ import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.EventSource;
 import libterminal.utils.BiMap;
 import libterminal.utils.ExpressionTree;
+import libterminal.lib.results.Results;
 
 public abstract class Executor extends EventSource {
 
 	private final AtomicBoolean running;
 
 	private final BiMap biMap;
+
 	private final boolean[] touchedNodes;
 	private ExpressionTree expressionTree;
 
 	private Step currentStep;
 	private int numberOfStep;
+	private final long maxExecTime;
+
+	private final Timer stepTimer;
+	private StepTimeOutTimerTask stepTimerTask;
 
 	private final Timer timer;
-	private StepTimeOutTimerTask timerTask;
+	private RoutineTimerTask timerTask;
 
-	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
+	private Results results;
+
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long maxExecTime) {
 		this.running = new AtomicBoolean(false);
 
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
@@ -37,44 +45,62 @@ public abstract class Executor extends EventSource {
 
 		this.currentStep = null;
 		this.numberOfStep = 0;
+		this.maxExecTime = maxExecTime;
 
-		this.timer = new Timer("Step Time Out", false);
+		this.stepTimer = new Timer("Step Time Out", false);
+		this.stepTimerTask = null;
+
+		this.timer = new Timer("Routine Time Out", false);
 		this.timerTask = null;
+
+		this.results = results;
 	}
 
 	public synchronized void start() {
+		if (maxExecTime > 0) {
+			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
+		}
 		running.set(true);
 		currentStep = getNextStep();
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
 		for (int i = 0; i < touchedNodes.length - 1; i++) {
-			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor);
+			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor, 0);
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		prepareStep();
+		results.start();
 	}
 
 	public synchronized void stop() {
+		if (isRunning()) {
+			if (timerTask != null) {
+				timerTask.cancel();
+			}
+			timer.cancel();
+		}
 		if (running.get()) {
 			finalizeStep();
-			timer.cancel();
+			stepTimer.cancel();
 			running.set(false);
 		}
 
 	}
 
-	public synchronized void touche(final int physicalIdOfNode) {
+	public synchronized void touche(final int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
-			// TODO comprobar si pertenece al paso actual, modificar el
-			// protocolo para incluir el paso
+			if(stepId != numberOfStep){
+				throw new IllegalStateException("<< Executor >> Se recibio un paquete de un paso distinto al actual");
+			}
 			touchedNodes[logicalId] = true;
-			// TODO almacenar en log aca.
+			results.touche(logicalId, stepId, toucheColor, toucheDelay);
 			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
 				finalizeStep();
 				if (hasNextStep()) {
 					currentStep = getNextStep();
 					prepareStep();
 				} else {
+					results.finish();
 					sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 				}
 			}
@@ -83,10 +109,13 @@ public abstract class Executor extends EventSource {
 
 	protected synchronized void stepTimeout() {
 		if (running.get()) {
+			results.stepTimeout();
 			sendEvent(new Event(Event.EventType.executorStepTimeout, null));
 			if (currentStep.getStopOnTimeout()) {
+				results.finish();
 				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			} else if (!hasNextStep()) {
+				results.finish();
 				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			} else {
 				finalizeStep();
@@ -110,11 +139,11 @@ public abstract class Executor extends EventSource {
 				maxDelay = delay;
 			}
 			final Color color = nodeConfiguration.getColor();
-			final CommandParameters parameters = new CommandParameters(physicalId, delay, color);
+			final CommandParameters parameters = new CommandParameters(physicalId, delay, color, numberOfStep);
 			sendEvent(new Event(Event.EventType.commandRequest, parameters));
 		}
 		if (currentStep.getTimeOut() > 0) {
-			timer.schedule(timerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
+			stepTimer.schedule(stepTimerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
 		}
 		expressionTree = new ExpressionTree(currentStep.getExpression());
 	}
@@ -125,17 +154,17 @@ public abstract class Executor extends EventSource {
 			final int logicalId = nodeConfiguration.getId();
 			if (!touchedNodes[logicalId]) {
 				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
-				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor);
+				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor, 0);
 				sendEvent(new Event(Event.EventType.commandRequest, parameters));
 			}
 		}
 		for (int i = 0; i < touchedNodes.length; i++) {
 			touchedNodes[i] = false;
 		}
-		if (timerTask != null) {
-			timerTask.cancel();
+		if (stepTimerTask != null) {
+			stepTimerTask.cancel();
 		}
-		timer.purge();
+		stepTimer.purge();
 		expressionTree = null;
 	}
 
@@ -146,6 +175,10 @@ public abstract class Executor extends EventSource {
 	protected abstract Step getNextStep();
 
 	protected abstract boolean hasNextStep();
+
+	public final Results getResults(){
+		return this.results;
+	}
 
 	private final class StepTimeOutTimerTask extends TimerTask {
 
@@ -158,6 +191,20 @@ public abstract class Executor extends EventSource {
 				stepTimeout();
 			} catch (final Exception e) {
 				e.printStackTrace();
+			}
+		}
+
+	}
+
+	private final class RoutineTimerTask extends TimerTask {
+
+		public RoutineTimerTask() {
+		}
+
+		@Override
+		public void run() {
+			if (isRunning()) {
+				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
 			}
 		}
 

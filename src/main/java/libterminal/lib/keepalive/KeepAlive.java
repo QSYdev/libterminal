@@ -11,7 +11,7 @@ import libterminal.patterns.observer.EventSource;
 
 public final class KeepAlive extends EventSource {
 
-	public static final int MAX_KEEP_ALIVE_DELAY = (int) ((5 / 2f) * QSYPacket.KEEP_ALIVE_MS);
+	public static final int MAX_KEEP_ALIVE_DELAY = (int) (5 * QSYPacket.KEEP_ALIVE_MS);
 
 	private final TreeMap<Integer, Node> nodes;
 	private final Timer timer;

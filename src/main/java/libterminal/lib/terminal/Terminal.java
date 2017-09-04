@@ -142,7 +142,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		case Touche:
 			synchronized (executorLock) {
 				if (executor != null) {
-					executor.touche(qsyPacket.getId());
+					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
 				}
 			}
 			break;
@@ -164,12 +164,12 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		searchNodes.set(false);
 	}
 
-	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations) {
+	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations, final int maxExecTime) {
 		synchronized (executorLock) {
 			if (executor == null) {
 				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations,
 						routine.getNumberOfNodes());
-				executor = new CustomExecutor(routine, associations);
+				executor = new CustomExecutor(routine, associations, maxExecTime);
 				executor.addListener(this);
 				executor.start();
 			} else {
