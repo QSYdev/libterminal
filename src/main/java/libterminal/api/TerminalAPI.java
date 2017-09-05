@@ -10,7 +10,9 @@ import libterminal.lib.terminal.Terminal;
 import libterminal.patterns.observer.EventListener;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -23,11 +25,17 @@ public final class TerminalAPI {
 
     private Terminal terminal;
 
+    private Inet4Address multicastAddress;
+
     private boolean up;
+
+    public TerminalAPI(Inet4Address multicastAddress) {
+        this.multicastAddress = multicastAddress;
+    }
 
     public void start() throws IOException {
         final MulticastReceiver multicastReceiver = new MulticastReceiver(
-                (InetAddress) InetAddress.getByName(System.getenv("MY_IP")),
+                multicastAddress,
                 (InetAddress) InetAddress.getByName(QSYPacket.MULTICAST_ADDRESS),
                 QSYPacket.MULTICAST_PORT
         );
@@ -74,6 +82,7 @@ public final class TerminalAPI {
         terminal.executePlayer(nodesIdsAssociations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout);
     }
 
+    // TODO: fix nombres en toda la api
     public void suscribeToTerminalEvents(final EventListener listener) {
         terminal.addListener(listener);
     }
