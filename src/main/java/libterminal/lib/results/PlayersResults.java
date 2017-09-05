@@ -54,7 +54,7 @@ public class PlayersResults extends Results{
 	public void finish() {
 		end = new Date();
 		//TODO: esto seria en el caso de que se desea guardar
-		super.classToJSON(this,"jsonFile");
+//		super.classToJSON(this,"jsonFile");
 	}
 }
 

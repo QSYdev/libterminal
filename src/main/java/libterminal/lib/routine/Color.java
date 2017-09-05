@@ -8,6 +8,15 @@ public final class Color {
 	private final byte green;
 	private final byte blue;
 
+	public static final Color WHITE = new Color((byte) 0x0F, (byte) 0x0F, (byte) 0x0F);
+	public static final Color YELLOW = new Color((byte) 0x0F, (byte) 0x0F, (byte) 0x00);
+	public static final Color VIOLET = new Color((byte) 0x0F, (byte) 0x00, (byte) 0x0F);
+	public static final Color RED = new Color((byte) 0x0F, (byte) 0x00, (byte) 0x00);
+	public static final Color CYAN = new Color((byte) 0x00, (byte) 0x0F, (byte) 0x0F);
+	public static final Color GREEN = new Color((byte) 0x00, (byte) 0x0F, (byte) 0x00);
+	public static final Color BLUE = new Color((byte) 0x00, (byte) 0x00, (byte) 0x0F);
+	public static final Color NO_COLOR = new Color((byte) 0x00, (byte) 0x00, (byte) 0x00);
+
 	public Color(final byte red, final byte green, final byte blue) {
 		if (checkAmountOfColor(red) && checkAmountOfColor(green) && checkAmountOfColor(blue)) {
 			this.red = red;
