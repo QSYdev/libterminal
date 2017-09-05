@@ -26,7 +26,7 @@ public class ExecutorsTest {
 	public void execution() {
 		Routine routine = setupCustom();
 		ArrayList<Step> steps = routine.getSteps();
-		executor = new CustomExecutor(routine, nodesIdsAssociations);
+		executor = new CustomExecutor(routine, nodesIdsAssociations, 0L);
 		runner = new ExecutorRunner(executor);
 		executor.addListener(runner);
 

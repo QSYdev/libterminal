@@ -25,7 +25,7 @@ public final class Event {
 
 		/**
 		 * La aplicacion ha enviado un command hacia el nodo. En Content se
-		 * encuentra el QSYPacket. Listeners: - <b>SenderSelector</b>: cuando se
+		 * encuentra el QSYPacket. Listeners: - <b>Sender</b>: cuando se
 		 * quiere enviar un qsy command a un nodo. Senders: - <b>Terminal</b>:
 		 * cuando se quiere enviar un comando a algun nodo en particular.
 		 */

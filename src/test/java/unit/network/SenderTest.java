@@ -1,6 +1,6 @@
 package unit.network;
 
-import libterminal.lib.network.SenderSelector;
+import libterminal.lib.network.Sender;
 import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.patterns.observer.Event;
@@ -18,7 +18,7 @@ import java.util.TreeMap;
 import static org.mockito.Mockito.*;
 
 @RunWith(JUnitPlatform.class)
-public class SenderSelectorTest {
+public class SenderTest {
 	private static final byte Q_INDEX = 0x00;
 	private static final byte S_INDEX = 0x01;
 	private static final byte Y_INDEX = 0x02;
@@ -46,9 +46,9 @@ public class SenderSelectorTest {
 
 	@Test
 	public void run() {
-		SenderSelector sender = new SenderSelector(nodes);
+		Sender sender = new Sender(nodes);
 		Thread senderThread = new Thread(sender, "Sender thread");
-		SenderSelectorRunner senderSelectorRunner = new SenderSelectorRunner();
+		SenderRunner senderSelectorRunner = new SenderRunner();
 		senderSelectorRunner.addListener(sender);
 		senderThread.start();
 		senderSelectorRunner.sendEvent(new Event(Event.EventType.commandPacketSent, qsyPacket));
@@ -72,6 +72,6 @@ public class SenderSelectorTest {
 		}
 	}
 
-	private class SenderSelectorRunner extends EventSource {
+	private class SenderRunner extends EventSource {
 	}
 }
