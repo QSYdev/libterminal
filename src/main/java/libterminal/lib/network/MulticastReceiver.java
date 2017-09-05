@@ -14,7 +14,7 @@ public final class MulticastReceiver extends EventSource implements Runnable {
 	private final DatagramPacket packet;
 	private final AtomicBoolean running;
 
-	public MulticastReceiver(Inet4Address interfaceAddress, Inet4Address multicastAddress, int port) throws IOException {
+	public MulticastReceiver(InetAddress interfaceAddress, InetAddress multicastAddress, int port) throws IOException {
 		this.socket = new MulticastSocket(port);
 		this.socket.joinGroup(new InetSocketAddress(multicastAddress, port), NetworkInterface.getByInetAddress(interfaceAddress));
 
