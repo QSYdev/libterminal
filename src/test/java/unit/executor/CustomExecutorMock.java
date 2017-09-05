@@ -9,7 +9,7 @@ import java.util.TreeMap;
 public class CustomExecutorMock extends CustomExecutor {
 
 	public CustomExecutorMock(Routine routine, TreeMap<Integer, Integer> nodesIdsAssociations) {
-		super(routine, nodesIdsAssociations);
+		super(routine, nodesIdsAssociations, 0L);
 	}
 
 	@Override

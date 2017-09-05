@@ -11,14 +11,14 @@ import java.nio.channels.SocketChannel;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class SenderSelector extends AsynchronousListener implements Runnable, AutoCloseable {
+public final class Sender extends AsynchronousListener implements Runnable, AutoCloseable {
 
 	private final TreeMap<Integer, Node> nodes;
 	private final ByteBuffer byteBuffer;
 
 	private final AtomicBoolean running;
 
-	public SenderSelector(final TreeMap<Integer, Node> nodes) {
+	public Sender(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 
