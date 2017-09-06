@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(JUnitPlatform.class)
 public class QSYPacketTest {
-	public static final byte PACKET_SIZE = 12;
+	public static final byte PACKET_SIZE = 16;
 	private static final byte Q_INDEX = 0x00;
 	private static final byte S_INDEX = 0x01;
 	private static final byte Y_INDEX = 0x02;
