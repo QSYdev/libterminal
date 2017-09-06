@@ -11,7 +11,8 @@ import libterminal.patterns.observer.EventSource;
 
 public final class KeepAlive extends EventSource {
 
-	public static final int MAX_KEEP_ALIVE_DELAY = (int) (5 * QSYPacket.KEEP_ALIVE_MS);
+	//TODO: evaluar cuando funciona y cuando no el periodo del purger
+	public static final int MAX_KEEP_ALIVE_DELAY = (int) (10 * QSYPacket.KEEP_ALIVE_MS);
 
 	private final TreeMap<Integer, Node> nodes;
 	private final Timer timer;

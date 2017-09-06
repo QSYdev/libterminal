@@ -12,7 +12,6 @@ import libterminal.patterns.observer.EventListener;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -110,5 +109,4 @@ public final class TerminalAPI {
 	public void stopExecution() {
 		terminal.stopExecution();
 	}
-
 }
