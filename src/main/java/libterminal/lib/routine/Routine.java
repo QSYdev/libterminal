@@ -44,5 +44,9 @@ public final class Routine implements Iterable<Step> {
 			return getSteps().get(index++);
 		}
 
+		@Override
+		public void remove() {
+		}
+
 	}
 }

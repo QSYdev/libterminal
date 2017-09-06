@@ -71,17 +71,19 @@ public final class TerminalAPI {
 		terminal.finalizeNodesSearch();
 	}
 
-	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations, final int maxExecTime) {
-		terminal.executeCustom(routine, nodesIdsAssociations, maxExecTime);
+	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations,
+	                          final int maxExecTime, boolean soundEnabled, boolean touchEnabled) {
+		terminal.executeCustom(routine, nodesIdsAssociations, maxExecTime, soundEnabled, touchEnabled);
 	}
 
 	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes,
 	                          final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
-	                          final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) {
-		terminal.executePlayer(nodesIdsAssociations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout);
+	                          final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout,
+	                          boolean soundEnabled, boolean touchEnabled) {
+		terminal.executePlayer(nodesIdsAssociations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut,
+			delay, maxExecTime, totalStep, stopOnTimeout, soundEnabled, touchEnabled);
 	}
 
-	// TODO: fix nombres en toda la api
 	public void addListener(final EventListener listener) {
 		terminal.addListener(listener);
 	}
