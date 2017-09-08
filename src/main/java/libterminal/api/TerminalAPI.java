@@ -113,8 +113,8 @@ public final class TerminalAPI {
 		terminal.stopExecution();
 	}
 
-	public void sendPacket(InetAddress nodeAddress, CommandParameters commandParameters, boolean soundEnabled,
+	public void sendPacket(Integer nodeId, CommandParameters commandParameters, boolean soundEnabled,
 	                       boolean touchEnabled) {
-		terminal.sendQSYPacket(QSYPacket.createCommandPacket(nodeAddress, commandParameters, touchEnabled, soundEnabled));
+		terminal.sendQSYPacket(QSYPacket.createCommandPacket(terminal.getNodeAddress(nodeId), commandParameters, touchEnabled, soundEnabled));
 	}
 }

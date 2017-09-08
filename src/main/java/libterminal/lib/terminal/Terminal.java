@@ -294,4 +294,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		internalListener.receiveEvent(event);
 	}
 
+	public InetAddress getNodeAddress(Integer nodeId) {
+		return nodes.get(nodeId).getNodeAddress();
+	}
 }
