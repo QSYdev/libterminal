@@ -3,6 +3,7 @@ package libterminal.api;
 import libterminal.lib.network.MulticastReceiver;
 import libterminal.lib.network.ReceiverSelector;
 import libterminal.lib.network.Sender;
+import libterminal.lib.protocol.CommandParameters;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.Routine;
@@ -110,5 +111,10 @@ public final class TerminalAPI {
 
 	public void stopExecution() {
 		terminal.stopExecution();
+	}
+
+	public void sendPacket(InetAddress nodeAddress, CommandParameters commandParameters, boolean soundEnabled,
+	                       boolean touchEnabled) {
+		terminal.sendQSYPacket(QSYPacket.createCommandPacket(nodeAddress, commandParameters, touchEnabled, soundEnabled));
 	}
 }
