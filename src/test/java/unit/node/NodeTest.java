@@ -27,7 +27,7 @@ public class NodeTest {
 		doCallRealMethod().when(node).isAlive(anyLong());
 	}
 
-	@Test
+	@ClassTest
 	public void keepAliveInteractions() {
 		node.keepAlive(System.currentTimeMillis());
 		assertEquals(true, node.isAlive(System.currentTimeMillis()), "El nodo deberia estar vivo");
@@ -35,7 +35,7 @@ public class NodeTest {
 		assertEquals(false, node.isAlive(System.currentTimeMillis()), "El nodo no deberia estar vivo");
 	}
 
-	@Test
+	@ClassTest
 	public void compareTo() {
 		Node newNode = mock(Node.class);
 		when(newNode.getNodeId()).thenReturn(3);

@@ -26,10 +26,10 @@ public class PlayerExecutor extends Executor {
 	private int stepIndex;
 
 	public PlayerExecutor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
-			final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout) {
+			final long delay, final long totalTimeOut, final int totalStep, final boolean stopOnTimeout) {
 
 		super(nodesIdsAssociations, numberOfNodes, new PlayersResults(numberOfNodes, playersAndColors,
-				waitForAllPlayers, timeOut, delay, maxExecTime, totalStep, stopOnTimeout), maxExecTime);
+				waitForAllPlayers, timeOut, delay, totalTimeOut, totalStep, stopOnTimeout), totalTimeOut);
 
 		this.playersAndColors = playersAndColors;
 		this.stepsWinners = new ArrayList<>();

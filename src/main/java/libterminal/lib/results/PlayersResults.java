@@ -1,60 +1,60 @@
 package libterminal.lib.results;
 
-import libterminal.lib.routine.Color;
-
-import java.util.Date;
 import java.util.ArrayList;
 
-public class PlayersResults extends Results{
+import libterminal.lib.routine.Color;
 
-	private final String TYPE = "Player";
-	private Date start;
-	private Date end;
-	private int numberOfNodes, totalSteps;
-	private long stepTimeout, delay, maxExecTime;
-	private boolean waitForAllPlayers, stopOnTimeout;
-	private ArrayList<Color> playersAndColors;
-	private ArrayList<PlayerAction> executionLog;
+public class PlayersResults extends Results {
 
-	public PlayersResults(final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers,
-	                      final long stepTimeout, final long delay, final long maxExecTime, final int totalSteps,
-	                      final boolean stopOnTimeout){
+	private final int numberOfNodes, totalSteps;
+	private final long stepTimeout, delay;
+	private final boolean waitForAllPlayers, stopOnTimeout;
+	private final ArrayList<Color> playersAndColors;
+
+	public PlayersResults(final int numberOfNodes, final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long stepTimeout,
+			final long delay, final long totalTimeOut, final int totalSteps, final boolean stopOnTimeout) {
+
+		super(PLAYER_TYPE, totalTimeOut);
+
 		this.numberOfNodes = numberOfNodes;
 		this.playersAndColors = playersAndColors;
 		this.waitForAllPlayers = waitForAllPlayers;
 		this.stepTimeout = stepTimeout;
 		this.delay = delay;
-		this.maxExecTime = maxExecTime;
 		this.totalSteps = totalSteps;
 		this.stopOnTimeout = stopOnTimeout;
-
-		this.start = null;
-		this.end = null;
-		this.executionLog = null;
-	}
-
-	@Override
-	public void start() {
-		start = new Date();
-		executionLog = new ArrayList<PlayerAction>();
 	}
 
 	@Override
 	public void touche(final int logicId, final int stepId, final Color color, final long delay) {
-		executionLog.add(new PlayerAction(logicId, delay, stepId, playersAndColors.indexOf(color)));
+		getExecutionLog().add(new ActionLog.PlayerToucheActionLog(logicId, delay, stepId, playersAndColors.indexOf(color)));
 	}
 
-	@Override
-	public void stepTimeout() {
-		//TODO: por ahora action vacia representa el timeout
-		executionLog.add(null);
+	public int getNumberOfNodes() {
+		return numberOfNodes;
 	}
 
-	@Override
-	public void finish() {
-		end = new Date();
-		//TODO: esto seria en el caso de que se desea guardar
-//		super.classToJSON(this,"jsonFile");
+	public int getTotalSteps() {
+		return totalSteps;
+	}
+
+	public long getStepTimeout() {
+		return stepTimeout;
+	}
+
+	public long getDelay() {
+		return delay;
+	}
+
+	public boolean isWaitForAllPlayers() {
+		return waitForAllPlayers;
+	}
+
+	public boolean isStopOnTimeout() {
+		return stopOnTimeout;
+	}
+
+	public ArrayList<Color> getPlayersAndColors() {
+		return playersAndColors;
 	}
 }
-

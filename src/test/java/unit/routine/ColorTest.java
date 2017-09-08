@@ -16,7 +16,7 @@ public class ColorTest {
 	private final byte GREEN = 15;
 	private final byte BLUE = 15;
 
-	@Test
+	@ClassTest
 	public void colorTest() {
 		Color color;
 		assertThrows(IllegalArgumentException.class, new Executable() {

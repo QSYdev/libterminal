@@ -44,7 +44,7 @@ public class SenderTest {
 		nodes.put(1, node);
 	}
 
-	@Test
+	@ClassTest
 	public void run() {
 		Sender sender = new Sender(nodes);
 		Thread senderThread = new Thread(sender, "Sender thread");

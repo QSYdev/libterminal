@@ -31,7 +31,7 @@ public class QSYPacketTest {
 
 	private byte[] qsyPacketData;
 
-	@Test
+	@ClassTest
 	public void qsyPacketConstruction() {
 		final InetAddress nodeAddress = mock(InetAddress.class);
 		qsyPacketData = new byte[PACKET_SIZE];
@@ -71,7 +71,7 @@ public class QSYPacketTest {
 		assertNotNull(new QSYPacket(nodeAddress, qsyPacketData), "QSYPacket no deberia ser null");
 	}
 
-	@Test
+	@ClassTest
 	public void createCommandPacket() {
 		final CommandParameters commandParameters = new CommandParameters(1,1000, new Color((byte)15, (byte)0, (byte)0),0);
 		assertThrows(IllegalArgumentException.class, new Executable() {

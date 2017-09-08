@@ -6,6 +6,7 @@ import libterminal.lib.routine.NodeConfiguration;
 import libterminal.lib.routine.Routine;
 import libterminal.lib.routine.Step;
 import libterminal.utils.RoutineManager;
+
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;

@@ -45,7 +45,7 @@ public class KeepAliveTest {
 		nodes.put(1, node);
 	}
 
-	@Test
+	@ClassTest
 	public void qsyKeepAlivePacketReceived() {
 		runner = new KeepAliveRunner();
 		keepAlive = new KeepAlive(nodes);
@@ -60,7 +60,7 @@ public class KeepAliveTest {
 		assertNotEquals(0, runner.getKeepAliveErrorCountNode1());
 	}
 
-	@Test
+	@ClassTest
 	public void newNodeCreated() {
 		runner = new KeepAliveRunner();
 		keepAlive = new KeepAlive(nodes);

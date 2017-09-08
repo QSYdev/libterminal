@@ -6,15 +6,21 @@ import java.util.Iterator;
 public final class Routine implements Iterable<Step> {
 
 	private final byte numberOfNodes;
+	private final long totalTimeOut;
 	private final ArrayList<Step> steps;
 
-	public Routine(final byte numberOfNodes, final ArrayList<Step> steps) {
+	public Routine(final byte numberOfNodes, final long totalTimeOut, final ArrayList<Step> steps) {
 		this.numberOfNodes = numberOfNodes;
+		this.totalTimeOut = totalTimeOut;
 		this.steps = steps;
 	}
 
 	public byte getNumberOfNodes() {
 		return numberOfNodes;
+	}
+
+	public long getTotalTimeOut() {
+		return totalTimeOut;
 	}
 
 	public ArrayList<Step> getSteps() {

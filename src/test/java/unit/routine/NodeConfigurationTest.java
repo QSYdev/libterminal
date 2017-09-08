@@ -21,17 +21,17 @@ public class NodeConfigurationTest {
 		nodeConfiguration = new NodeConfiguration(ID, DELAY, COLOR);
 	}
 
-	@Test
+	@ClassTest
 	public void getId() {
 		assertEquals(ID, nodeConfiguration.getId());
 	}
 
-	@Test
+	@ClassTest
 	public void getDelay() {
 		assertEquals(DELAY, nodeConfiguration.getDelay());
 	}
 
-	@Test
+	@ClassTest
 	public void getColor() {
 		assertEquals(COLOR, nodeConfiguration.getColor());
 	}

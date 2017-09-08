@@ -12,11 +12,12 @@ import libterminal.lib.executor.CustomExecutor;
 import libterminal.lib.executor.Executor;
 import libterminal.lib.executor.PlayerExecutor;
 import libterminal.lib.keepalive.KeepAlive;
+import libterminal.lib.node.Node;
 import libterminal.lib.protocol.CommandParameters;
 import libterminal.lib.protocol.QSYPacket;
+import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.Routine;
-import libterminal.lib.node.Node;
 import libterminal.patterns.observer.AsynchronousListener;
 import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.EventListener;
@@ -70,89 +71,91 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	private void processEvent(Event event) throws IOException, ClosedByInterruptException {
 		switch (event.getEventType()) {
-			case incomingQSYPacket:
-				processPacket((QSYPacket) event.getContent());
-				break;
-			case keepAliveError:
-				final Node node = (Node) event.getContent();
-				synchronized (nodes) {
-					nodes.remove(node.getNodeId());
-				}
-				node.close();
+		case incomingQSYPacket:
+			processPacket((QSYPacket) event.getContent());
+			break;
+		case keepAliveError:
+			final Node node = (Node) event.getContent();
+			synchronized (nodes) {
+				nodes.remove(node.getNodeId());
+			}
+			node.close();
 
-				sendEvent(new Event(Event.EventType.disconnectedNode, node));
-				System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
-				break;
-			case commandRequest:
-				final CommandParameters parameters = (CommandParameters) event.getContent();
-				final InetAddress nodeAddress;
-				synchronized (nodes) {
-					nodeAddress = nodes.get(parameters.getPhysicalId()).getNodeAddress();
+			sendEvent(new Event(Event.EventType.disconnectedNode, node));
+			System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
+			break;
+		case commandRequest:
+			final CommandParameters parameters = (CommandParameters) event.getContent();
+			final InetAddress nodeAddress;
+			synchronized (nodes) {
+				nodeAddress = nodes.get(parameters.getPhysicalId()).getNodeAddress();
+			}
+			final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters, touchEnabled.get(), soundEnabled.get());
+			sendQSYPacket(commandPacket);
+			break;
+		case executorStepTimeout:
+			System.out.println("Timeout de step.");
+			break;
+		case executorDoneExecuting:
+			Results results = null;
+			synchronized (executorLock) {
+				if (executor != null) {
+					executor.stop();
+					executor.removeListener(this);
+					results = executor.getResults();
+					executor = null;
+					this.soundEnabled.set(false);
+					this.touchEnabled.set(false);
 				}
-				final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters, touchEnabled.get(), soundEnabled.get());
-				sendQSYPacket(commandPacket);
-				break;
-			case executorStepTimeout:
-				System.out.println("Timeout de step.");
-				break;
-			case executorDoneExecuting:
-				synchronized (executorLock) {
-					if (executor != null) {
-						executor.stop();
-						executor.removeListener(this);
-						executor = null;
-						this.soundEnabled.set(false);
-						this.touchEnabled.set(false);
-					}
-				}
-				System.out.println("Se termino la rutina");
-				break;
-			default:
-				break;
+			}
+			System.out.println("Se termino la rutina");
+			sendEvent(new Event(Event.EventType.routineFinished, results));
+			break;
+		default:
+			break;
 		}
 	}
 
 	private void processPacket(QSYPacket qsyPacket) {
 		switch (qsyPacket.getType()) {
-			case Hello:
-				if (searchNodes.get()) {
-					final boolean contains;
-					synchronized (nodes) {
-						contains = nodes.containsKey(qsyPacket.getId());
-					}
-					if (!contains) {
-						Node node;
-						try {
-							node = new Node(qsyPacket);
-							synchronized (nodes) {
-								nodes.put(node.getNodeId(), node);
-							}
-							keepAlive.newNodeCreated(node);
-							sendEvent(new Event(Event.EventType.newNode, node));
-						} catch (IllegalArgumentException e) {
-							System.err.println(e.getMessage());
-						} catch (IOException e) {
-							this.running.set(false);
-							e.printStackTrace();
+		case Hello:
+			if (searchNodes.get()) {
+				final boolean contains;
+				synchronized (nodes) {
+					contains = nodes.containsKey(qsyPacket.getId());
+				}
+				if (!contains) {
+					Node node;
+					try {
+						node = new Node(qsyPacket);
+						synchronized (nodes) {
+							nodes.put(node.getNodeId(), node);
 						}
+						keepAlive.newNodeCreated(node);
+						sendEvent(new Event(Event.EventType.newNode, node));
+					} catch (IllegalArgumentException e) {
+						System.err.println(e.getMessage());
+					} catch (IOException e) {
+						this.running.set(false);
+						e.printStackTrace();
 					}
 				}
-				break;
-			case Keepalive:
-				keepAlive.qsyKeepAlivePacketReceived(qsyPacket);
-				break;
-			case Touche:
-				synchronized (executorLock) {
-					if (executor != null) {
-						executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
-					}
+			}
+			break;
+		case Keepalive:
+			keepAlive.qsyKeepAlivePacketReceived(qsyPacket);
+			break;
+		case Touche:
+			synchronized (executorLock) {
+				if (executor != null) {
+					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
 				}
-				break;
-			default:
-				break;
+			}
+			break;
+		default:
+			break;
 		}
 	}
-
 
 	public TreeMap<Integer, Node> getNodes() {
 		return nodes;
@@ -166,15 +169,13 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		searchNodes.set(false);
 	}
 
-	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations,
-	                          final int maxExecTime, boolean soundEnabled, boolean touchEnabled) {
+	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations, boolean soundEnabled, boolean touchEnabled) {
 		synchronized (executorLock) {
 			if (executor == null) {
-				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations,
-					routine.getNumberOfNodes());
+				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, routine.getNumberOfNodes());
 				this.soundEnabled.set(soundEnabled);
 				this.touchEnabled.set(touchEnabled);
-				executor = new CustomExecutor(routine, associations, maxExecTime);
+				executor = new CustomExecutor(routine, associations);
 				executor.addListener(this);
 				executor.start();
 			} else {
@@ -183,22 +184,21 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		}
 	}
 
-	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes,
-	                          final ArrayList<Color> playersAndColors, final boolean waitForAllPlayers, final long timeOut,
-	                          final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout,
-	                          boolean soundEnabled, boolean touchEnabled) {
+	public void executePlayer(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final ArrayList<Color> playersAndColors,
+			final boolean waitForAllPlayers, final long timeOut, final long delay, final long maxExecTime, final int totalStep, final boolean stopOnTimeout,
+			boolean soundEnabled, boolean touchEnabled) {
 
 		synchronized (executorLock) {
 			if (executor == null) {
 				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0)
-					|| playersAndColors.size() > numberOfNodes) {
+						|| playersAndColors.size() > numberOfNodes) {
 					throw new IllegalArgumentException();
 				}
 				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, numberOfNodes);
 				this.soundEnabled.set(soundEnabled);
 				this.touchEnabled.set(touchEnabled);
-				executor = new PlayerExecutor(associations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut,
-					delay, maxExecTime, totalStep, stopOnTimeout);
+				executor = new PlayerExecutor(associations, numberOfNodes, playersAndColors, waitForAllPlayers, timeOut, delay, maxExecTime, totalStep,
+						stopOnTimeout);
 				executor.addListener(this);
 				executor.start();
 			} else {
@@ -219,8 +219,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		}
 	}
 
-	private TreeMap<Integer, Integer> associateNodes(final TreeMap<Integer, Integer> nodesIdsAssociations,
-	                                                 final int numberOfNodes) {
+	private TreeMap<Integer, Integer> associateNodes(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes) {
 		TreeMap<Integer, Integer> nodesAddresses;
 		if (nodesIdsAssociations == null) {
 			synchronized (nodes) {
@@ -250,16 +249,14 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		}
 	}
 
-	private TreeMap<Integer, Integer> getNodesAssociationsFromIds(
-		final TreeMap<Integer, Integer> nodesIdsAssociations) {
+	private TreeMap<Integer, Integer> getNodesAssociationsFromIds(final TreeMap<Integer, Integer> nodesIdsAssociations) {
 		if (nodesIdsAssociations.size() <= nodes.size()) {
 			final TreeMap<Integer, Integer> nodesAddresses = new TreeMap<>();
 			for (final Entry<Integer, Integer> entry : nodesIdsAssociations.entrySet()) {
 				if (nodes.containsKey(entry.getValue())) {
 					nodesAddresses.put(entry.getKey(), entry.getValue());
 				} else {
-					throw new IllegalStateException(
-						"<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion.");
+					throw new IllegalStateException("<< Terminal >> No hay suficientes nodos registrados para hacer la asociacion.");
 				}
 			}
 			return nodesAddresses;
