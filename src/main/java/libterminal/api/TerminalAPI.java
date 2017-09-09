@@ -22,6 +22,7 @@ public final class TerminalAPI {
 	private Thread threadTerminal;
 	private Thread threadSender;
 	private Thread threadMulticastReceiver;
+	private MulticastReceiver multicastReceiver;
 
 	private Terminal terminal;
 
@@ -34,7 +35,7 @@ public final class TerminalAPI {
 	}
 
 	public void start() throws IOException {
-		final MulticastReceiver multicastReceiver = new MulticastReceiver(
+		multicastReceiver = new MulticastReceiver(
 			multicastAddress,
 			(InetAddress) InetAddress.getByName(QSYPacket.MULTICAST_ADDRESS),
 			QSYPacket.MULTICAST_PORT
@@ -97,7 +98,7 @@ public final class TerminalAPI {
 		threadReceiveSelector.interrupt();
 		threadTerminal.interrupt();
 		threadSender.interrupt();
-		threadMulticastReceiver.close();
+		multicastReceiver.stop();
 		threadReceiveSelector.join();
 		threadTerminal.join();
 		threadSender.join();
