@@ -94,11 +94,11 @@ public final class TerminalAPI {
 		terminal.removeListener(listener);
 	}
 
-	public void stop() throws InterruptedException {
+	public void stop() throws InterruptedException, Exception {
 		threadReceiveSelector.interrupt();
 		threadTerminal.interrupt();
 		threadSender.interrupt();
-		multicastReceiver.stop();
+		multicastReceiver.close();
 		threadReceiveSelector.join();
 		threadTerminal.join();
 		threadSender.join();
