@@ -97,7 +97,7 @@ public final class TerminalAPI {
 		threadReceiveSelector.interrupt();
 		threadTerminal.interrupt();
 		threadSender.interrupt();
-		threadMulticastReceiver.interrupt();
+		threadMulticastReceiver.close();
 		threadReceiveSelector.join();
 		threadTerminal.join();
 		threadSender.join();
