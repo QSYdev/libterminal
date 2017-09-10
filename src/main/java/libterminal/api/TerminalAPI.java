@@ -22,6 +22,7 @@ public final class TerminalAPI {
 	private Thread threadTerminal;
 	private Thread threadSender;
 	private Thread threadMulticastReceiver;
+	private MulticastReceiver multicastReceiver;
 
 	private Terminal terminal;
 
@@ -34,8 +35,7 @@ public final class TerminalAPI {
 	}
 
 	public void start() throws IOException {
-		final MulticastReceiver multicastReceiver = new MulticastReceiver(multicastAddress, (InetAddress) InetAddress.getByName(QSYPacket.MULTICAST_ADDRESS),
-				QSYPacket.MULTICAST_PORT);
+		multicastReceiver = new MulticastReceiver(multicastAddress, (InetAddress) InetAddress.getByName(QSYPacket.MULTICAST_ADDRESS), QSYPacket.MULTICAST_PORT);
 		terminal = new Terminal();
 		final ReceiverSelector receiverSelector = new ReceiverSelector();
 		final Sender senderSelector = new Sender(terminal.getNodes());
@@ -88,11 +88,11 @@ public final class TerminalAPI {
 		terminal.removeListener(listener);
 	}
 
-	public void stop() throws InterruptedException {
+	public void stop() throws InterruptedException, Exception {
 		threadReceiveSelector.interrupt();
 		threadTerminal.interrupt();
 		threadSender.interrupt();
-		threadMulticastReceiver.interrupt();
+		multicastReceiver.close();
 		threadReceiveSelector.join();
 		threadTerminal.join();
 		threadSender.join();

@@ -23,8 +23,6 @@ public class Node implements Comparable<Node>, AutoCloseable {
 			final InetSocketAddress hostAddress = new InetSocketAddress(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT);
 			final SocketChannel nodeSocketChannel = SocketChannel.open(hostAddress);
 			nodeSocketChannel.configureBlocking(false);
-			nodeSocketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
-			nodeSocketChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, false);
 			this.nodeId = qsyPacket.getId();
 			this.nodeAddress = qsyPacket.getNodeAddress();
 			this.nodeSocketChannel = nodeSocketChannel;
