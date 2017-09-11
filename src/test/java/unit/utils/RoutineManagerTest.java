@@ -2,6 +2,7 @@ package unit.utils;
 
 import libterminal.lib.routine.Routine;
 import libterminal.utils.RoutineManager;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -23,7 +24,7 @@ public class RoutineManagerTest {
 
 	private final String UNEXPECTED_NULL = "La rutina no deberia ser null";
 
-	@Test
+	@ClassTest
 	public void loadRoutine() {
 		assertThrows(IOException.class, new Executable() {
 			@Override
@@ -34,7 +35,7 @@ public class RoutineManagerTest {
 		assertNotNull(loadRoutineMethod(), UNEXPECTED_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void storeRoutine() {
 		try {
 			RoutineManager.storeRoutine(FACTORY_TEST_ROUTINE_STORE_PATH, loadRoutineMethod());

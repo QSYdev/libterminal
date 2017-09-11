@@ -39,7 +39,7 @@ class PlayerExecutorMockTest {
 		executor.start();
 	}
 
-	@Test
+	@ClassTest
 	public void getNextStep() {
 		Step step = executor.getNextStep();
 		assertNotNull(step, "Paso no deberia ser null");
@@ -53,7 +53,7 @@ class PlayerExecutorMockTest {
 		}
 	}
 
-	@Test
+	@ClassTest
 	public void hasNextStep() {
 		assertEquals(true, executor.hasNextStep(), "Una vez creado deberian haber pasos");
 		for(int i = 0; i < totalStep-1; i++)

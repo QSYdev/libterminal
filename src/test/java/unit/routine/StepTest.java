@@ -27,22 +27,22 @@ public class StepTest {
 		step = new Step(nodesConfiguration, TIMEOUT, EXPRESSION, STOP_ON_TIMEOUT);
 	}
 
-	@Test
+	@ClassTest
 	public void getTimeout() {
 		assertEquals(TIMEOUT, step.getTimeOut());
 	}
 
-	@Test
+	@ClassTest
 	public void getExpression() {
 		assertEquals(EXPRESSION, step.getExpression());
 	}
 
-	@Test
+	@ClassTest
 	public void getStopOnTimeout() {
 		assertEquals(STOP_ON_TIMEOUT, step.getStopOnTimeout());
 	}
 
-	@Test
+	@ClassTest
 	public void getNodesConfiguration() {
 		assertEquals(nodesConfiguration, step.getNodesConfiguration());
 	}

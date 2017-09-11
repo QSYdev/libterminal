@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import libterminal.lib.routine.Step;
 import libterminal.utils.RoutineManager;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
@@ -37,7 +38,7 @@ public class CustomExecutorMockTest {
 		executor.start();
 	}
 
-	@Test
+	@ClassTest
 	public void getNextStep() {
 		for(int i = 1; i < NUMBER_OF_STEPS; i++) {
 			Step step = executor.getNextStep();
@@ -51,7 +52,7 @@ public class CustomExecutorMockTest {
 		}
 	}
 
-	@Test
+	@ClassTest
 	public void hasNextStep() {
 		assertEquals(true, executor.hasNextStep(), "Una vez creado deberian haber pasos");
 		for(int i = 0; i < NUMBER_OF_STEPS-1; i++)

@@ -1,37 +1,53 @@
 package libterminal.lib.results;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import libterminal.lib.routine.Color;
 
-import java.io.*;
-
 public abstract class Results {
-	public abstract void start();
-	public abstract void touche(final int logicID, final int stepId, final Color color, final long delay);
-	public abstract void stepTimeout();
-	//TODO: agregar un executionTimeout, pero para eso agregar timeout a Custom Execution para que el executor lo sepa
-	public abstract void finish();
 
-	public void bufferToFile(final StringBuilder buffer, final String fileName){
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName+".txt")));
-			writer.write(buffer.toString());
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static final byte PLAYER_TYPE = 0x00;
+	public static final byte CUSTOM_TYPE = 0x01;
+
+	private final byte type;
+	private final long totalTimeOut;
+	private final ArrayList<ActionLog> executionLog;
+
+	public Results(final byte type, final long totalTimeOut) {
+		this.type = type;
+		this.totalTimeOut = totalTimeOut;
+		this.executionLog = new ArrayList<>();
 	}
-	protected void classToJSON(Results results, String fileName){
-		GsonBuilder builder = new GsonBuilder();
-		builder.setPrettyPrinting();
-		Gson gson = builder.create();
-		try {
-			Writer writer = new FileWriter(fileName+".json");
-			gson.toJson(results, writer);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+	public void start() {
+		executionLog.add(new ActionLog.StartActionLog(new Date()));
+	}
+
+	public abstract void touche(final int logicID, final int stepId, final Color color, final long delay);
+
+	public void stepTimeout() {
+		executionLog.add(new ActionLog.StepTimeOutActionLog());
+	}
+
+	public void routineTimeOut() {
+		executionLog.add(new ActionLog.RoutineTimeOutActionLog());
+	}
+
+	public void finish() {
+		executionLog.add(new ActionLog.StopActionLog(new Date()));
+	}
+
+	public List<ActionLog> getExecutionLog() {
+		return executionLog;
+	}
+
+	public byte getType() {
+		return type;
+	}
+
+	public long getTotalTimeOut() {
+		return totalTimeOut;
 	}
 }

@@ -11,12 +11,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.NodeConfiguration;
 import libterminal.lib.routine.Routine;
 import libterminal.lib.routine.Step;
-import com.google.gson.*;
-
 
 public final class RoutineManager {
 
@@ -57,10 +65,11 @@ public final class RoutineManager {
 		}
 	}
 
-	private static class RoutineSerializer implements JsonDeserializer<Routine>, JsonSerializer<Routine> {
+	static final class RoutineSerializer implements JsonDeserializer<Routine>, JsonSerializer<Routine> {
 
 		private static final String NUMBER_OF_NODES_ATT = "numberOfNodes";
 		private static final String STEPS_ATT = "steps";
+		private static final String TOTAL_TIME_OUT_ATT = "totalTimeOut";
 
 		public RoutineSerializer() {
 		}
@@ -69,9 +78,10 @@ public final class RoutineManager {
 		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
 			final byte numberOfNodes = jsonObject.get(NUMBER_OF_NODES_ATT).getAsByte();
+			final long totalTimeOut = jsonObject.get(TOTAL_TIME_OUT_ATT).getAsLong();
 			final Step[] steps = context.deserialize(jsonObject.get(STEPS_ATT), Step[].class);
 
-			return new Routine(numberOfNodes, new ArrayList<>(Arrays.asList(steps)));
+			return new Routine(numberOfNodes, totalTimeOut, new ArrayList<>(Arrays.asList(steps)));
 		}
 
 		@Override
@@ -79,13 +89,14 @@ public final class RoutineManager {
 			final JsonObject jsonObject = new JsonObject();
 
 			jsonObject.addProperty(NUMBER_OF_NODES_ATT, routine.getNumberOfNodes());
+			jsonObject.addProperty(TOTAL_TIME_OUT_ATT, routine.getTotalTimeOut());
 			jsonObject.add(STEPS_ATT, context.serialize(routine.getSteps()));
 
 			return jsonObject;
 		}
 	}
 
-	private static class StepSerializer implements JsonDeserializer<Step>, JsonSerializer<Step> {
+	static class StepSerializer implements JsonDeserializer<Step>, JsonSerializer<Step> {
 
 		private static final String EXPRESSION_ATT = "expression";
 		private static final String TIME_OUT_ATT = "timeOut";
@@ -121,7 +132,7 @@ public final class RoutineManager {
 
 	}
 
-	private static class NodeConfigurationSerializer implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
+	static class NodeConfigurationSerializer implements JsonDeserializer<NodeConfiguration>, JsonSerializer<NodeConfiguration> {
 
 		private static final String ID_ATT = "id";
 		private static final String DELAY_ATT = "delay";
@@ -154,7 +165,7 @@ public final class RoutineManager {
 
 	}
 
-	private static class ColorSerializer implements JsonDeserializer<Color>, JsonSerializer<Color> {
+	static class ColorSerializer implements JsonDeserializer<Color>, JsonSerializer<Color> {
 
 		private static final String RED_ATT = "red";
 		private static final String GREEN_ATT = "green";
@@ -185,4 +196,5 @@ public final class RoutineManager {
 			return jsonObject;
 		}
 	}
+
 }

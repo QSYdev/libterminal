@@ -43,13 +43,13 @@ public class RoutineTest {
 		routine = new Routine((byte)1, steps);
 	}
 
-	@Test
+	@ClassTest
 	public void routineTest() {
 		assertEquals(1, routine.getNumberOfNodes());
 		assertEquals(steps, routine.getSteps());
 	}
 
-	@Test
+	@ClassTest
 	public void getIterator() {
 		final Iterator iterator = routine.iterator();
 		assertEquals(true, iterator.hasNext());

@@ -18,7 +18,7 @@ public class ExpressionTreeTest {
 	private boolean[] touchedNodes;
 	private final int MAX_NODES = 4;
 
-	@Test
+	@ClassTest
 	public void evaluateExpressionTree() {
 		// SIMPLE STEP
 		touchedNodes = new boolean[2];

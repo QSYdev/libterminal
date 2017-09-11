@@ -26,7 +26,7 @@ public abstract class Executor extends EventSource {
 
 	private Step currentStep;
 	private int numberOfStep;
-	private final long maxExecTime;
+	private final long totalTimeOut;
 
 	private final Timer stepTimer;
 	private StepTimeOutTimerTask stepTimerTask;
@@ -34,9 +34,9 @@ public abstract class Executor extends EventSource {
 	private final Timer timer;
 	private RoutineTimerTask timerTask;
 
-	private Results results;
+	private final Results results;
 
-	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long maxExecTime) {
+	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long totalTimeOut) {
 		this.running = new AtomicBoolean(false);
 
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
@@ -45,7 +45,7 @@ public abstract class Executor extends EventSource {
 
 		this.currentStep = null;
 		this.numberOfStep = 0;
-		this.maxExecTime = maxExecTime;
+		this.totalTimeOut = totalTimeOut;
 
 		this.stepTimer = new Timer("Step Time Out", false);
 		this.stepTimerTask = null;
@@ -57,8 +57,8 @@ public abstract class Executor extends EventSource {
 	}
 
 	public synchronized void start() {
-		if (maxExecTime > 0) {
-			timer.schedule(timerTask = new RoutineTimerTask(), maxExecTime);
+		if (totalTimeOut > 0) {
+			timer.schedule(timerTask = new RoutineTimerTask(), totalTimeOut);
 		}
 		running.set(true);
 		currentStep = getNextStep();

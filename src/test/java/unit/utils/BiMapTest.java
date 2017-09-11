@@ -17,55 +17,55 @@ public class BiMapTest {
 	private final String UNEXPECTED_PHYSICAL_ID = "La clave fisica obtenida no es la correcta";
 	private final String UNEXPECTED_LOGICAL_ID = "La clave logica obtenida no es la correcta";
 
-	@Test
+	@ClassTest
 	public void numberOfIdsConstructor() {
 		biMap = new BiMap(2);
 		assertNull(biMap.getPhysicalId(1), UNEXPECTED_NOT_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void associationsConstructor(){
 		setUpWithAssociations();
 		assertNotNull(biMap.getLogicalId(1), UNEXPECTED_NULL);
 		assertNull(biMap.getLogicalId(5), UNEXPECTED_NOT_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void addEntry(){
 		biMap = new BiMap(2);
 		biMap.addEntry(1,1);
 		assertNotNull(biMap.getLogicalId(1), UNEXPECTED_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void getPhysicalId(){
 		setUpWithAssociations();
 		assertEquals(new Integer(1), biMap.getPhysicalId(1), UNEXPECTED_PHYSICAL_ID);
 		assertNotEquals(new Integer(5), biMap.getPhysicalId(2), UNEXPECTED_PHYSICAL_ID);
 	}
 
-	@Test
+	@ClassTest
 	public void getLogicalId(){
 		setUpWithAssociations();
 		assertEquals(new Integer(1), biMap.getLogicalId(1), UNEXPECTED_LOGICAL_ID);
 		assertNotEquals(new Integer(4), biMap.getLogicalId(3), UNEXPECTED_LOGICAL_ID);
 	}
 
-	@Test
+	@ClassTest
 	public void removeByPhysicalId(){
 		setUpWithAssociations();
 		biMap.removeByPhysicalId(1);
 		assertNull(biMap.getLogicalId(1), UNEXPECTED_NOT_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void removeByLogicalId(){
 		setUpWithAssociations();
 		biMap.removeByLogicalId(1);
 		assertNull(biMap.getLogicalId(1), UNEXPECTED_NOT_NULL);
 	}
 
-	@Test
+	@ClassTest
 	public void clear(){
 		setUpWithAssociations();
 		biMap.clear();

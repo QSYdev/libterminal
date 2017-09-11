@@ -14,7 +14,7 @@ public class UtilsStaticTest {
 	private static final String UNEXPECTED_LENGTH = "La cantidad de numeros no es la correcta";
 	private static final String UNEXPECTED_VALUE = "El entero identificador obtenido es incorrecto";
 
-	@Test
+	@ClassTest
 	public void fromInfixToPostfix() {
 		final int[] result = {1, 2, Utils.AND_INT_VALUE, 3, 4, Utils.AND_INT_VALUE, Utils.OR_INT_VALUE};
 		final int[] numbers = Utils.fromInfixToPostfix("(1&2)|(3&4)");
