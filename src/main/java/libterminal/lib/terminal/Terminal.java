@@ -285,6 +285,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 					e.printStackTrace();
 				}
 			}
+			nodes.clear();
 		}
 		super.close();
 	}

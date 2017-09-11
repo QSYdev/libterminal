@@ -66,11 +66,19 @@ public final class TerminalAPI {
 	}
 
 	public void startNodesSearch() {
-		terminal.searchNodes();
+		if (up) {
+			terminal.searchNodes();
+		} else {
+			throw new IllegalStateException("Terminal no está corriendo");
+		}
 	}
 
 	public void stopNodesSearch() {
-		terminal.finalizeNodesSearch();
+		if (up) {
+			terminal.finalizeNodesSearch();
+		} else {
+			throw new IllegalStateException("Terminal no está corriendo");
+		}
 	}
 
 	public void executeCustom(final Routine routine, final TreeMap<Integer, Integer> nodesIdsAssociations,
@@ -95,23 +103,34 @@ public final class TerminalAPI {
 	}
 
 	public void stop() throws InterruptedException, Exception {
-		threadReceiveSelector.interrupt();
-		threadTerminal.interrupt();
-		threadSender.interrupt();
-		multicastReceiver.close();
-		threadReceiveSelector.join();
-		threadTerminal.join();
-		threadSender.join();
-		threadMulticastReceiver.join();
-		up = false;
+		if (up) {
+			threadReceiveSelector.interrupt();
+			threadTerminal.interrupt();
+			threadSender.interrupt();
+			multicastReceiver.close();
+			threadReceiveSelector.join();
+			threadTerminal.join();
+			threadSender.join();
+			threadMulticastReceiver.join();
+			terminal = null;
+			up = false;
+		}
 	}
 
 	public int connectedNodesAmount() {
-		return terminal.getNodes().size();
+		if (up) {
+			return terminal.getNodes().size();
+		} else {
+			throw new IllegalStateException("Terminal no está corriendo");
+		}
 	}
 
 	public void stopExecution() {
-		terminal.stopExecution();
+		if (up) {
+			terminal.stopExecution();
+		} else {
+			throw new IllegalStateException("Terminal no está corriendo");
+		}
 	}
 
 	public void sendPacket(Integer nodeId, CommandParameters commandParameters, boolean soundEnabled,
