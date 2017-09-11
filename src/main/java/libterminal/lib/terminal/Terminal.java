@@ -191,7 +191,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		synchronized (executorLock) {
 			if (executor == null) {
 				if (timeOut < 0 || delay < 0 || maxExecTime < 0 || totalStep < 0 || (maxExecTime == 0 && totalStep == 0)
-						|| playersAndColors.size() > numberOfNodes) {
+						|| playersAndColors.size() > numberOfNodes || playersAndColors.size() <= 0) {
 					throw new IllegalArgumentException();
 				}
 				final TreeMap<Integer, Integer> associations = associateNodes(nodesIdsAssociations, numberOfNodes);
