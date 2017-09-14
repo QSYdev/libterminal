@@ -84,15 +84,29 @@ public abstract class ActionLog {
 
 	public static final class StepTimeOutActionLog extends ActionLog {
 
-		public StepTimeOutActionLog() {
+		private final int stepId;
+
+		public StepTimeOutActionLog(final int stepId) {
 			super(STEP_TIME_OUT_ID);
+			this.stepId = stepId;
+		}
+
+		public int getStepId() {
+			return stepId;
 		}
 	}
 
 	public static final class RoutineTimeOutActionLog extends ActionLog {
 
-		public RoutineTimeOutActionLog() {
+		private final int stepId;
+
+		public RoutineTimeOutActionLog(final int stepId) {
 			super(ROUTINE_TIME_OUT_ID);
+			this.stepId = stepId;
+		}
+
+		public int getStepId() {
+			return stepId;
 		}
 	}
 

@@ -27,12 +27,12 @@ public abstract class Results {
 
 	public abstract void touche(final int logicID, final int stepId, final Color color, final long delay);
 
-	public void stepTimeout() {
-		executionLog.add(new ActionLog.StepTimeOutActionLog());
+	public void stepTimeout(final int stepId) {
+		executionLog.add(new ActionLog.StepTimeOutActionLog(stepId));
 	}
 
-	public void routineTimeOut() {
-		executionLog.add(new ActionLog.RoutineTimeOutActionLog());
+	public void routineTimeOut(final int stepId) {
+		executionLog.add(new ActionLog.RoutineTimeOutActionLog(stepId));
 	}
 
 	public void finish() {

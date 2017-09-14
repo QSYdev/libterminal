@@ -228,9 +228,9 @@ public class ResultsManager {
 				return new ActionLog.PlayerToucheActionLog(logicId, delay, stepId, playerId);
 			}
 			case ActionLog.STEP_TIME_OUT_ID:
-				return new ActionLog.StepTimeOutActionLog();
+				return new ActionLog.StepTimeOutActionLog(jsonObject.get(STEP_ID_ATT).getAsInt());
 			case ActionLog.ROUTINE_TIME_OUT_ID:
-				return new ActionLog.RoutineTimeOutActionLog();
+				return new ActionLog.RoutineTimeOutActionLog(jsonObject.get(STEP_ID_ATT).getAsInt());
 			case ActionLog.STOP_ID:
 				final Date stop = new Date(jsonObject.get(STOP_ATT).getAsLong());
 				return new ActionLog.StopActionLog(stop);
@@ -274,11 +274,11 @@ public class ResultsManager {
 		}
 
 		private void serialize(final RoutineTimeOutActionLog actionLog, final JsonObject jsonObject) {
-			return;
+			jsonObject.addProperty(STEP_ID_ATT, actionLog.getStepId());
 		}
 
 		private void serialize(final StepTimeOutActionLog actionLog, final JsonObject jsonObject) {
-			return;
+			jsonObject.addProperty(STEP_ID_ATT, actionLog.getStepId());
 		}
 
 		private void serialize(final PlayerToucheActionLog actionLog, final JsonObject jsonObject) {

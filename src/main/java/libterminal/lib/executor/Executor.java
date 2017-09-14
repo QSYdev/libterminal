@@ -6,14 +6,14 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import libterminal.lib.protocol.CommandParameters;
+import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
-import libterminal.lib.routine.Step;
 import libterminal.lib.routine.NodeConfiguration;
+import libterminal.lib.routine.Step;
 import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.EventSource;
 import libterminal.utils.BiMap;
 import libterminal.utils.ExpressionTree;
-import libterminal.lib.results.Results;
 
 public abstract class Executor extends EventSource {
 
@@ -89,7 +89,7 @@ public abstract class Executor extends EventSource {
 	public synchronized void touche(final int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
-			if(stepId != numberOfStep){
+			if (stepId != numberOfStep) {
 				throw new IllegalStateException("<< Executor >> Se recibio un paquete de un paso distinto al actual");
 			}
 			touchedNodes[logicalId] = true;
@@ -109,7 +109,7 @@ public abstract class Executor extends EventSource {
 
 	protected synchronized void stepTimeout() {
 		if (running.get()) {
-			results.stepTimeout();
+			results.stepTimeout(numberOfStep);
 			sendEvent(new Event(Event.EventType.executorStepTimeout, null));
 			if (currentStep.getStopOnTimeout()) {
 				results.finish();
@@ -176,7 +176,7 @@ public abstract class Executor extends EventSource {
 
 	protected abstract boolean hasNextStep();
 
-	public final Results getResults(){
+	public final Results getResults() {
 		return this.results;
 	}
 
