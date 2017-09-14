@@ -1,13 +1,12 @@
 package libterminal.lib.node;
 
-import libterminal.lib.keepalive.KeepAlive;
-import libterminal.lib.protocol.QSYPacket;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
+
+import libterminal.lib.keepalive.KeepAlive;
+import libterminal.lib.protocol.QSYPacket;
 
 public class Node implements Comparable<Node>, AutoCloseable {
 

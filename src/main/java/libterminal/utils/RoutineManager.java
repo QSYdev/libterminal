@@ -65,6 +65,10 @@ public final class RoutineManager {
 		}
 	}
 
+	public static String storeRoutine(final Routine routine) {
+		return gson.toJson(routine);
+	}
+
 	static final class RoutineSerializer implements JsonDeserializer<Routine>, JsonSerializer<Routine> {
 
 		private static final String NUMBER_OF_NODES_ATT = "numberOfNodes";

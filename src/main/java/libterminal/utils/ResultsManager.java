@@ -81,6 +81,10 @@ public class ResultsManager {
 		}
 	}
 
+	public static String storeResults(final Results results) {
+		return gson.toJson(results);
+	}
+
 	static final class ResultsSerializer implements JsonDeserializer<Results>, JsonSerializer<Results> {
 
 		private static final String TYPE_ATT = "type";
