@@ -76,6 +76,8 @@ public final class Event {
 		 */
 		commandRequest,
 
+		routineStarted, commandIssued, toucheReceived,
+
 		/**
 		 * La terminal envia este evento hacia afuera, para avisar a la vista, que la
 		 * rutina ha finalizado. En Content se pueden extraer los resultados para luego
