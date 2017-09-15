@@ -76,7 +76,24 @@ public final class Event {
 		 */
 		commandRequest,
 
-		routineStarted, commandIssued, toucheReceived,
+		/**
+		 * Evento que envia la terminal hacia fuera de la API para indicar que la rutina
+		 * a iniciado
+		 */
+		routineStarted,
+
+		/**
+		 * Indica que se ha enviado un command. En content se encuentra un array de
+		 * Objects que tienen los siguientes elementos. Número de nodo, color y delay
+		 * (en ese orden).
+		 */
+		commandIssued,
+
+		/**
+		 * Indica que se ha recibido un touche. En content se encuentra el numero de
+		 * nodo.
+		 */
+		toucheReceived,
 
 		/**
 		 * La terminal envia este evento hacia afuera, para avisar a la vista, que la
