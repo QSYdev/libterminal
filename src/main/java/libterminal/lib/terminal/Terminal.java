@@ -15,11 +15,13 @@ import libterminal.lib.keepalive.KeepAlive;
 import libterminal.lib.node.Node;
 import libterminal.lib.protocol.CommandParameters;
 import libterminal.lib.protocol.QSYPacket;
+import libterminal.lib.protocol.QSYPacket.PacketType;
 import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.Routine;
 import libterminal.patterns.observer.AsynchronousListener;
 import libterminal.patterns.observer.Event;
+import libterminal.patterns.observer.Event.EventType;
 import libterminal.patterns.observer.EventListener;
 import libterminal.patterns.observer.EventSource;
 
@@ -149,6 +151,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 			synchronized (executorLock) {
 				if (executor != null) {
 					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
+					sendEvent(new Event(EventType.toucheReceived, qsyPacket.getId()));
 				}
 			}
 			break;
@@ -178,6 +181,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 				executor = new CustomExecutor(routine, associations);
 				executor.addListener(this);
 				executor.start();
+				sendEvent(new Event(EventType.routineStarted, null));
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de inciar otra.");
 			}
@@ -201,6 +205,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 						stopOnTimeout);
 				executor.addListener(this);
 				executor.start();
+				sendEvent(new Event(EventType.routineStarted, null));
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de iniciar otra.");
 			}
@@ -267,7 +272,10 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 	}
 
 	public void sendQSYPacket(final QSYPacket qsyPacket) {
-		sendEvent(new Event(Event.EventType.commandPacketSent, qsyPacket));
+		if (qsyPacket.getType() == PacketType.Command) {
+			sendEvent(new Event(Event.EventType.commandPacketSent, qsyPacket));
+			sendEvent(new Event(EventType.commandIssued, new Object[] { qsyPacket.getId(), qsyPacket.getColor(), qsyPacket.getDelay() }));
+		}
 	}
 
 	@Override
