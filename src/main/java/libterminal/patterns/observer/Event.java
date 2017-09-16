@@ -4,20 +4,24 @@ import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
+import libterminal.patterns.visitor.ExternalEventHandle;
+import libterminal.patterns.visitor.ExternaleventHandler;
+import libterminal.patterns.visitor.InternalEventHandle;
+import libterminal.patterns.visitor.InternalEventHandler;
 
 public abstract class Event {
 
 	public Event() {
 	}
 
-	public static abstract class ExternalEvent extends Event {
+	public static abstract class ExternalEvent extends Event implements ExternalEventHandle {
 
 		public ExternalEvent() {
 		}
 
 	}
 
-	public static abstract class InternalEvent extends Event {
+	public static abstract class InternalEvent extends Event implements InternalEventHandle {
 
 		public InternalEvent() {
 		}
@@ -44,6 +48,11 @@ public abstract class Event {
 			return packet;
 		}
 
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -66,6 +75,11 @@ public abstract class Event {
 			return node;
 		}
 
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -84,6 +98,11 @@ public abstract class Event {
 
 		public QSYPacket getPacket() {
 			return packet;
+		}
+
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
 		}
 
 	}
@@ -108,6 +127,11 @@ public abstract class Event {
 			return node;
 		}
 
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -128,19 +152,29 @@ public abstract class Event {
 			return node;
 		}
 
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
 	 * El functional.executor termino de ejecutar la rutina, esto se puede dar
 	 * porque se terminaron todos los pasos o porque se cumplio el tiempo de la
-	 * rutina. TODO: en Content que vamos a poner? Listeners: - <b>Terminal</b>:
-	 * frena el functional.executor lo setea a null y le avisa al cliente que la
-	 * ejecucion termino Senders: - <b>Executor</b>: cuando la ejecucion de la
-	 * rutina actual termina sin ser cortada por el usuario
+	 * rutina. Listeners: - <b>Terminal</b>: frena el functional.executor lo setea a
+	 * null y le avisa al cliente que la ejecucion termino Senders: -
+	 * <b>Executor</b>: cuando la ejecucion de la rutina actual termina sin ser
+	 * cortada por el usuario
 	 */
 	public static final class ExecutorDoneExecutingEvent extends InternalEvent {
 
 		public ExecutorDoneExecutingEvent() {
+		}
+
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
 		}
 
 	}
@@ -155,6 +189,11 @@ public abstract class Event {
 	public static final class ExecutorStepTimeOutEvent extends InternalEvent {
 
 		public ExecutorStepTimeOutEvent() {
+		}
+
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
 		}
 
 	}
@@ -195,6 +234,11 @@ public abstract class Event {
 			return numberOfStep;
 		}
 
+		@Override
+		public void acceptHandler(final InternalEventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -204,6 +248,11 @@ public abstract class Event {
 	public static final class RoutineStartedEvent extends ExternalEvent {
 
 		public RoutineStartedEvent() {
+		}
+
+		@Override
+		public void acceptHandler(ExternaleventHandler handler) {
+			handler.handle(this);
 		}
 
 	}
@@ -237,6 +286,11 @@ public abstract class Event {
 			return delay;
 		}
 
+		@Override
+		public void acceptHandler(final ExternaleventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -254,6 +308,12 @@ public abstract class Event {
 		public int getPhysicalId() {
 			return physicalId;
 		}
+
+		@Override
+		public void acceptHandler(final ExternaleventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 	/**
@@ -272,6 +332,12 @@ public abstract class Event {
 		public Results getResults() {
 			return results;
 		}
+
+		@Override
+		public void acceptHandler(final ExternaleventHandler handler) {
+			handler.handle(this);
+		}
+
 	}
 
 }

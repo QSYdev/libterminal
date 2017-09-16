@@ -51,7 +51,8 @@ public class QSYPacket {
 	private final boolean sound;
 	private final byte[] rawData;
 
-	private QSYPacket(final InetAddress nodeAddress, final PacketType type, final int id, final Color color, final long delay, final int numberOfStep, final boolean touch, final boolean sound) throws IllegalArgumentException {
+	private QSYPacket(final InetAddress nodeAddress, final PacketType type, final int id, final Color color, final long delay, final int numberOfStep,
+			final boolean touch, final boolean sound) throws IllegalArgumentException {
 		this.rawData = new byte[PACKET_SIZE];
 		rawData[Q_INDEX] = 'Q';
 		rawData[S_INDEX] = 'S';
@@ -95,7 +96,7 @@ public class QSYPacket {
 		this.numberOfStep = (int) convertBytesToLong(data, STEP_INDEX, (byte) (STEP_INDEX + 1));
 
 		final short configuration = (short) convertBytesToLong(data, CONFIGURATION_INDEX, (byte) (CONFIGURATION_INDEX + 1));
-		//System.out.println(configuration & 0x0002);
+		// System.out.println(configuration & 0x0002);
 		this.touch = ((configuration & 0x0002) == 0x0002);
 		this.sound = ((configuration & 0x0001) == 0x0001);
 		rawData = Arrays.copyOf(data, PACKET_SIZE);
@@ -257,18 +258,18 @@ public class QSYPacket {
 		return stringBuilder.toString();
 	}
 
-	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final CommandParameters commandParameters, final boolean touchEnabled, final boolean soundEnabled)
-			throws IllegalArgumentException {
+	public static QSYPacket createCommandPacket(final InetAddress nodeAddress, final int physicialId, final Color color, final long delay,
+			final int numberOfStep, final boolean touchEnabled, final boolean soundEnabled) throws IllegalArgumentException {
 		if (nodeAddress == null) {
 			throw new IllegalArgumentException("<< QSY_NODE_ADDRESS_ERROR >> La direccion del nodo debe ser valida");
-		} else if (commandParameters.getPhysicalId() < MIN_ID_SIZE || commandParameters.getPhysicalId() > MAX_ID_SIZE) {
+		} else if (physicialId < MIN_ID_SIZE || physicialId > MAX_ID_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El id debe estar entre [" + MIN_ID_SIZE + " ; " + MAX_ID_SIZE + "]");
-		} else if (commandParameters.getColor() == null) {
+		} else if (color == null) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El QSYPacket no posee el color correspondiente.");
-		} else if (commandParameters.getDelay() < MIN_DELAY_SIZE || commandParameters.getDelay() > MAX_DELAY_SIZE) {
+		} else if (delay < MIN_DELAY_SIZE || delay > MAX_DELAY_SIZE) {
 			throw new IllegalArgumentException("<< QSY_PACKET_ERROR >> El delay debe estar entre [" + MIN_DELAY_SIZE + " ; " + MAX_DELAY_SIZE + "]");
 		} else {
-			return new QSYPacket(nodeAddress, PacketType.Command, commandParameters.getPhysicalId(), commandParameters.getColor(), commandParameters.getDelay(), commandParameters.getNumberOfStep(), touchEnabled, soundEnabled);
+			return new QSYPacket(nodeAddress, PacketType.Command, physicialId, color, delay, numberOfStep, touchEnabled, soundEnabled);
 		}
 	}
 }

@@ -5,7 +5,6 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import libterminal.lib.protocol.CommandParameters;
 import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
 import libterminal.lib.routine.NodeConfiguration;
@@ -64,8 +63,7 @@ public abstract class Executor extends EventSource {
 		currentStep = getNextStep();
 		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
 		for (int i = 0; i < touchedNodes.length - 1; i++) {
-			final CommandParameters parameters = new CommandParameters(biMap.getPhysicalId(i + 1), 0, noColor, 0);
-			sendEvent(new Event(Event.EventType.commandRequest, parameters));
+			sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i + 1), 0, noColor, 0));
 		}
 		prepareStep();
 		results.start();
@@ -101,7 +99,7 @@ public abstract class Executor extends EventSource {
 					prepareStep();
 				} else {
 					results.finish();
-					sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
+					sendEvent(new Event.ExecutorDoneExecutingEvent());
 				}
 			}
 		}
@@ -110,13 +108,13 @@ public abstract class Executor extends EventSource {
 	protected synchronized void stepTimeout() {
 		if (running.get()) {
 			results.stepTimeout(numberOfStep);
-			sendEvent(new Event(Event.EventType.executorStepTimeout, null));
+			sendEvent(new Event.ExecutorStepTimeOutEvent());
 			if (currentStep.getStopOnTimeout()) {
 				results.finish();
-				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
+				sendEvent(new Event.ExecutorDoneExecutingEvent());
 			} else if (!hasNextStep()) {
 				results.finish();
-				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
+				sendEvent(new Event.ExecutorDoneExecutingEvent());
 			} else {
 				finalizeStep();
 				currentStep = getNextStep();
@@ -139,8 +137,7 @@ public abstract class Executor extends EventSource {
 				maxDelay = delay;
 			}
 			final Color color = nodeConfiguration.getColor();
-			final CommandParameters parameters = new CommandParameters(physicalId, delay, color, numberOfStep);
-			sendEvent(new Event(Event.EventType.commandRequest, parameters));
+			sendEvent(new Event.CommandRequestEvent(physicalId, delay, color, numberOfStep));
 		}
 		if (currentStep.getTimeOut() > 0) {
 			stepTimer.schedule(stepTimerTask = new StepTimeOutTimerTask(), currentStep.getTimeOut() + maxDelay);
@@ -154,8 +151,7 @@ public abstract class Executor extends EventSource {
 			final int logicalId = nodeConfiguration.getId();
 			if (!touchedNodes[logicalId]) {
 				final int physicalId = biMap.getPhysicalId(nodeConfiguration.getId());
-				final CommandParameters parameters = new CommandParameters(physicalId, 0, noColor, 0);
-				sendEvent(new Event(Event.EventType.commandRequest, parameters));
+				sendEvent(new Event.CommandRequestEvent(physicalId, 0, noColor, 0));
 			}
 		}
 		for (int i = 0; i < touchedNodes.length; i++) {
@@ -204,7 +200,7 @@ public abstract class Executor extends EventSource {
 		@Override
 		public void run() {
 			if (isRunning()) {
-				sendEvent(new Event(Event.EventType.executorDoneExecuting, null));
+				sendEvent(new Event.ExecutorDoneExecutingEvent());
 			}
 		}
 
