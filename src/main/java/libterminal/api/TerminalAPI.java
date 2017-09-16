@@ -100,7 +100,11 @@ public final class TerminalAPI {
 		if (isUp()) {
 			terminal.addListener(listener);
 		} else {
-			pendingObservers.add(() -> terminal.addListener(listener));
+			pendingObservers.add(new Runnable() {
+				public void run() {
+					terminal.addListener(listener);
+				}
+			});
 		}
 	}
 
@@ -108,7 +112,11 @@ public final class TerminalAPI {
 		if (isUp()) {
 			terminal.removeListener(listener);
 		} else {
-			pendingObservers.add(() -> terminal.removeListener(listener));
+			pendingObservers.add(new Runnable() {
+				public void run() {
+					terminal.removeListener(listener);
+				}
+			});
 		}
 	}
 
