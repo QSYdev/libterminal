@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import libterminal.lib.network.MulticastReceiver;
@@ -18,6 +19,8 @@ import libterminal.patterns.observer.EventListener;
 
 public final class TerminalAPI {
 
+	private final LinkedList<Runnable> pendingObservers;
+
 	private Thread threadReceiveSelector;
 	private Thread threadTerminal;
 	private Thread threadSender;
@@ -30,8 +33,9 @@ public final class TerminalAPI {
 
 	private boolean up;
 
-	public TerminalAPI(Inet4Address multicastAddress) {
+	public TerminalAPI(final Inet4Address multicastAddress) {
 		this.multicastAddress = multicastAddress;
+		this.pendingObservers = new LinkedList<>();
 	}
 
 	public void start() throws IOException {
@@ -43,6 +47,10 @@ public final class TerminalAPI {
 		receiverSelector.addListener(terminal);
 		terminal.addListener(receiverSelector);
 		terminal.addListener(senderSelector);
+		for (final Runnable task : pendingObservers) {
+			task.run();
+		}
+		pendingObservers.clear();
 
 		threadReceiveSelector = new Thread(receiverSelector, "Receive Selector");
 		threadTerminal = new Thread(terminal, "Terminal");
@@ -89,15 +97,28 @@ public final class TerminalAPI {
 	}
 
 	public void addListener(final EventListener listener) {
-		terminal.addListener(listener);
+		if (isUp()) {
+			terminal.addListener(listener);
+		} else {
+			pendingObservers.add(() -> terminal.addListener(listener));
+		}
 	}
 
 	public void removeListener(EventListener listener) {
-		terminal.removeListener(listener);
+		if (isUp()) {
+			terminal.removeListener(listener);
+		} else {
+			pendingObservers.add(() -> terminal.removeListener(listener));
+		}
 	}
 
 	public void stop() throws InterruptedException, Exception {
 		if (up) {
+			for (final Runnable task : pendingObservers) {
+				task.run();
+			}
+			pendingObservers.clear();
+
 			threadReceiveSelector.interrupt();
 			threadTerminal.interrupt();
 			threadSender.interrupt();
