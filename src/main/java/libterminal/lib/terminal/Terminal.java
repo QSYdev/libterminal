@@ -65,7 +65,9 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		while (running.get()) {
 			try {
 				final Event event = internalListener.getEvent();
-				((InternalEvent) event).acceptHandler(eventHandler);
+				if (event instanceof InternalEvent) {
+					((InternalEvent) event).acceptHandler(eventHandler);
+				}
 			} catch (final InterruptedException e) {
 				try {
 					this.close();

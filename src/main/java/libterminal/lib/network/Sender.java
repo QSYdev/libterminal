@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.patterns.observer.AsynchronousListener;
+import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.Event.CommandPacketSentEvent;
 import libterminal.patterns.observer.Event.InternalEvent;
 import libterminal.patterns.visitor.InternalEventHandler;
@@ -34,8 +35,10 @@ public final class Sender extends AsynchronousListener implements Runnable, Auto
 	public void run() {
 		while (running.get()) {
 			try {
-				final InternalEvent event = (InternalEvent) getEvent();
-				event.acceptHandler(eventHandler);
+				final Event event = getEvent();
+				if (event instanceof InternalEvent) {
+					((InternalEvent) event).acceptHandler(eventHandler);
+				}
 			} catch (InterruptedException e) {
 				this.close();
 			}

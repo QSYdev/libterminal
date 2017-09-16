@@ -108,7 +108,9 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 
 	@Override
 	public void receiveEvent(final Event event) {
-		((InternalEvent) event).acceptHandler(eventHandler);
+		if (event instanceof InternalEvent) {
+			((InternalEvent) event).acceptHandler(eventHandler);
+		}
 	}
 
 	private final class EventHandler extends InternalEventHandler {
