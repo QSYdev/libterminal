@@ -108,7 +108,7 @@ public final class TerminalAPI {
 		}
 	}
 
-	public void removeListener(EventListener listener) {
+	public void removeListener(final EventListener listener) {
 		if (isUp()) {
 			terminal.removeListener(listener);
 		} else {
