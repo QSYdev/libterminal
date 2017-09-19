@@ -5,6 +5,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeMap;
 
 import libterminal.lib.network.MulticastReceiver;
@@ -19,7 +20,7 @@ import libterminal.patterns.observer.EventListener;
 
 public final class TerminalAPI {
 
-	private final LinkedList<Runnable> pendingObservers;
+	private List<EventListener> listeners;
 
 	private Thread threadReceiveSelector;
 	private Thread threadTerminal;
@@ -35,7 +36,7 @@ public final class TerminalAPI {
 
 	public TerminalAPI(final Inet4Address multicastAddress) {
 		this.multicastAddress = multicastAddress;
-		this.pendingObservers = new LinkedList<>();
+		this.listeners = new LinkedList<>();
 	}
 
 	public void start() throws IOException {
@@ -47,10 +48,10 @@ public final class TerminalAPI {
 		receiverSelector.addListener(terminal);
 		terminal.addListener(receiverSelector);
 		terminal.addListener(senderSelector);
-		for (final Runnable task : pendingObservers) {
-			task.run();
+
+		for (EventListener listener : listeners) {
+		    terminal.addListener(listener);
 		}
-		pendingObservers.clear();
 
 		threadReceiveSelector = new Thread(receiverSelector, "Receive Selector");
 		threadTerminal = new Thread(terminal, "Terminal");
@@ -97,36 +98,19 @@ public final class TerminalAPI {
 	}
 
 	public void addListener(final EventListener listener) {
-		if (isUp()) {
+		listeners.add(listener);
+	    if (up)
 			terminal.addListener(listener);
-		} else {
-			pendingObservers.add(new Runnable() {
-				public void run() {
-					terminal.addListener(listener);
-				}
-			});
-		}
 	}
 
 	public void removeListener(final EventListener listener) {
-		if (isUp()) {
+		listeners.remove(listener);
+		if (up)
 			terminal.removeListener(listener);
-		} else {
-			pendingObservers.add(new Runnable() {
-				public void run() {
-					terminal.removeListener(listener);
-				}
-			});
-		}
 	}
 
 	public void stop() throws InterruptedException, Exception {
 		if (up) {
-			for (final Runnable task : pendingObservers) {
-				task.run();
-			}
-			pendingObservers.clear();
-
 			threadReceiveSelector.interrupt();
 			threadTerminal.interrupt();
 			threadSender.interrupt();
