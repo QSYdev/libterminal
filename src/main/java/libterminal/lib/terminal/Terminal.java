@@ -118,7 +118,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		}
 	}
 
-	private void processPacket(QSYPacket qsyPacket) {
+	private void processPacket(final QSYPacket qsyPacket) {
 		switch (qsyPacket.getType()) {
 		case Hello:
 			if (searchNodes.get()) {
@@ -151,9 +151,9 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 			synchronized (executorLock) {
 				if (executor != null) {
 					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
-					sendEvent(new Event(EventType.toucheReceived, qsyPacket.getId()));
 				}
 			}
+			sendEvent(new Event(EventType.toucheReceived, qsyPacket.getId()));
 			break;
 		default:
 			break;
