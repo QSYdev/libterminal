@@ -108,7 +108,6 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 			synchronized (executorLock) {
 				if (executor != null) {
 					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
-					sendEvent(new Event.ToucheReceivedEvent(qsyPacket.getId()));
 				}
 			}
 			sendEvent(new Event.ToucheReceivedEvent(qsyPacket.getId()));
