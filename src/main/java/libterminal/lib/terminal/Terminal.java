@@ -23,17 +23,16 @@ import libterminal.patterns.observer.Event.CommandRequestEvent;
 import libterminal.patterns.observer.Event.ExecutorDoneExecutingEvent;
 import libterminal.patterns.observer.Event.ExecutorStepTimeOutEvent;
 import libterminal.patterns.observer.Event.IncomingPacketEvent;
-import libterminal.patterns.observer.Event.InternalEvent;
 import libterminal.patterns.observer.Event.KeepAliveErrorEvent;
 import libterminal.patterns.observer.EventListener;
 import libterminal.patterns.observer.EventSource;
-import libterminal.patterns.visitor.InternalEventHandler;
+import libterminal.patterns.visitor.EventHandler;
 
 public final class Terminal extends EventSource implements Runnable, EventListener {
 
 	private final TreeMap<Integer, Node> nodes;
 
-	private final InternalEventHandler eventHandler;
+	private final EventHandler eventHandler;
 
 	private final AsynchronousListener internalListener;
 	private final KeepAlive keepAlive;
@@ -48,7 +47,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	public Terminal() {
 		this.nodes = new TreeMap<>();
-		this.eventHandler = new EventHandler();
+		this.eventHandler = new InternalEventHandler();
 		this.internalListener = new AsynchronousListener();
 		this.keepAlive = new KeepAlive(nodes);
 		this.keepAlive.addListener(this);
@@ -65,9 +64,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		while (running.get()) {
 			try {
 				final Event event = internalListener.getEvent();
-				if (event instanceof InternalEvent) {
-					((InternalEvent) event).acceptHandler(eventHandler);
-				}
+				event.acceptHandler(eventHandler);
 			} catch (final InterruptedException e) {
 				try {
 					this.close();
@@ -264,7 +261,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		return nodes.get(nodeId).getNodeAddress();
 	}
 
-	private final class EventHandler extends InternalEventHandler {
+	private final class InternalEventHandler extends EventHandler {
 
 		@Override
 		public void handle(final IncomingPacketEvent event) {

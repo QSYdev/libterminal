@@ -4,28 +4,12 @@ import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.lib.results.Results;
 import libterminal.lib.routine.Color;
-import libterminal.patterns.visitor.ExternalEventHandle;
-import libterminal.patterns.visitor.ExternaleventHandler;
-import libterminal.patterns.visitor.InternalEventHandle;
-import libterminal.patterns.visitor.InternalEventHandler;
+import libterminal.patterns.visitor.EventHandle;
+import libterminal.patterns.visitor.EventHandler;
 
-public abstract class Event {
+public abstract class Event implements EventHandle {
 
 	public Event() {
-	}
-
-	public static abstract class ExternalEvent extends Event implements ExternalEventHandle {
-
-		public ExternalEvent() {
-		}
-
-	}
-
-	public static abstract class InternalEvent extends Event implements InternalEventHandle {
-
-		public InternalEvent() {
-		}
-
 	}
 
 	/**
@@ -36,7 +20,7 @@ public abstract class Event {
 	 * cuando llega un packet por el selector. - <b>MulticastReveiver</b>: cuando
 	 * llega un packet por multicast.
 	 */
-	public static final class IncomingPacketEvent extends InternalEvent {
+	public static final class IncomingPacketEvent extends Event {
 
 		private final QSYPacket packet;
 
@@ -49,7 +33,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -63,7 +47,7 @@ public abstract class Event {
 	 * selector. Senders: - <b>Terminal</b>: envia el evento cuando llega un
 	 * QSYPacket de tipo Hello.
 	 */
-	public static final class NewNodeEvent extends InternalEvent {
+	public static final class NewNodeEvent extends Event {
 
 		private final Node node;
 
@@ -76,7 +60,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -88,7 +72,7 @@ public abstract class Event {
 	 * a un nodo. Senders: - <b>Terminal</b>: cuando se quiere enviar un comando a
 	 * algun nodo en particular.
 	 */
-	public static final class CommandPacketSentEvent extends InternalEvent {
+	public static final class CommandPacketSentEvent extends Event {
 
 		private final QSYPacket packet;
 
@@ -101,7 +85,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -115,7 +99,7 @@ public abstract class Event {
 	 * vivo, es decir pasa el tiempo limite. - <b>KeepAlive::DeadNodesPurger</b>:
 	 * cuando se identifica un nodo no esta vivo.
 	 */
-	public static final class KeepAliveErrorEvent extends InternalEvent {
+	public static final class KeepAliveErrorEvent extends Event {
 
 		private final Node node;
 
@@ -128,7 +112,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -140,7 +124,7 @@ public abstract class Event {
 	 * cancela la conexion del nodo que se desconecto. Senders: - <b>Terminal</b>:
 	 * cuando le llega un keepAliveError.
 	 */
-	public static final class DisconnectedNodeEvent extends InternalEvent {
+	public static final class DisconnectedNodeEvent extends Event {
 
 		private final Node node;
 
@@ -153,7 +137,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -167,13 +151,13 @@ public abstract class Event {
 	 * <b>Executor</b>: cuando la ejecucion de la rutina actual termina sin ser
 	 * cortada por el usuario
 	 */
-	public static final class ExecutorDoneExecutingEvent extends InternalEvent {
+	public static final class ExecutorDoneExecutingEvent extends Event {
 
 		public ExecutorDoneExecutingEvent() {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -186,13 +170,13 @@ public abstract class Event {
 	 * cuando no se tocaron los nodos que se debian tocar en cierta cantidad de
 	 * tiempo
 	 */
-	public static final class ExecutorStepTimeOutEvent extends InternalEvent {
+	public static final class ExecutorStepTimeOutEvent extends Event {
 
 		public ExecutorStepTimeOutEvent() {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -204,7 +188,7 @@ public abstract class Event {
 	 * parametros de ese command. La terminal es la encargada de crear el paquete y
 	 * enviarlo.
 	 */
-	public static final class CommandRequestEvent extends InternalEvent {
+	public static final class CommandRequestEvent extends Event {
 
 		private final int physicalId;
 		private final long delay;
@@ -235,7 +219,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final InternalEventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -245,13 +229,13 @@ public abstract class Event {
 	 * Evento que envia la terminal hacia fuera de la API para indicar que la rutina
 	 * a iniciado
 	 */
-	public static final class RoutineStartedEvent extends ExternalEvent {
+	public static final class RoutineStartedEvent extends Event {
 
 		public RoutineStartedEvent() {
 		}
 
 		@Override
-		public void acceptHandler(ExternaleventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -262,7 +246,7 @@ public abstract class Event {
 	 * Objects que tienen los siguientes elementos. Número de nodo, color y delay
 	 * (en ese orden).
 	 */
-	public static final class CommandIssuedEvent extends ExternalEvent {
+	public static final class CommandIssuedEvent extends Event {
 
 		private final int physicalId;
 		private final Color color;
@@ -287,7 +271,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final ExternaleventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -297,7 +281,7 @@ public abstract class Event {
 	 * Indica que se ha recibido un touche. En content se encuentra el numero de
 	 * nodo.
 	 */
-	public static final class ToucheReceivedEvent extends ExternalEvent {
+	public static final class ToucheReceivedEvent extends Event {
 
 		private final int physicalId;
 
@@ -310,7 +294,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final ExternaleventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 
@@ -321,7 +305,7 @@ public abstract class Event {
 	 * rutina ha finalizado. En Content se pueden extraer los resultados para luego
 	 * ser guardados en caso de que se desee.
 	 */
-	public static final class RoutineFinishedEvent extends ExternalEvent {
+	public static final class RoutineFinishedEvent extends Event {
 
 		private final Results results;
 
@@ -334,7 +318,7 @@ public abstract class Event {
 		}
 
 		@Override
-		public void acceptHandler(final ExternaleventHandler handler) {
+		public void acceptHandler(final EventHandler handler) {
 			handler.handle(this);
 		}
 

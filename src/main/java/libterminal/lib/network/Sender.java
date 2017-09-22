@@ -11,12 +11,11 @@ import libterminal.lib.protocol.QSYPacket;
 import libterminal.patterns.observer.AsynchronousListener;
 import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.Event.CommandPacketSentEvent;
-import libterminal.patterns.observer.Event.InternalEvent;
-import libterminal.patterns.visitor.InternalEventHandler;
+import libterminal.patterns.visitor.EventHandler;
 
 public final class Sender extends AsynchronousListener implements Runnable, AutoCloseable {
 
-	private final InternalEventHandler eventHandler;
+	private final EventHandler eventHandler;
 
 	private final TreeMap<Integer, Node> nodes;
 	private final ByteBuffer byteBuffer;
@@ -26,7 +25,7 @@ public final class Sender extends AsynchronousListener implements Runnable, Auto
 	public Sender(final TreeMap<Integer, Node> nodes) {
 		this.nodes = nodes;
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
-		this.eventHandler = new EventHandler();
+		this.eventHandler = new InternalEventHandler();
 
 		this.running = new AtomicBoolean(true);
 	}
@@ -36,13 +35,12 @@ public final class Sender extends AsynchronousListener implements Runnable, Auto
 		while (running.get()) {
 			try {
 				final Event event = getEvent();
-				if (event instanceof InternalEvent) {
-					((InternalEvent) event).acceptHandler(eventHandler);
-				}
+				event.acceptHandler(eventHandler);
 			} catch (InterruptedException e) {
 				this.close();
 			}
 		}
+
 	}
 
 	@Override
@@ -50,7 +48,7 @@ public final class Sender extends AsynchronousListener implements Runnable, Auto
 		running.set(false);
 	}
 
-	private final class EventHandler extends InternalEventHandler {
+	private final class InternalEventHandler extends EventHandler {
 
 		@Override
 		public void handle(final CommandPacketSentEvent event) {

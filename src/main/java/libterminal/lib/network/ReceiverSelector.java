@@ -14,15 +14,14 @@ import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.Event.DisconnectedNodeEvent;
-import libterminal.patterns.observer.Event.InternalEvent;
 import libterminal.patterns.observer.Event.NewNodeEvent;
 import libterminal.patterns.observer.EventListener;
 import libterminal.patterns.observer.EventSource;
-import libterminal.patterns.visitor.InternalEventHandler;
+import libterminal.patterns.visitor.EventHandler;
 
 public final class ReceiverSelector extends EventSource implements Runnable, EventListener {
 
-	private final InternalEventHandler eventHandler;
+	private final EventHandler eventHandler;
 
 	private final Selector selector;
 	private final LinkedList<Runnable> pendingActions;
@@ -36,7 +35,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 		this.pendingActions = new LinkedList<>();
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 		this.data = new byte[QSYPacket.PACKET_SIZE];
-		this.eventHandler = new EventHandler();
+		this.eventHandler = new InternalEventHandler();
 
 		this.running = new AtomicBoolean(true);
 	}
@@ -108,12 +107,10 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 
 	@Override
 	public void receiveEvent(final Event event) {
-		if (event instanceof InternalEvent) {
-			((InternalEvent) event).acceptHandler(eventHandler);
-		}
+		event.acceptHandler(eventHandler);
 	}
 
-	private final class EventHandler extends InternalEventHandler {
+	private final class InternalEventHandler extends EventHandler {
 
 		@Override
 		public void handle(final NewNodeEvent event) {
