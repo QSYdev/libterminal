@@ -49,8 +49,8 @@ public final class TerminalAPI {
 		terminal.addListener(receiverSelector);
 		terminal.addListener(senderSelector);
 
-		for (EventListener listener : listeners) {
-		    terminal.addListener(listener);
+		for (final EventListener listener : listeners) {
+			terminal.addListener(listener);
 		}
 
 		threadReceiveSelector = new Thread(receiverSelector, "Receive Selector");
@@ -99,7 +99,7 @@ public final class TerminalAPI {
 
 	public void addListener(final EventListener listener) {
 		listeners.add(listener);
-	    if (up)
+		if (up)
 			terminal.addListener(listener);
 	}
 
@@ -140,7 +140,8 @@ public final class TerminalAPI {
 		}
 	}
 
-	public void sendPacket(Integer nodeId, CommandParameters commandParameters, boolean soundEnabled, boolean touchEnabled) {
-		terminal.sendQSYPacket(QSYPacket.createCommandPacket(terminal.getNodeAddress(nodeId), commandParameters, touchEnabled, soundEnabled));
+	public void sendPacket(Integer nodeId, CommandParameters cp, boolean soundEnabled, boolean touchEnabled) {
+		terminal.sendQSYPacket(QSYPacket.createCommandPacket(terminal.getNodeAddress(nodeId), cp.getPhysicalId(), cp.getColor(), cp.getDelay(),
+				cp.getNumberOfStep(), touchEnabled, soundEnabled));
 	}
 }

@@ -13,11 +13,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import libterminal.lib.node.Node;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.patterns.observer.Event;
-import libterminal.patterns.observer.Event.EventType;
+import libterminal.patterns.observer.Event.DisconnectedNodeEvent;
+import libterminal.patterns.observer.Event.NewNodeEvent;
 import libterminal.patterns.observer.EventListener;
 import libterminal.patterns.observer.EventSource;
+import libterminal.patterns.visitor.EventHandler;
 
 public final class ReceiverSelector extends EventSource implements Runnable, EventListener {
+
+	private final EventHandler eventHandler;
 
 	private final Selector selector;
 	private final LinkedList<Runnable> pendingActions;
@@ -31,6 +35,7 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 		this.pendingActions = new LinkedList<>();
 		this.byteBuffer = ByteBuffer.allocate(QSYPacket.PACKET_SIZE);
 		this.data = new byte[QSYPacket.PACKET_SIZE];
+		this.eventHandler = new InternalEventHandler();
 
 		this.running = new AtomicBoolean(true);
 	}
@@ -38,37 +43,37 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 	@Override
 	public void run() {
 		while (running.get()) {
-				synchronized (pendingActions) {
-					for (final Runnable task : pendingActions) {
-						task.run();
-					}
-					pendingActions.clear();
+			synchronized (pendingActions) {
+				for (final Runnable task : pendingActions) {
+					task.run();
 				}
+				pendingActions.clear();
+			}
 
-				try {
-					selector.select();
-					if(Thread.interrupted())
-						throw new InterruptedException();
-					for (final SelectionKey key : selector.selectedKeys()) {
-						if (key.isReadable()) {
-							final SocketChannel channel = (SocketChannel) key.channel();
-							channel.read(byteBuffer);
-							byteBuffer.flip();
-							byteBuffer.get(data);
-							sendEvent(new Event(EventType.incomingQSYPacket, new QSYPacket(channel.socket().getInetAddress(), data)));
-							byteBuffer.clear();
-						}
+			try {
+				selector.select();
+				if (Thread.interrupted())
+					throw new InterruptedException();
+				for (final SelectionKey key : selector.selectedKeys()) {
+					if (key.isReadable()) {
+						final SocketChannel channel = (SocketChannel) key.channel();
+						channel.read(byteBuffer);
+						byteBuffer.flip();
+						byteBuffer.get(data);
+						sendEvent(new Event.IncomingPacketEvent(new QSYPacket(channel.socket().getInetAddress(), data)));
+						byteBuffer.clear();
 					}
-					selector.selectedKeys().clear();
-				} catch (ClosedByInterruptException | InterruptedException e) {
-					try {
-						this.close();
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
+				selector.selectedKeys().clear();
+			} catch (ClosedByInterruptException | InterruptedException e) {
+				try {
+					this.close();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -102,20 +107,21 @@ public final class ReceiverSelector extends EventSource implements Runnable, Eve
 
 	@Override
 	public void receiveEvent(final Event event) {
-		switch (event.getEventType()) {
-		case newNode: {
-			final Node node = (Node) event.getContent();
-			newNodeCreated(node);
-			break;
+		event.acceptHandler(eventHandler);
+	}
+
+	private final class InternalEventHandler extends EventHandler {
+
+		@Override
+		public void handle(final NewNodeEvent event) {
+			super.handle(event);
+			newNodeCreated(event.getNode());
 		}
-		case disconnectedNode: {
-			final Node node = (Node) event.getContent();
-			node.getNodeSocketChannel().keyFor(selector).cancel();
-			break;
-		}
-		default: {
-			break;
-		}
+
+		@Override
+		public void handle(final DisconnectedNodeEvent event) {
+			super.handle(event);
+			event.getNode().getNodeSocketChannel().keyFor(selector).cancel();
 		}
 	}
 

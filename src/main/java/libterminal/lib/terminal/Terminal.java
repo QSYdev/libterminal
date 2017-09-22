@@ -2,7 +2,6 @@ package libterminal.lib.terminal;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -13,7 +12,6 @@ import libterminal.lib.executor.Executor;
 import libterminal.lib.executor.PlayerExecutor;
 import libterminal.lib.keepalive.KeepAlive;
 import libterminal.lib.node.Node;
-import libterminal.lib.protocol.CommandParameters;
 import libterminal.lib.protocol.QSYPacket;
 import libterminal.lib.protocol.QSYPacket.PacketType;
 import libterminal.lib.results.Results;
@@ -21,13 +19,20 @@ import libterminal.lib.routine.Color;
 import libterminal.lib.routine.Routine;
 import libterminal.patterns.observer.AsynchronousListener;
 import libterminal.patterns.observer.Event;
-import libterminal.patterns.observer.Event.EventType;
+import libterminal.patterns.observer.Event.CommandRequestEvent;
+import libterminal.patterns.observer.Event.ExecutorDoneExecutingEvent;
+import libterminal.patterns.observer.Event.ExecutorStepTimeOutEvent;
+import libterminal.patterns.observer.Event.IncomingPacketEvent;
+import libterminal.patterns.observer.Event.KeepAliveErrorEvent;
 import libterminal.patterns.observer.EventListener;
 import libterminal.patterns.observer.EventSource;
+import libterminal.patterns.visitor.EventHandler;
 
 public final class Terminal extends EventSource implements Runnable, EventListener {
 
 	private final TreeMap<Integer, Node> nodes;
+
+	private final EventHandler eventHandler;
 
 	private final AsynchronousListener internalListener;
 	private final KeepAlive keepAlive;
@@ -42,6 +47,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	public Terminal() {
 		this.nodes = new TreeMap<>();
+		this.eventHandler = new InternalEventHandler();
 		this.internalListener = new AsynchronousListener();
 		this.keepAlive = new KeepAlive(nodes);
 		this.keepAlive.addListener(this);
@@ -58,63 +64,14 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		while (running.get()) {
 			try {
 				final Event event = internalListener.getEvent();
-				processEvent(event);
-			} catch (final ClosedByInterruptException | InterruptedException e) {
+				event.acceptHandler(eventHandler);
+			} catch (final InterruptedException e) {
 				try {
 					this.close();
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
-			} catch (final IOException e) {
-				e.printStackTrace();
 			}
-		}
-	}
-
-	private void processEvent(Event event) throws IOException, ClosedByInterruptException {
-		switch (event.getEventType()) {
-		case incomingQSYPacket:
-			processPacket((QSYPacket) event.getContent());
-			break;
-		case keepAliveError:
-			final Node node = (Node) event.getContent();
-			synchronized (nodes) {
-				nodes.remove(node.getNodeId());
-			}
-			node.close();
-
-			sendEvent(new Event(Event.EventType.disconnectedNode, node));
-			System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
-			break;
-		case commandRequest:
-			final CommandParameters parameters = (CommandParameters) event.getContent();
-			final InetAddress nodeAddress;
-			synchronized (nodes) {
-				nodeAddress = nodes.get(parameters.getPhysicalId()).getNodeAddress();
-			}
-			final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, parameters, touchEnabled.get(), soundEnabled.get());
-			sendQSYPacket(commandPacket);
-			break;
-		case executorStepTimeout:
-			System.out.println("Timeout de step.");
-			break;
-		case executorDoneExecuting:
-			Results results = null;
-			synchronized (executorLock) {
-				if (executor != null) {
-					executor.stop();
-					executor.removeListener(this);
-					results = executor.getResults();
-					executor = null;
-					this.soundEnabled.set(false);
-					this.touchEnabled.set(false);
-				}
-			}
-			System.out.println("Se termino la rutina");
-			sendEvent(new Event(Event.EventType.routineFinished, results));
-			break;
-		default:
-			break;
 		}
 	}
 
@@ -134,10 +91,10 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 							nodes.put(node.getNodeId(), node);
 						}
 						keepAlive.newNodeCreated(node);
-						sendEvent(new Event(Event.EventType.newNode, node));
-					} catch (IllegalArgumentException e) {
+						sendEvent(new Event.NewNodeEvent(node));
+					} catch (final IllegalArgumentException e) {
 						System.err.println(e.getMessage());
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						this.running.set(false);
 						e.printStackTrace();
 					}
@@ -151,9 +108,10 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 			synchronized (executorLock) {
 				if (executor != null) {
 					executor.touche(qsyPacket.getId(), qsyPacket.getNumberOfStep(), qsyPacket.getColor(), qsyPacket.getDelay());
+					sendEvent(new Event.ToucheReceivedEvent(qsyPacket.getId()));
 				}
 			}
-			sendEvent(new Event(EventType.toucheReceived, qsyPacket.getId()));
+			sendEvent(new Event.ToucheReceivedEvent(qsyPacket.getId()));
 			break;
 		default:
 			break;
@@ -181,7 +139,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 				executor = new CustomExecutor(routine, associations);
 				executor.addListener(this);
 				executor.start();
-				sendEvent(new Event(EventType.routineStarted, null));
+				sendEvent(new Event.RoutineStartedEvent());
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de inciar otra.");
 			}
@@ -205,7 +163,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 						stopOnTimeout);
 				executor.addListener(this);
 				executor.start();
-				sendEvent(new Event(EventType.routineStarted, null));
+				sendEvent(new Event.RoutineStartedEvent());
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de iniciar otra.");
 			}
@@ -273,8 +231,8 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	public void sendQSYPacket(final QSYPacket qsyPacket) {
 		if (qsyPacket.getType() == PacketType.Command) {
-			sendEvent(new Event(Event.EventType.commandPacketSent, qsyPacket));
-			sendEvent(new Event(EventType.commandIssued, new Object[] { qsyPacket.getId(), qsyPacket.getColor(), qsyPacket.getDelay() }));
+			sendEvent(new Event.CommandPacketSentEvent(qsyPacket));
+			sendEvent(new Event.CommandIssuedEvent(qsyPacket.getId(), qsyPacket.getColor(), qsyPacket.getDelay()));
 		}
 	}
 
@@ -300,7 +258,69 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		internalListener.receiveEvent(event);
 	}
 
-	public InetAddress getNodeAddress(Integer nodeId) {
+	public InetAddress getNodeAddress(final Integer nodeId) {
 		return nodes.get(nodeId).getNodeAddress();
+	}
+
+	private final class InternalEventHandler extends EventHandler {
+
+		@Override
+		public void handle(final IncomingPacketEvent event) {
+			super.handle(event);
+			processPacket(event.getPacket());
+		}
+
+		@Override
+		public void handle(final KeepAliveErrorEvent event) {
+			super.handle(event);
+			try {
+				final Node node = event.getNode();
+				synchronized (nodes) {
+					nodes.remove(node.getNodeId());
+				}
+				node.close();
+				sendEvent(new Event.DisconnectedNodeEvent(node));
+				System.err.println("Se ha desconectado el nodo id = " + node.getNodeId());
+			} catch (final IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void handle(final CommandRequestEvent event) {
+			super.handle(event);
+			final InetAddress nodeAddress;
+			synchronized (nodes) {
+				nodeAddress = nodes.get(event.getPhysicalId()).getNodeAddress();
+			}
+			final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, event.getPhysicalId(), event.getColor(), event.getDelay(),
+					event.getNumberOfStep(), touchEnabled.get(), soundEnabled.get());
+			sendQSYPacket(commandPacket);
+		}
+
+		@Override
+		public void handle(final ExecutorStepTimeOutEvent event) {
+			super.handle(event);
+			System.out.println("Timeout de step.");
+		}
+
+		@Override
+		public void handle(final ExecutorDoneExecutingEvent event) {
+			super.handle(event);
+			Results results = null;
+			synchronized (executorLock) {
+				if (executor != null) {
+					executor.stop();
+					executor.removeListener(Terminal.this);
+					results = executor.getResults();
+					executor = null;
+					soundEnabled.set(false);
+					touchEnabled.set(false);
+				}
+			}
+			System.out.println("Se termino la rutina");
+			sendEvent(new Event.RoutineFinishedEvent(results));
+		}
+
 	}
 }
