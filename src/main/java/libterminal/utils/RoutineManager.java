@@ -71,6 +71,7 @@ public final class RoutineManager {
 
 	static final class RoutineSerializer implements JsonDeserializer<Routine>, JsonSerializer<Routine> {
 
+		private static final String PLAYERS_COUNT_ATT = "playerCount";
 		private static final String NUMBER_OF_NODES_ATT = "numberOfNodes";
 		private static final String STEPS_ATT = "steps";
 		private static final String TOTAL_TIME_OUT_ATT = "totalTimeOut";
@@ -81,17 +82,19 @@ public final class RoutineManager {
 		@Override
 		public Routine deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
 			final JsonObject jsonObject = json.getAsJsonObject();
+			final byte playersCount = jsonObject.get(PLAYERS_COUNT_ATT).getAsByte();
 			final byte numberOfNodes = jsonObject.get(NUMBER_OF_NODES_ATT).getAsByte();
 			final long totalTimeOut = jsonObject.get(TOTAL_TIME_OUT_ATT).getAsLong();
 			final Step[] steps = context.deserialize(jsonObject.get(STEPS_ATT), Step[].class);
 
-			return new Routine(numberOfNodes, totalTimeOut, new ArrayList<>(Arrays.asList(steps)));
+			return new Routine(playersCount, numberOfNodes, totalTimeOut, new ArrayList<>(Arrays.asList(steps)));
 		}
 
 		@Override
 		public JsonElement serialize(final Routine routine, final Type typeOfSrc, final JsonSerializationContext context) {
 			final JsonObject jsonObject = new JsonObject();
 
+			jsonObject.addProperty(PLAYERS_COUNT_ATT, routine.getPlayersCount());
 			jsonObject.addProperty(NUMBER_OF_NODES_ATT, routine.getNumberOfNodes());
 			jsonObject.addProperty(TOTAL_TIME_OUT_ATT, routine.getTotalTimeOut());
 			jsonObject.add(STEPS_ATT, context.serialize(routine.getSteps()));
