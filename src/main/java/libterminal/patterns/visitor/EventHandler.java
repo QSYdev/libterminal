@@ -5,6 +5,7 @@ import libterminal.patterns.observer.Event.CommandPacketSentEvent;
 import libterminal.patterns.observer.Event.CommandRequestEvent;
 import libterminal.patterns.observer.Event.DisconnectedNodeEvent;
 import libterminal.patterns.observer.Event.ExecutorDoneExecutingEvent;
+import libterminal.patterns.observer.Event.ExecutorRoutineStarted;
 import libterminal.patterns.observer.Event.ExecutorStepTimeOutEvent;
 import libterminal.patterns.observer.Event.IncomingPacketEvent;
 import libterminal.patterns.observer.Event.KeepAliveErrorEvent;
@@ -30,6 +31,9 @@ public abstract class EventHandler {
 	public void handle(final DisconnectedNodeEvent disconnectedNodeEvent) {
 	}
 
+	public void handle(final RoutineFinishedEvent routineFinishedEvent) {
+	}
+
 	public void handle(final ExecutorDoneExecutingEvent executorDoneExecutingEvent) {
 	}
 
@@ -48,7 +52,7 @@ public abstract class EventHandler {
 	public void handle(final ToucheReceivedEvent toucheReceivedEvent) {
 	}
 
-	public void handle(final RoutineFinishedEvent routineFinishedEvent) {
+	public void handle(final ExecutorRoutineStarted executorRoutineStarted) {
 	}
 
 }
