@@ -21,6 +21,7 @@ import libterminal.patterns.observer.AsynchronousListener;
 import libterminal.patterns.observer.Event;
 import libterminal.patterns.observer.Event.CommandRequestEvent;
 import libterminal.patterns.observer.Event.ExecutorDoneExecutingEvent;
+import libterminal.patterns.observer.Event.ExecutorRoutineStarted;
 import libterminal.patterns.observer.Event.ExecutorStepTimeOutEvent;
 import libterminal.patterns.observer.Event.IncomingPacketEvent;
 import libterminal.patterns.observer.Event.KeepAliveErrorEvent;
@@ -138,7 +139,6 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 				executor = new CustomExecutor(routine, associations);
 				executor.addListener(this);
 				executor.start();
-				sendEvent(new Event.RoutineStartedEvent());
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de inciar otra.");
 			}
@@ -162,7 +162,6 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 						stopOnTimeout);
 				executor.addListener(this);
 				executor.start();
-				sendEvent(new Event.RoutineStartedEvent());
 			} else {
 				throw new IllegalStateException("<< Terminal >> Hay una rutina activa. Finalizala antes de iniciar otra.");
 			}
@@ -171,12 +170,15 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	public void stopExecution() {
 		synchronized (executorLock) {
-			if (executor != null) {
+			if (executor != null && executor.canStop()) {
 				executor.stop();
 				executor.removeListener(this);
 				this.soundEnabled.set(false);
 				this.touchEnabled.set(false);
 				executor = null;
+			} else {
+				throw new IllegalStateException(
+						"<< Terminal >> No se ha podido finalizar la rutina. Es posible que no exista la rutina o que se encuentre en el estado de preparación.");
 			}
 		}
 	}
@@ -295,6 +297,12 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 			final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, event.getPhysicalId(), event.getColor(), event.getDelay(),
 					event.getNumberOfStep(), touchEnabled.get(), soundEnabled.get());
 			sendQSYPacket(commandPacket);
+		}
+
+		@Override
+		public void handle(final ExecutorRoutineStarted event) {
+			super.handle(event);
+			sendEvent(new Event.RoutineStartedEvent());
 		}
 
 		@Override

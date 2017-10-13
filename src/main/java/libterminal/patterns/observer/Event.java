@@ -144,6 +144,22 @@ public abstract class Event implements EventHandle {
 	}
 
 	/**
+	 * El evento se basa en notificar desde executor hasta la terminal, de que la
+	 * rutina ha comenzado. La misma inicia cuando finaliza la etapa de preinicio,
+	 * es decir, la etapa en donde titilan los nodos involucrados.
+	 */
+	public static final class ExecutorRoutineStarted extends Event {
+
+		public ExecutorRoutineStarted() {
+		}
+
+		@Override
+		public void acceptHandler(final EventHandler handler) {
+			handler.handle(this);
+		}
+	}
+
+	/**
 	 * El functional.executor termino de ejecutar la rutina, esto se puede dar
 	 * porque se terminaron todos los pasos o porque se cumplio el tiempo de la
 	 * rutina. Listeners: - <b>Terminal</b>: frena el functional.executor lo setea a

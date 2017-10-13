@@ -18,6 +18,9 @@ public abstract class Executor extends EventSource {
 
 	private final AtomicBoolean running;
 
+	private final AtomicBoolean canStop;
+	private final Thread preinitThread;
+
 	private final BiMap biMap;
 
 	private final boolean[] touchedNodes;
@@ -38,6 +41,9 @@ public abstract class Executor extends EventSource {
 	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long totalTimeOut) {
 		this.running = new AtomicBoolean(false);
 
+		this.canStop = new AtomicBoolean(false);
+		this.preinitThread = new Thread(new PreinitTask(), "Preinit Task");
+
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
 		this.touchedNodes = new boolean[numberOfNodes + 1];
 		this.expressionTree = null;
@@ -56,17 +62,26 @@ public abstract class Executor extends EventSource {
 	}
 
 	public synchronized void start() {
+		preinitThread.start();
+	}
+
+	private synchronized void startExecution() {
+		running.set(true);
+		sendEvent(new Event.ExecutorRoutineStarted());
 		if (totalTimeOut > 0) {
 			timer.schedule(timerTask = new RoutineTimerTask(), totalTimeOut);
 		}
-		running.set(true);
 		currentStep = getNextStep();
-		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
+		final Color noColor = Color.NO_COLOR;
 		for (int i = 0; i < touchedNodes.length - 1; i++) {
 			sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i + 1), 0, noColor, 0));
 		}
 		prepareStep();
 		results.start();
+	}
+
+	public synchronized boolean canStop() {
+		return canStop.get();
 	}
 
 	public synchronized void stop() {
@@ -146,7 +161,7 @@ public abstract class Executor extends EventSource {
 	}
 
 	private void finalizeStep() {
-		final Color noColor = new Color((byte) 0, (byte) 0, (byte) 0);
+		final Color noColor = Color.NO_COLOR;
 		for (final NodeConfiguration nodeConfiguration : currentStep.getNodesConfiguration()) {
 			final int logicalId = nodeConfiguration.getId();
 			if (!touchedNodes[logicalId]) {
@@ -174,6 +189,40 @@ public abstract class Executor extends EventSource {
 
 	public final Results getResults() {
 		return this.results;
+	}
+
+	private final class PreinitTask implements Runnable {
+
+		public PreinitTask() {
+		}
+
+		@Override
+		public void run() {
+			try {
+				for (int i = 0; i < 2; i++) {
+					turnAllNodes(Color.RED);
+					Thread.sleep(500);
+					turnAllNodes(Color.NO_COLOR);
+					Thread.sleep(500);
+				}
+				for (int i = 0; i < 2; i++) {
+					turnAllNodes(Color.GREEN);
+					Thread.sleep(150);
+					turnAllNodes(Color.NO_COLOR);
+					Thread.sleep(150);
+				}
+				startExecution();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void turnAllNodes(final Color color) {
+			for (int i = 1; i <= biMap.size(); i++) {
+				sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i), 0, color, 0));
+			}
+		}
+
 	}
 
 	private final class StepTimeOutTimerTask extends TimerTask {
