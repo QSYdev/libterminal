@@ -32,7 +32,7 @@ public class CustomRoutineGenerator {
 			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
 			steps.add(new Step(nodesConfig, 2000L, "1", false));
 		}
-		final Routine routine = new Routine((byte) 1, (byte) 1, 0L, steps);
+		final Routine routine = new Routine((byte) 1, (byte) 1, 0L, steps, "Rutina simple");
 
 		RoutineManager.storeRoutine(PATH + "routine1.json", routine);
 	}
