@@ -20,21 +20,50 @@ public class CustomRoutineGenerator {
 		{
 			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
 			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
+
 			steps.add(new Step(nodesConfig, 0L, "1", false));
 		}
 		{
 			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
-			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
-			steps.add(new Step(nodesConfig, 2000L, "1", false));
+			nodesConfig.add(new NodeConfiguration(2, 500, Color.RED));
+			steps.add(new Step(nodesConfig, 0L, "2", false));
+		}
+		{
+			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
+			nodesConfig.add(new NodeConfiguration(3, 500, Color.MAGENTA));
+			steps.add(new Step(nodesConfig, 0L, "3", false));
 		}
 		{
 			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
 			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
-			steps.add(new Step(nodesConfig, 2000L, "1", false));
+			nodesConfig.add(new NodeConfiguration(2, 500, Color.RED));
+			nodesConfig.add(new NodeConfiguration(3, 500, Color.MAGENTA));
+			steps.add(new Step(nodesConfig, 0L, "1&2&3", false));
 		}
-		final Routine routine = new Routine((byte) 1, (byte) 1, 0L, steps, "Rutina simple");
+		{
+			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
+			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
+			nodesConfig.add(new NodeConfiguration(2, 500, Color.RED));
+			nodesConfig.add(new NodeConfiguration(3, 500, Color.MAGENTA));
+			steps.add(new Step(nodesConfig, 0L, "1|2|3", false));
+		}
+		{
+			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
+			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
+			nodesConfig.add(new NodeConfiguration(2, 500, Color.RED));
+			nodesConfig.add(new NodeConfiguration(3, 500, Color.MAGENTA));
+			steps.add(new Step(nodesConfig, 0L, "(1&2)|3", false));
+		}
+		{
+			final LinkedList<NodeConfiguration> nodesConfig = new LinkedList<>();
+			nodesConfig.add(new NodeConfiguration(1, 500, Color.BLUE));
+			nodesConfig.add(new NodeConfiguration(2, 500, Color.RED));
+			nodesConfig.add(new NodeConfiguration(3, 500, Color.MAGENTA));
+			steps.add(new Step(nodesConfig, 0L, "(1|2)&3", false));
+		}
 
-		RoutineManager.storeRoutine(PATH + "routine1.json", routine);
+		final Routine routine = new Routine((byte) 1, (byte) 3, 0L, steps, "Rutina de funcionalidades");
+		RoutineManager.storeRoutine(PATH + "routine2.json", routine);
 	}
 
 }

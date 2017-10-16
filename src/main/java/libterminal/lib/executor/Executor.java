@@ -67,6 +67,7 @@ public abstract class Executor extends EventSource {
 
 	private synchronized void startExecution() {
 		running.set(true);
+		canStop.set(true);
 		sendEvent(new Event.ExecutorRoutineStarted());
 		if (totalTimeOut > 0) {
 			timer.schedule(timerTask = new RoutineTimerTask(), totalTimeOut);
@@ -102,19 +103,18 @@ public abstract class Executor extends EventSource {
 	public synchronized void touche(final int physicalIdOfNode, final int stepId, final Color toucheColor, final long toucheDelay) {
 		if (running.get()) {
 			final int logicalId = biMap.getLogicalId(physicalIdOfNode);
-			if (stepId != numberOfStep) {
-				throw new IllegalStateException("<< Executor >> Se recibio un paquete de un paso distinto al actual");
-			}
-			touchedNodes[logicalId] = true;
-			results.touche(logicalId, stepId, toucheColor, toucheDelay);
-			if (expressionTree.evaluateExpressionTree(touchedNodes)) {
-				finalizeStep();
-				if (hasNextStep()) {
-					currentStep = getNextStep();
-					prepareStep();
-				} else {
-					results.finish();
-					sendEvent(new Event.ExecutorDoneExecutingEvent());
+			if (stepId == numberOfStep) {
+				touchedNodes[logicalId] = true;
+				results.touche(logicalId, stepId, toucheColor, toucheDelay);
+				if (expressionTree.evaluateExpressionTree(touchedNodes)) {
+					finalizeStep();
+					if (hasNextStep()) {
+						currentStep = getNextStep();
+						prepareStep();
+					} else {
+						results.finish();
+						sendEvent(new Event.ExecutorDoneExecutingEvent());
+					}
 				}
 			}
 		}
@@ -138,7 +138,7 @@ public abstract class Executor extends EventSource {
 		}
 	}
 
-	public boolean isRunning() {
+	public synchronized boolean isRunning() {
 		return running.get();
 	}
 
@@ -187,7 +187,7 @@ public abstract class Executor extends EventSource {
 
 	protected abstract boolean hasNextStep();
 
-	public final Results getResults() {
+	public synchronized Results getResults() {
 		return this.results;
 	}
 
