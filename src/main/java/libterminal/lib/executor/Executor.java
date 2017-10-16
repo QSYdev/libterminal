@@ -207,9 +207,9 @@ public abstract class Executor extends EventSource {
 				}
 				for (int i = 0; i < 2; i++) {
 					turnAllNodes(Color.GREEN);
-					Thread.sleep(50);
+					Thread.sleep(100);
 					turnAllNodes(Color.NO_COLOR);
-					Thread.sleep(50);
+					Thread.sleep(100);
 				}
 				startExecution();
 			} catch (final InterruptedException e) {
