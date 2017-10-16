@@ -1,6 +1,7 @@
 package libterminal.lib.node;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -21,6 +22,7 @@ public class Node implements Comparable<Node>, AutoCloseable {
 		if (qsyPacket.getType() == QSYPacket.PacketType.Hello) {
 			final InetSocketAddress hostAddress = new InetSocketAddress(qsyPacket.getNodeAddress().getHostAddress(), QSYPacket.TCP_PORT);
 			final SocketChannel nodeSocketChannel = SocketChannel.open(hostAddress);
+			nodeSocketChannel.socket().setTcpNoDelay(true);
 			nodeSocketChannel.configureBlocking(false);
 			this.nodeId = qsyPacket.getId();
 			this.nodeAddress = qsyPacket.getNodeAddress();
