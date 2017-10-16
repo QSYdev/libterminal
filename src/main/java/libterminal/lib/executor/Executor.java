@@ -198,17 +198,25 @@ public abstract class Executor extends EventSource {
 
 		@Override
 		public void run() {
-			for (int i = 0; i < 3; i++) {
-				try {
+			try {
+				for (int i = 0; i < 2; i++) {
+					turnAllNodes(Color.RED);
+					Thread.sleep(500);
 					turnAllNodes(Color.NO_COLOR);
 					Thread.sleep(500);
-					turnAllNodes(Color.GREEN);
-					Thread.sleep(500);
-				} catch (final InterruptedException e) {
-					e.printStackTrace();
 				}
+				turnAllNodes(Color.GREEN);
+				Thread.sleep(250);
+				turnAllNodes(Color.NO_COLOR);
+				Thread.sleep(250);
+				turnAllNodes(Color.GREEN);
+				Thread.sleep(250);
+				turnAllNodes(Color.NO_COLOR);
+				Thread.sleep(250);
+				startExecution();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
 			}
-			startExecution();
 		}
 
 		private void turnAllNodes(final Color color) {
