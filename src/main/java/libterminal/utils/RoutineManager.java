@@ -75,6 +75,7 @@ public final class RoutineManager {
 		private static final String NUMBER_OF_NODES_ATT = "numberOfNodes";
 		private static final String STEPS_ATT = "steps";
 		private static final String TOTAL_TIME_OUT_ATT = "totalTimeOut";
+		private static final String NAME_ATT = "name";
 
 		public RoutineSerializer() {
 		}
@@ -86,8 +87,9 @@ public final class RoutineManager {
 			final byte numberOfNodes = jsonObject.get(NUMBER_OF_NODES_ATT).getAsByte();
 			final long totalTimeOut = jsonObject.get(TOTAL_TIME_OUT_ATT).getAsLong();
 			final Step[] steps = context.deserialize(jsonObject.get(STEPS_ATT), Step[].class);
+			String name = jsonObject.get(NAME_ATT).getAsString();
 
-			return new Routine(playersCount, numberOfNodes, totalTimeOut, new ArrayList<>(Arrays.asList(steps)));
+			return new Routine(playersCount, numberOfNodes, totalTimeOut, new ArrayList<>(Arrays.asList(steps)), name);
 		}
 
 		@Override
@@ -98,6 +100,7 @@ public final class RoutineManager {
 			jsonObject.addProperty(NUMBER_OF_NODES_ATT, routine.getNumberOfNodes());
 			jsonObject.addProperty(TOTAL_TIME_OUT_ATT, routine.getTotalTimeOut());
 			jsonObject.add(STEPS_ATT, context.serialize(routine.getSteps()));
+			jsonObject.addProperty(NAME_ATT, routine.getName());
 
 			return jsonObject;
 		}

@@ -8,13 +8,15 @@ public final class Routine implements Iterable<Step> {
 	private final byte playersCount;
 	private final byte numberOfNodes;
 	private final long totalTimeOut;
+	private String name;
 	private final ArrayList<Step> steps;
 
-	public Routine(final byte playersCount, final byte numberOfNodes, final long totalTimeOut, final ArrayList<Step> steps) {
+	public Routine(final byte playersCount, final byte numberOfNodes, final long totalTimeOut, final ArrayList<Step> steps, String name) {
 		this.playersCount = playersCount;
 		this.numberOfNodes = numberOfNodes;
 		this.totalTimeOut = totalTimeOut;
 		this.steps = steps;
+		this.name = name;
 	}
 
 	public byte getPlayersCount() {
@@ -31,6 +33,10 @@ public final class Routine implements Iterable<Step> {
 
 	public ArrayList<Step> getSteps() {
 		return steps;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	@Override
