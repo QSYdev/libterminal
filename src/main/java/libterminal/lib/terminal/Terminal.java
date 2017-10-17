@@ -170,7 +170,7 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 
 	public void stopExecution() {
 		synchronized (executorLock) {
-			if (executor != null && executor.canStop()) {
+			if (executor != null) {
 				executor.stop();
 				executor.removeListener(this);
 				this.soundEnabled.set(false);
