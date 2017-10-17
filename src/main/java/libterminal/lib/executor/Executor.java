@@ -88,6 +88,7 @@ public abstract class Executor extends EventSource {
 			}
 			timer.cancel();
 			finalizeStep();
+			turnAllNodes(Color.NO_COLOR);
 			stepTimer.cancel();
 			if (preinitRunning.get())
 				preinitThread.interrupt();
@@ -211,13 +212,12 @@ public abstract class Executor extends EventSource {
 			} catch (final InterruptedException e) {
 			}
 		}
+	}
 
-		private void turnAllNodes(final Color color) {
-			for (int i = 1; i <= biMap.size(); i++) {
-				sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i), 0, color, 0));
-			}
+	private void turnAllNodes(final Color color) {
+		for (int i = 1; i <= biMap.size(); i++) {
+			sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i), 0, color, 0));
 		}
-
 	}
 
 	private final class StepTimeOutTimerTask extends TimerTask {
