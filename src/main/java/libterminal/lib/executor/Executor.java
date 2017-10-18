@@ -87,8 +87,8 @@ public abstract class Executor extends EventSource {
 				timerTask.cancel();
 			}
 			timer.cancel();
-			finalizeStep();
 			turnAllNodes(Color.NO_COLOR);
+			finalizeStep();
 			stepTimer.cancel();
 			if (preinitRunning.get())
 				preinitThread.interrupt();
