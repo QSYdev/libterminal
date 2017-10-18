@@ -291,9 +291,15 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 		public void handle(final CommandRequestEvent event) {
 			super.handle(event);
 			final InetAddress nodeAddress;
+			final Node node;
 			synchronized (nodes) {
-				nodeAddress = nodes.get(event.getPhysicalId()).getNodeAddress();
+				node = nodes.get(event.getPhysicalId());
 			}
+			if(node == null) {
+				stopExecution();
+				return;
+			}
+			nodeAddress = node.getNodeAddress();
 			final QSYPacket commandPacket = QSYPacket.createCommandPacket(nodeAddress, event.getPhysicalId(), event.getColor(), event.getDelay(),
 					event.getNumberOfStep(), touchEnabled.get(), soundEnabled.get());
 			sendQSYPacket(commandPacket);

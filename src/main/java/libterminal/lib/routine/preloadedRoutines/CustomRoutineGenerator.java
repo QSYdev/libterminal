@@ -63,7 +63,7 @@ public class CustomRoutineGenerator {
 		}
 
 		final Routine routine = new Routine((byte) 1, (byte) 3, 0L, steps, "Rutina de funcionalidades");
-		RoutineManager.storeRoutine(PATH + "routine2.json", routine);
+		RoutineManager.storeRoutine(PATH + "qsy.json", routine);
 	}
 
 }
