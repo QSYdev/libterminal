@@ -296,7 +296,6 @@ public final class Terminal extends EventSource implements Runnable, EventListen
 				node = nodes.get(event.getPhysicalId());
 			}
 			if(node == null) {
-				stopExecution();
 				return;
 			}
 			nodeAddress = node.getNodeAddress();
