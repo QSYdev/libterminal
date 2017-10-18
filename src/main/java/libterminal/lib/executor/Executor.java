@@ -18,7 +18,7 @@ public abstract class Executor extends EventSource {
 
 	private final AtomicBoolean running;
 
-	private final AtomicBoolean canStop;
+	private final AtomicBoolean preinitRunning;
 	private final Thread preinitThread;
 
 	private final BiMap biMap;
@@ -41,7 +41,7 @@ public abstract class Executor extends EventSource {
 	public Executor(final TreeMap<Integer, Integer> nodesIdsAssociations, final int numberOfNodes, final Results results, final long totalTimeOut) {
 		this.running = new AtomicBoolean(false);
 
-		this.canStop = new AtomicBoolean(false);
+		this.preinitRunning = new AtomicBoolean(false);
 		this.preinitThread = new Thread(new PreinitTask(), "Preinit Task");
 
 		this.biMap = new BiMap(numberOfNodes, nodesIdsAssociations);
@@ -67,7 +67,7 @@ public abstract class Executor extends EventSource {
 
 	private synchronized void startExecution() {
 		running.set(true);
-		canStop.set(true);
+		preinitRunning.set(true);
 		sendEvent(new Event.ExecutorRoutineStarted());
 		if (totalTimeOut > 0) {
 			timer.schedule(timerTask = new RoutineTimerTask(), totalTimeOut);
@@ -81,20 +81,17 @@ public abstract class Executor extends EventSource {
 		results.start();
 	}
 
-	public synchronized boolean canStop() {
-		return canStop.get();
-	}
-
 	public synchronized void stop() {
-		if (isRunning()) {
+		if (running.get()) {
 			if (timerTask != null) {
 				timerTask.cancel();
 			}
 			timer.cancel();
-		}
-		if (running.get()) {
+			turnAllNodes(Color.NO_COLOR);
 			finalizeStep();
 			stepTimer.cancel();
+			if (preinitRunning.get())
+				preinitThread.interrupt();
 			running.set(false);
 		}
 
@@ -213,16 +210,14 @@ public abstract class Executor extends EventSource {
 				}
 				startExecution();
 			} catch (final InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
+	}
 
-		private void turnAllNodes(final Color color) {
-			for (int i = 1; i <= biMap.size(); i++) {
-				sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i), 0, color, 0));
-			}
+	private void turnAllNodes(final Color color) {
+		for (int i = 1; i <= biMap.size(); i++) {
+			sendEvent(new Event.CommandRequestEvent(biMap.getPhysicalId(i), 0, color, 0));
 		}
-
 	}
 
 	private final class StepTimeOutTimerTask extends TimerTask {
