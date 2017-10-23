@@ -249,6 +249,7 @@ public abstract class Executor extends EventSource {
 		@Override
 		public void run() {
 			if (isRunning()) {
+				results.routineTimeOut(numberOfStep);
 				sendEvent(new Event.ExecutorDoneExecutingEvent());
 			}
 		}
